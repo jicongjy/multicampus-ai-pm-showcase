@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FLAG = re.compile(r"^\s*공개\s*[:：]\s*예\s*$")
 DROP_HEADING = re.compile(r"교안|슬랙|회고|출처|메모|과제|링크 모음|다음에")
-DROP_LINE = re.compile(r"교안|슬랙|강사 안내|셀렉트웨이|비공개")
+DROP_LINE = re.compile(r"교안|슬랙|강사 안내|셀렉트웨이|비공개|미기입")
 SENSITIVE = [
     ("이메일", re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")),
     ("전화번호", re.compile(r"01[016789][- ]?\d{3,4}[- ]?\d{4}")),
