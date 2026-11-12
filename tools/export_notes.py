@@ -255,6 +255,26 @@ def headings_of(lines):
     return out
 
 
+def parts_of(lines):
+    """가장 큰 제목 단위로 구역을 나누고 구역별 글자 수를 센다. 카드의 구성 막대에 쓴다."""
+    hs = [heading(l) for l in lines if heading(l)]
+    if not hs:
+        return []
+    top = min(h[0] for h in hs)
+    out, cur, fence = [], None, False
+    for line in lines:
+        if line.strip().startswith("```"):
+            fence = not fence
+        h = None if fence else heading(line)
+        if h and h[0] == top:
+            t = re.sub(r"[*`]", "", re.sub(r"^\d+(?:[-.]\d+)*[.)]?\s+", "", h[1])).strip()
+            cur = {"t": t if len(t) <= 30 else t[:28] + "…", "n": 0}
+            out.append(cur)
+        elif cur is not None:
+            cur["n"] += len(re.sub(r"\s+", "", line))
+    return [x for x in out if x["n"] > 0]
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     dry = "--dry-run" in sys.argv
@@ -290,7 +310,7 @@ def main():
         entries.append({
             "id": nid, "title": re.sub(r"^\d{6}\s+", "", title), "week": wk, "date": date,
             "summary": summary, "html": "notes/%s.html" % nid,
-            "headings": heads[:5], "sections": len(heads), "mins": max(1, round(chars / 500)),
+            "headings": heads[:5], "parts": parts_of(body_lines), "sections": len(heads), "mins": max(1, round(chars / 500)),
         })
         if not dry:
             out = ROOT / "notes" / ("%s.html" % nid)

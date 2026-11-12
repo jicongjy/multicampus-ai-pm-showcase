@@ -126,28 +126,82 @@
   }
   function mrow(ic, text) { return el("div", { class: "mrow" }, [icon(ic), el("span", { text: text })]); }
 
-  function pcard(w) {
-    var tall = /\.(pdf|png)$/i.test(w.file || "");
+  function classDays() {
+    var wk = data.weeks, out = [], cur = wk[0].start, end = wk[wk.length - 1].end, guard = 0;
+    while (cur <= end && guard++ < 60) {
+      var dw = dowOf(cur);
+      if (dw !== 0 && dw !== 6) {
+        var wid = (wk.filter(function (x) { return cur >= x.start && cur <= x.end; })[0] || wk[0]).id;
+        out.push({ date: cur, week: wid });
+      }
+      var p = parts(cur), nx = new Date(Date.UTC(p.y, p.m - 1, p.d + 1));
+      cur = iso(nx.getUTCFullYear(), nx.getUTCMonth() + 1, nx.getUTCDate());
+    }
+    return out;
+  }
+  function notesOn(date) { return notes.filter(function (n) { return n.date === date; }); }
+
+  /* 수업일 막대: 이 결과물을 만든 날을 표시 */
+  function dayStrip(w) {
+    var box = el("div", { class: "dstrip" });
+    classDays().forEach(function (d) {
+      var n = worksOn(d.date).length;
+      box.appendChild(el("i", { class: d.date === w.date ? "on" : "", style: "height:" + Math.min(100, n ? 34 + n * 14 : 16) + "%", title: koDay(d.date) + " " + n + "개" }));
+    });
+    var cnt = worksOn(w.date).length;
+    return el("div", { class: "dwrap" }, [box, el("small", { text: mmdd(w.date) + " · 이날 " + cnt + "개" })]);
+  }
+
+  function chips(w) {
     var rel = glossaryFor(w.id);
-    var body = [el("h3", { text: w.title })];
-    if (w.summary) body.push(el("p", { class: "psum", text: w.summary }));
-    if (w.metric) body.push(el("div", { class: "metric" }, [
+    return rel.length ? el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })) : null;
+  }
+  function metricBlock(w) {
+    return w.metric ? el("div", { class: "metric" }, [
       el("strong", { text: w.metric.value }),
       el("div", {}, [el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null])
-    ]));
-    if (rel.length) body.push(el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })));
+    ]) : null;
+  }
+  function infoRows(w) {
     var rows = el("div", { class: "mrows" }, [mrow("note", kindOf(w) + (w.kb ? " · " + sizeText(w.kb) : ""))]);
-    if ((w.links || []).length) rows.appendChild(mrow("link", "링크 " + w.links.length + "개"));
-    body.push(rows);
-    return el("a", { class: "card pcard" + (tall ? " tall" : ""), href: href(["projects", w.id]), "aria-label": w.title }, [
-      el("div", { class: "phead " + wcls(w.week) }, [
-        el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }),
-        el("div", { class: "who" }, [el("b", { text: weekOf(w.week).label }), el("small", { text: "No." + pad(w.no) + " · " + mmdd(w.date) })]),
-        el("span", { class: "pill", text: w.type })
-      ]),
-      thumbBox(w, false),
-      el("div", { class: "pbody" }, body)
+    if ((w.links || []).length) rows.appendChild(mrow("link", w.links.map(function (l) { return l.label; }).join(" · ")));
+    var nn = notesOn(w.date).length;
+    if (nn) rows.appendChild(mrow("book", "같은 날 학습 노트 " + nn + "개"));
+    return rows;
+  }
+  function pheadFor(w, cls) {
+    return el("div", { class: "phead " + wcls(w.week) + (cls ? " " + cls : "") }, [
+      el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }),
+      el("div", { class: "who" }, [el("b", { text: weekOf(w.week).label }), el("small", { text: "No." + pad(w.no) + " · " + mmdd(w.date) })]),
+      el("span", { class: "pill", text: w.type })
     ]);
+  }
+
+  function pcard(w) {
+    var url = href(["projects", w.id]);
+    var visual = w.type === "프로토타입" || w.type === "웹서비스";
+    var v = w.metric ? "stat" : (visual ? "shot" : "doc");
+    var kids;
+    if (v === "shot") {
+      var tb = thumbBox(w, false);
+      tb.appendChild(el("div", { class: "over" }, [el("h3", { text: w.title })]));
+      tb.appendChild(el("div", { class: "ovtop " + wcls(w.week) }, [el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }), el("span", { text: weekOf(w.week).label + " · No." + pad(w.no) }), el("span", { class: "pill", text: w.type })]));
+      kids = [tb, el("div", { class: "pbody" }, [
+        w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), dayStrip(w), infoRows(w)
+      ])];
+    } else if (v === "doc") {
+      kids = [pheadFor(w), el("div", { class: "dtop" }, [
+        el("div", {}, [el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null]),
+        thumbBox(w, false)
+      ]), el("div", { class: "pbody" }, [chips(w), dayStrip(w), infoRows(w)])];
+    } else {
+      kids = [pheadFor(w), el("div", { class: "bigstat" }, [
+        el("strong", { text: w.metric.value }), el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null
+      ]), thumbBox(w, false), el("div", { class: "pbody" }, [
+        el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), dayStrip(w), infoRows(w)
+      ])];
+    }
+    return el("a", { class: "card pcard v-" + v, href: url, "aria-label": w.title }, kids);
   }
 
   function prow(w) {
@@ -197,13 +251,26 @@
     ]);
   }
 
-  function ncard(n) {
+  var ncount = 0;
+  function partsBar(n) {
+    var ps = n.parts || [], total = ps.reduce(function (a, x) { return a + x.n; }, 0) || 1;
+    var bar = el("div", { class: "pbar" });
+    ps.forEach(function (x, i) { bar.appendChild(el("i", { style: "flex:" + x.n + ";opacity:" + (1 - Math.min(i, 4) * 0.2), title: x.t + " · 약 " + Math.round(x.n / 500 * 10) / 10 + "분" })); });
+    return ps.length ? bar : null;
+  }
+  function ncard(n, idx) {
     var d = n.date || "", p = d ? parts(d) : null;
+    var variant = idx === 0 ? "dark" : (idx % 3 === 1 ? "soft" : "plain");
+    var rel = d ? worksOn(d) : [];
     var body = [el("h3", { text: n.title })];
     if (n.summary) body.push(el("p", { class: "psum", text: n.summary }));
+    var pb = partsBar(n);
+    if (pb) body.push(el("div", { class: "pwrap" }, [pb, el("small", { text: "구성 " + (n.parts || []).length + "개 구역 · 약 " + (n.mins || 1) + "분" })]));
     if ((n.headings || []).length) body.push(el("div", { class: "chipline" }, n.headings.slice(0, 3).map(function (h) { return el("span", { text: h }); })));
-    if (n.mins) body.push(el("div", { class: "mrows" }, [mrow("book", "약 " + n.mins + "분 · 구역 " + (n.sections || 0) + "개")]));
-    return el("a", { class: "card ncard", href: href(["notes", n.id]) }, [
+    var rows = el("div", { class: "mrows" });
+    if (rel.length) rows.appendChild(mrow("folder", "같은 날 결과물 " + rel.length + "개"));
+    if (rows.childNodes.length) body.push(rows);
+    return el("a", { class: "card ncard n-" + variant, href: href(["notes", n.id]) }, [
       el("div", { class: "leaf " + (n.week ? wcls(n.week) : "") }, p ? [
         el("small", { text: p.m + "월" }), el("strong", { text: String(p.d) }), el("small", { text: DOW[dowOf(d)] })
       ] : []),
@@ -308,20 +375,12 @@
   }
 
   function dayChart() {
-    var wk = data.weeks, cols = [], max = 1;
-    var cur = wk[0].start, end = wk[wk.length - 1].end;
-    var guard = 0;
-    while (cur <= end && guard++ < 60) {
-      var dw = dowOf(cur);
-      if (dw !== 0 && dw !== 6) {
-        var on = works.filter(function (w) { return w.date === cur; });
-        var wid = (wk.filter(function (x) { return cur >= x.start && cur <= x.end; })[0] || wk[0]).id;
-        cols.push({ date: cur, n: on.length, week: wid });
-        max = Math.max(max, on.length);
-      }
-      var p = parts(cur), nx = new Date(Date.UTC(p.y, p.m - 1, p.d + 1));
-      cur = iso(nx.getUTCFullYear(), nx.getUTCMonth() + 1, nx.getUTCDate());
-    }
+    var cols = [], max = 1;
+    classDays().forEach(function (d) {
+      var n = worksOn(d.date).length;
+      cols.push({ date: d.date, n: n, week: d.week });
+      max = Math.max(max, n);
+    });
     var box = el("div", { class: "bars" });
     cols.forEach(function (c) {
       box.appendChild(el("div", { class: "col" }, [
@@ -397,11 +456,11 @@
 
     if (notes.length) {
       main.appendChild(el("div", { class: "section" }, [el("h2", { text: "최근 학습 노트" }), el("a", { href: href(["notes"]), text: "전체 보기" })]));
-      main.appendChild(masonry(notes.slice(0, 3).map(ncard), 324));
+      main.appendChild(masonry(notes.slice(0, 3).map(function (n, i) { return ncard(n, i); }), 324));
     }
 
     main.appendChild(el("div", { class: "section" }, [el("h2", { text: "이어서 보기" }), el("a", { href: href(["projects"]), text: "전체 보기" })]));
-    main.appendChild(masonry(latest.slice(1, 5).map(pcard), 324));
+    main.appendChild(masonry(latest.slice(1, 5).map(function (w) { return pcard(w); }), 324));
 
     /* aside */
     var aside = el("div", { class: "aside" });
@@ -497,7 +556,7 @@
       list.forEach(function (w) { rows.appendChild(prow(w)); });
       frag.appendChild(rows);
     } else {
-      frag.appendChild(masonry(list.map(pcard)));
+      frag.appendChild(masonry(list.map(function (w) { return pcard(w); })));
     }
     return frag;
   }
@@ -545,15 +604,29 @@
     }
 
     var related = glossaryFor(w.id);
+    function prop(k, v) { return el("div", { class: "prop" }, [el("span", { text: k }), el("b", { text: v })]); }
+    var props = el("div", { class: "props" }, [
+      prop("종류", w.type), prop("주차", weekOf(w.week).label + " · " + weekOf(w.week).period), prop("만든 날", koDay(w.date)),
+      prop("형식", kindOf(w) + (w.kb ? " · " + sizeText(w.kb) : "")), prop("순서", "No." + pad(w.no) + " / " + works.length)
+    ]);
+    function block(title, kids) { return kids.length ? el("div", { class: "dblock" }, [el("h4", { text: title })].concat(kids)) : null; }
+    var sameNotes = notesOn(w.date).map(function (n) {
+      return el("a", { class: "xlink", href: href(["notes", n.id]) }, [icon("book"), el("span", { text: n.title }), el("em", { text: "노트" })]);
+    });
+    var sameDay = worksOn(w.date).filter(function (x) { return x.id !== w.id; }).map(function (x) {
+      return el("a", { class: "xlink", href: href(["projects", x.id]) }, [icon("folder"), el("span", { text: x.title }), el("em", { text: x.type })]);
+    });
     var info = el("aside", { class: "card dinfo" }, [
       el("div", { class: "meta" }, [wtag(w), el("span", { text: w.date + " / " + w.type })]),
       el("h1", { text: w.title }),
       w.summary ? el("p", { class: "sum", text: w.summary }) : null,
+      metricBlock(w),
       actions,
-      related.length ? el("div", { class: "tcard", style: "padding:0" }, [
-        el("div", { class: "full", text: "관련 용어" }),
-        el("div", { class: "rel" }, related.map(function (t) { return el("a", { href: href(["glossary"]), text: t.term }); }))
-      ]) : null,
+      props,
+      el("div", { class: "dblock" }, [el("h4", { text: "수업 기간 중 위치" }), dayStrip(w)]),
+      block("같은 날 쓴 노트", sameNotes),
+      block("같은 날 만든 결과물", sameDay),
+      related.length ? el("div", { class: "dblock" }, [el("h4", { text: "관련 용어" }), el("div", { class: "chipline" }, related.map(function (t) { return el("a", { href: href(["glossary"]), text: t.term }); }))]) : null,
       el("div", { class: "dnav" }, [navBtn("← 이전", prev), el("span", { class: "pos", text: (idx + 1) + " / " + order.length }), navBtn("다음 →", next)])
     ]);
     frag.appendChild(el("div", { class: "detail" }, [info, stageFor(w)]));
@@ -663,7 +736,7 @@
       frag.appendChild(empty("공개한 노트가 아직 없습니다", "공개 표시한 노트를 정리해서 옮기면 이곳에 나타납니다."));
       return frag;
     }
-    frag.appendChild(masonry(notes.map(ncard)));
+    frag.appendChild(masonry(notes.map(function (n, i) { return ncard(n, i); })));
     return frag;
   }
 
@@ -673,13 +746,48 @@
     var frag = document.createDocumentFragment();
     frag.appendChild(el("a", { class: "back", href: href(["notes"]), text: "← 노트 목록" }));
     var body = el("div", { class: "reader-body" }, [el("p", { class: "count", text: "불러오는 중" })]);
-    frag.appendChild(el("article", { class: "card reader" }, [
-      el("div", { class: "meta" }, [n.week ? wtagInline(n.week) : null, el("span", { text: n.date || "" })]),
-      el("h1", { text: n.title }),
-      body
+    var toc = el("div", { class: "toc" });
+    var idx = notes.indexOf(n), prev = notes[idx + 1], next = notes[idx - 1];
+    var rel = n.date ? worksOn(n.date) : [];
+
+    var side = el("aside", { class: "nside" }, [
+      el("section", { class: "card panel" }, [
+        el("div", { class: "section" }, [el("h2", { text: "이 노트의 구성" })]),
+        partsBar(n),
+        el("p", { class: "count", text: "약 " + (n.mins || 1) + "분 · " + (n.parts || []).length + "개 구역" }),
+        toc
+      ]),
+      rel.length ? el("section", { class: "card panel" }, [
+        el("div", { class: "section" }, [el("h2", { text: "같은 날 만든 결과물" })])
+      ].concat(rel.map(function (w) {
+        return el("a", { class: "lrow", href: href(["projects", w.id]) }, [el("span", { class: "srcdot", style: "background:" + wcolor(w.week) }), el("b", { text: w.title }), el("small", { text: w.type })]);
+      }))) : null,
+      el("section", { class: "card panel" }, [
+        el("div", { class: "section" }, [el("h2", { text: "다른 노트" })]),
+        next ? el("a", { class: "lrow", href: href(["notes", next.id]) }, [el("b", { text: "다음 · " + next.title }), el("small", { text: mmdd(next.date) })]) : null,
+        prev ? el("a", { class: "lrow", href: href(["notes", prev.id]) }, [el("b", { text: "이전 · " + prev.title }), el("small", { text: mmdd(prev.date) })]) : null
+      ])
+    ]);
+
+    frag.appendChild(el("div", { class: "nlayout" }, [
+      el("article", { class: "card reader" }, [
+        el("div", { class: "meta" }, [n.week ? wtagInline(n.week) : null, el("span", { text: n.date || "" })]),
+        el("h1", { text: n.title }),
+        body
+      ]),
+      side
     ]));
     fetch(enc(n.html)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .then(function (t) { body.innerHTML = t; })
+      .then(function (t) {
+        body.innerHTML = t;
+        var hs = body.querySelectorAll("h2, h3");
+        Array.prototype.forEach.call(hs, function (h, i) {
+          h.id = "sec" + i;
+          var a = el("a", { class: "toc-" + h.tagName.toLowerCase(), href: "#", text: h.textContent });
+          a.addEventListener("click", function (e) { e.preventDefault(); h.scrollIntoView({ behavior: "smooth", block: "start" }); });
+          toc.appendChild(a);
+        });
+      })
       .catch(function () { body.textContent = "노트를 불러오지 못했습니다."; });
     return frag;
   }
