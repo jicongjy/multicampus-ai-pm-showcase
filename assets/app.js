@@ -302,25 +302,29 @@
   }
 
   /* ---------- 홈: 한 화면 대시보드 ---------- */
+  function chead(no, label, side) {
+    return el("div", { class: "ch" }, [el("span", { class: "ch-l" }, [el("em", { text: no }), el("b", { text: label })]), side || null]);
+  }
+  function stat(n, label) {
+    return el("div", { class: "stat" }, [el("b", { text: "" + n }), el("span", { text: label })]);
+  }
+
   function viewHome() {
     var map = activity();
     var cw = currentWeek();
+    var first = data.weeks[0].start;
     var page = el("div", { class: "home" });
 
     /* 소개 */
-    var hero = el("section", { class: "card hero rise" }, [
+    page.appendChild(el("section", { class: "card hero c-lime rise" }, [
+      el("span", { class: "orb pink" }), el("span", { class: "orb blue" }),
       el("div", { class: "hero-l" }, [
-        eyebrow("AI PM ARCHIVE · 2026"),
-        el("h1", {}, [txt("차곡차곡 쌓는 중,"), el("br"), el("span", { class: "dim", text: cw.label + "째." })]),
-        el("div", { class: "figs big" }, [
-          el("span", {}, [el("b", { text: "" + works.length }), el("em", { text: "결과물" })]),
-          el("span", {}, [el("b", { text: "" + notes.length }), el("em", { text: "노트" })]),
-          el("span", {}, [el("b", { text: "" + terms.length }), el("em", { text: "용어" })])
-        ])
+        chead("00", "AI PM ARCHIVE"),
+        el("h1", { text: cw.label }),
+        el("p", { class: "hero-sub", text: first.replace(/-/g, ".") + " — 지금 · " + (diffDays(TODAY, first) + 1) + "일째" })
       ]),
-      art("hero")
-    ]);
-    page.appendChild(hero);
+      el("div", { class: "hero-r" }, [stat(works.length, "결과물"), stat(notes.length, "노트"), stat(terms.length, "용어")])
+    ]));
 
     /* 잔디 */
     var dates = Object.keys(map).filter(function (d) { return total(map[d]) > 0; }).sort();
@@ -332,12 +336,11 @@
       panelHost.textContent = "";
       panelHost.appendChild(dayPanel(map, d));
     }
-    page.appendChild(el("section", { class: "card pad grasscard rise" }, [secHead("ACTIVITY", "하루 기록량"), g, panelHost]));
+    page.appendChild(el("section", { class: "card pad grasscard c-pink rise" }, [chead("01", "ACTIVITY", el("span", { class: "ch-r", text: "하루 기록량" })), g, panelHost]));
     if (pick) select(pick);
 
     /* 주차별 변화 */
     var mx = maxTotal();
-    var wk = el("section", { class: "card pad rise" }, [secHead("WEEKLY", more("주차 보기", href(["weeks"])))]);
     var wl = el("div", { class: "scroll wkl" });
     data.weeks.slice().reverse().forEach(function (w) {
       var c = counts(w);
@@ -347,9 +350,7 @@
         stackBar(c, mx)
       ]));
     });
-    wl.appendChild(el("p", { class: "legend" }, [el("i", { class: "s-w" }), txt("결과물"), el("i", { class: "s-n" }), txt("노트"), el("i", { class: "s-t" }), txt("용어")]));
-    wk.appendChild(wl);
-    page.appendChild(wk);
+    page.appendChild(el("section", { class: "card pad c-orange rise" }, [chead("02", "WEEKLY", more("주차 보기", href(["weeks"]))), wl]));
 
     /* 최근 추가 */
     var recent = [];
@@ -362,7 +363,7 @@
         el("span", { class: "li-side" }, [el("em", { text: r.kind }), el("span", { class: "sub", text: mmdd(r.date) })])
       ]);
     }));
-    page.appendChild(el("section", { class: "card pad rise" }, [secHead("RECENT", more("결과물", href(["projects"]))), rl]));
+    page.appendChild(el("section", { class: "card pad c-sky rise" }, [chead("03", "RECENT", more("결과물", href(["projects"]))), rl]));
 
     /* 최근 용어 */
     var rt = terms.slice().sort(function (a, b) { return a.first < b.first ? 1 : a.first > b.first ? -1 : a.name < b.name ? -1 : 1; });
@@ -372,7 +373,7 @@
         el("span", { class: "li-side" }, [strip(t, true)])
       ]);
     }));
-    page.appendChild(el("section", { class: "card pad rise" }, [secHead("TERMS", more("용어 전체", href(["terms"]))), tl]));
+    page.appendChild(el("section", { class: "card pad c-ink rise" }, [chead("04", "TERMS", more("용어 전체", href(["terms"]))), tl]));
     view.appendChild(page);
     view.classList.add("fit");
   }
