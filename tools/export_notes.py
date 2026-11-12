@@ -350,7 +350,15 @@ def main():
         date, wk, title = meta(path, lines)
         report = []
         body_lines = clean(lines[1:] if heading(lines[0]) else lines, report)
-        text = "\n".join(body_lines)
+        header_text = "\n".join([info["one"]] + [t["name"] + " " + t["def"] for t in info["terms"]] + info["works"])
+        for t in list(info["terms"]):
+            if DROP_LINE.search(t["name"] + " " + t["def"]):
+                report.append("머리말 용어 제거: " + t["name"])
+                info["terms"].remove(t)
+        if DROP_LINE.search(info["one"]):
+            report.append("머리말 한줄 제거: " + info["one"][:50])
+            info["one"] = ""
+        text = "\n".join(body_lines) + "\n" + header_text
         hits = [(n, p.search(text) or p.search(title)) for n, p in SENSITIVE]
         hits = [n for n, m in hits if m]
         rel = path.relative_to(repo)

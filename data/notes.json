@@ -63,7 +63,7 @@
         }
       ],
       "sections": 1,
-      "mins": 1
+      "mins": 2
     },
     {
       "id": "n-w3-day-02-web-crawling-event-taxonomy",
@@ -174,7 +174,7 @@
         }
       ],
       "sections": 3,
-      "mins": 1
+      "mins": 2
     },
     {
       "id": "n-w2-day-03-data-deployment",
