@@ -186,9 +186,7 @@
       el("h3", { text: n.title })
     ];
     if (n.summary) inner.push(el("div", { class: "host", text: n.summary }));
-    return n.file
-      ? el("a", { class: "card lcard", href: enc(n.file), target: "_blank", rel: "noopener" }, inner)
-      : el("div", { class: "card lcard" }, inner);
+    return el("a", { class: "card lcard", href: href(["notes", n.id]) }, inner);
   }
 
   function empty(title, text) {
@@ -558,6 +556,27 @@
     return frag;
   }
 
+  function viewNote(id) {
+    var n = notes.filter(function (x) { return x.id === id; })[0];
+    if (!n) return empty("찾을 수 없는 노트입니다", "목록으로 돌아가 다시 선택해 주세요.");
+    var frag = document.createDocumentFragment();
+    frag.appendChild(el("a", { class: "back", href: href(["notes"]), text: "← 노트 목록" }));
+    var body = el("div", { class: "reader-body" }, [el("p", { class: "count", text: "불러오는 중" })]);
+    frag.appendChild(el("article", { class: "card reader" }, [
+      el("div", { class: "meta" }, [n.week ? wtagInline(n.week) : null, el("span", { text: n.date || "" })]),
+      el("h1", { text: n.title }),
+      body
+    ]));
+    fetch(enc(n.html)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (t) { body.innerHTML = t; })
+      .catch(function () { body.textContent = "노트를 불러오지 못했습니다."; });
+    return frag;
+  }
+
+  function wtagInline(wid) {
+    return el("span", { class: "wtag " + wcls(wid), style: "position:static;box-shadow:0 0 0 1px var(--line-2)", text: weekOf(wid).label });
+  }
+
   function viewSearch(qs) {
     var frag = document.createDocumentFragment();
     var terms_ = qs.toLowerCase().split(/\s+/).filter(Boolean);
@@ -649,7 +668,7 @@
     if (state.q) { node = viewSearch(state.q); active.top = "search"; }
     else if (top === "") node = viewHome();
     else if (top === "projects") node = r.path[1] ? viewDetail(r.path[1]) : viewProjects(r.q);
-    else if (top === "notes") node = viewNotes();
+    else if (top === "notes") node = r.path[1] ? viewNote(r.path[1]) : viewNotes();
     else if (top === "links") node = viewLinks();
     else if (top === "calendar") node = viewCalendar(r.q);
     else if (top === "glossary") node = viewGlossary();
@@ -727,7 +746,7 @@
       if (w.file && !local(w.file)) w.file = "";
       if (w.thumb && !local(w.thumb)) w.thumb = "";
     });
-    (res[3].notes || []).forEach(function (n) { if (n.file && !local(n.file)) n.file = ""; });
+    (res[3].notes || []).forEach(function (n) { if (!local(n.html)) n.html = ""; });
     works.forEach(function (w) { w.links = (w.links || []).filter(function (l) { return safe(l.url); }); });
     links = (res[1].links || []).filter(function (l) { return safe(l.url); });
     terms = res[2].terms || [];

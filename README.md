@@ -9,6 +9,7 @@
 ├── index.html         # 페이지
 ├── assets/            # style.css, app.js, thumbs/ (썸네일 이미지)
 ├── tools/make_thumbs.py  # 썸네일 자동 생성
+├── tools/export_notes.py # 공개 노트 내보내기
 ├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
 ├── data/links.json    # 링크 모음
 ├── data/glossary.json # 용어
@@ -46,6 +47,21 @@ python3 tools/make_thumbs.py
 ```
 
 항목에 `"thumb": "assets/thumbs/아이디.jpg"`를 적어야 카드에 표시됩니다.
+
+## 노트 내보내기
+
+비공개 노트 저장소에서 공개로 표시한 노트만 골라 이 사이트에 올립니다.
+
+1. 공개할 노트의 앞부분(12줄 안)에 `공개: 예` 한 줄을 적습니다. 이 줄은 내보낼 때 지워집니다.
+2. 아래 명령으로 먼저 미리보기를 합니다. 빠지는 구역과 줄이 모두 나옵니다.
+
+```bash
+python3 tools/export_notes.py ~/노트저장소경로 --dry-run
+```
+
+3. 결과를 확인한 뒤 `--dry-run`을 빼고 실행하면 `notes/`와 `data/notes.json`이 만들어집니다.
+
+자동으로 빠지는 것: 교안, 슬랙, 회고, 출처, 메모, 과제, 링크 모음, 다음에 할 일 구역과, 교안이나 슬랙을 언급한 줄. 이메일, 전화번호, 키, 앱스 스크립트 주소 패턴이 남아 있으면 그 노트는 내보내지 않습니다. 공개 전에 결과 파일을 한 번 읽어 보세요.
 
 ## 내 컴퓨터에서 보기
 
