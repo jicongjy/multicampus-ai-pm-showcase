@@ -247,12 +247,22 @@
     ]));
 
     var stats = el("div", { class: "stats" });
-    [["결과물", works.length, "개", "w1"], ["학습 주차", data.weeks.length, "주", "w2"], ["결과물을 만든 날", Object.keys(days).length, "일", "w3"]].forEach(function (s) {
-      stats.appendChild(el("div", { class: "stat " + s[3] }, [
-        el("span", { text: s[0] }),
-        el("div", {}, [el("strong", { text: String(s[1]) }), el("small", { text: s[2] })])
-      ]));
-    });
+    var perWeek = data.weeks.map(function (w) { return works.filter(function (x) { return x.week === w.id; }).length; });
+    var seg = el("div", { class: "meter" });
+    data.weeks.forEach(function (w, i) { seg.appendChild(el("i", { class: wcls(w.id), style: "flex:" + perWeek[i] })); });
+    function stat(cls, mark, label, val, unit, extra) {
+      return el("div", { class: "card stat " + cls }, [
+        el("header", {}, [el("span", { class: "sq", text: mark }), el("span", { text: label })]),
+        el("div", { class: "val" }, [el("strong", { text: String(val) }), el("small", { text: unit })]),
+        extra
+      ]);
+    }
+    var first = data.weeks[0].start, last = data.weeks[data.weeks.length - 1].end;
+    var span = el("div", { class: "meter base" }, [el("i", { class: "w2", style: "width:100%" })]);
+    var dayBar = el("div", { class: "meter base" }, [el("i", { class: "w3", style: "width:" + Math.round(Object.keys(days).length / 12 * 100) + "%" })]);
+    stats.appendChild(stat("w1", "P", "프로젝트", works.length, "개", seg));
+    stats.appendChild(stat("w2", "W", "학습 주차", data.weeks.length, mmdd(first) + " ~ " + mmdd(last), span));
+    stats.appendChild(stat("w3", "D", "결과물을 만든 날", Object.keys(days).length, "일", dayBar));
     main.appendChild(stats);
 
     main.appendChild(el("div", { class: "section" }, [el("h2", { text: "주차별 진행" })]));
@@ -262,12 +272,12 @@
       var ul = el("ul");
       items.slice(0, 3).forEach(function (x) { ul.appendChild(el("li", { text: x.title })); });
       if (items.length > 3) ul.appendChild(el("li", { text: "외 " + (items.length - 3) + "개" }));
-      var bar = el("div", { class: "meter" }, [el("i", { style: "width:" + Math.round(items.length / max * 100) + "%" })]);
-      wk.appendChild(el("a", { class: "wcard " + wcls(w.id), href: href(["projects"], { week: w.id }) }, [
-        el("header", {}, [el("h3", { text: w.label }), el("span", { text: w.period })]),
+      var bar = el("div", { class: "meter base" }, [el("i", { class: wcls(w.id), style: "width:" + Math.round(items.length / max * 100) + "%" })]);
+      wk.appendChild(el("a", { class: "card wcard " + wcls(w.id), href: href(["projects"], { week: w.id }) }, [
+        el("header", {}, [el("span", { class: "sq", text: String(weekIndex(w.id) + 1) }), el("h3", { text: w.label }), el("span", { text: w.period })]),
         ul,
         bar,
-        el("footer", {}, [el("span", { text: "결과물 " + items.length + "개" }), el("span", { text: "보기 →" })])
+        el("footer", {}, [el("span", { text: "프로젝트 " + items.length + "개" }), el("span", { text: "보기 →" })])
       ]));
     });
     main.appendChild(wk);
@@ -662,30 +672,6 @@
     lastHash = location.hash;
   });
 
-  /* ---------- theme ---------- */
-  function effective() {
-    var cur = document.documentElement.getAttribute("data-theme");
-    if (cur) return cur;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-
-  function syncTheme() {
-    var m = effective();
-    [].forEach.call($("theme").children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-mode") === m)); });
-  }
-
-  var saved = store("aipm-theme");
-  if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
-  [].forEach.call($("theme").children, function (b) {
-    b.addEventListener("click", function () {
-      var m = b.getAttribute("data-mode");
-      document.documentElement.setAttribute("data-theme", m);
-      store("aipm-theme", m);
-      syncTheme();
-    });
-  });
-  syncTheme();
-
   /* ---------- chrome events ---------- */
   $("menu-btn").addEventListener("click", function () {
     $("side").classList.add("open");
@@ -731,7 +717,11 @@
     works = data.works.slice().sort(function (a, b) {
       return a.date === b.date ? (a.id < b.id ? -1 : 1) : a.date < b.date ? -1 : 1;
     }).map(function (w, i) { w.no = i + 1; return w; });
-    links = res[1].links || [];
+    function safe(u) {
+      try { return /^https?:$/.test(new URL(u).protocol); } catch (e) { return false; }
+    }
+    works.forEach(function (w) { w.links = (w.links || []).filter(function (l) { return safe(l.url); }); });
+    links = (res[1].links || []).filter(function (l) { return safe(l.url); });
     terms = res[2].terms || [];
     notes = res[3].notes || [];
     var d = parts(TODAY);
