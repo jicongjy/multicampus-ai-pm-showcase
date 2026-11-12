@@ -350,7 +350,11 @@ def main():
         date, wk, title = meta(path, lines)
         report = []
         body_lines = clean(lines[1:] if heading(lines[0]) else lines, report)
-        header_text = "\n".join([info["one"]] + [t["name"] + " " + t["def"] for t in info["terms"]] + info["works"])
+        header_text = "\n".join([info["one"]] + [t["name"] + " " + t["def"] for t in info["terms"]] + info["works"])  # 제거 전 원문까지 모두 검사
+        for w in list(info["works"]):
+            if DROP_LINE.search(w) or w not in work_ids:
+                report.append("머리말 결과물 제거(제외 단어 또는 없는 아이디): " + w[:40])
+                info["works"].remove(w)
         for t in list(info["terms"]):
             if DROP_LINE.search(t["name"] + " " + t["def"]):
                 report.append("머리말 용어 제거: " + t["name"])
