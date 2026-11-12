@@ -1,12 +1,68 @@
 {
   "notes": [
     {
+      "id": "n-w3-day-04-admin-page-claude-desktop",
+      "title": "2026-11-12 14일차 학습 노트",
+      "week": "week-03",
+      "date": "2026-11-12",
+      "summary": "",
+      "html": "notes/n-w3-day-04-admin-page-claude-desktop.html"
+    },
+    {
       "id": "n-w3-day-03-emotion-book-recommendation",
       "title": "3주차 DAY3 감정 책 추천 학습노트",
       "week": "week-03",
       "date": "2026-11-11",
       "summary": "",
       "html": "notes/n-w3-day-03-emotion-book-recommendation.html"
+    },
+    {
+      "id": "n-w3-day-02-web-crawling-event-taxonomy",
+      "title": "AI 프로덕트 매니저 3주차 DAY 2 학습 노트: 외부 데이터 모으기(웹 크롤링)",
+      "week": "week-03",
+      "date": "2026-11-10",
+      "summary": "",
+      "html": "notes/n-w3-day-02-web-crawling-event-taxonomy.html"
+    },
+    {
+      "id": "n-w2-day-05-google-ai-studio-firebase",
+      "title": "AI 프로덕트 매니저 2주차 DAY 5 학습 노트",
+      "week": "week-02",
+      "date": "2026-11-06",
+      "summary": "",
+      "html": "notes/n-w2-day-05-google-ai-studio-firebase.html"
+    },
+    {
+      "id": "n-w2-day-04-deployment-storage-bolt",
+      "title": "AI PM 캠프 9일차 노트: 필드 정의, 배포, 저장 위치, 볼트",
+      "week": "week-02",
+      "date": "2026-11-05",
+      "summary": "",
+      "html": "notes/n-w2-day-04-deployment-storage-bolt.html"
+    },
+    {
+      "id": "n-w2-day-03-data-deployment",
+      "title": "AI 프로덕트 매니저 2주차 DAY 3 학습 노트",
+      "week": "week-02",
+      "date": "2026-11-04",
+      "summary": "",
+      "html": "notes/n-w2-day-03-data-deployment.html"
+    },
+    {
+      "id": "n-w2-day-02-scenario-prd",
+      "title": "AI 프로덕트 매니저 2주차 · DAY 2 학습 노트",
+      "week": "week-02",
+      "date": "2026-11-03",
+      "summary": "",
+      "html": "notes/n-w2-day-02-scenario-prd.html"
+    },
+    {
+      "id": "n-w2-day-01-problem-definition",
+      "title": "AI 프로덕트 매니저 2주차 DAY 1: 문제부터 정의하고, 화면은 하나씩 고친다",
+      "week": "week-02",
+      "date": "2026-11-02",
+      "summary": "",
+      "html": "notes/n-w2-day-01-problem-definition.html"
     }
   ]
 }

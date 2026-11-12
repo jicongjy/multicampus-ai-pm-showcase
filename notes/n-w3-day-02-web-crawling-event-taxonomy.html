@@ -1,0 +1,9 @@
+<ul><li>날짜: 2026-11-10(화), 09:00~18:00, 실시간 비대면</li><li>오늘의 주제: 파이썬 크롤링과 클로드로 크롤링하기, 오후 보강으로 이벤트 텍소노미</li></ul>
+<h3>4-7. 실습 결과</h3>
+<ul><li>전처리 코드(클로드 보고): 드라이브의 원본 CSV를 읽어 점검하고, 원본은 그대로 둔 채 개선본을 별도 파일로 저장하는 코드를 만들었습니다. 가짜 200권 데이터로만 검증했고, 실제 드라이브와 실제 데이터의 점검 결과는 미확인입니다.</li><li>주의: 개선본의 별점이 숫자로 바뀌므로, 영어 단어 기준으로 별을 그리는 웹 코드에는 원본을 써야 별이 비어 보이지 않습니다.</li></ul>
+<h3>5-1. 실습 결과 (클로드 보고)</h3>
+<ol><li>"전체 페이지" 요청: 50쪽 1,000권을 CSV로 받았고, 제목이 비어 있는 2건(38쪽 16번째, 44쪽 8번째)을 [확인 필요]로 남겼습니다.</li></ol>
+<h3>6-3. 내가 만든 겨울 여행 신청 페이지의 이벤트 6개 (클로드 보고)</h3>
+<p>신청서가 맨 아래 있는 A안 하나만 남기고, A/B 판정용 이벤트(ab_exposure)와 variant는 뺐습니다.</p>
+<div class="tbl"><table><thead><tr><th>이벤트</th><th>언제 보내나</th><th>파라미터</th><th>알 수 있는 것</th></tr></thead><tbody><tr><td>page_view</td><td>페이지가 열릴 때 자동</td><td>없음</td><td>페이지 조회 수</td></tr><tr><td>apply_button_click</td><td>신청하기 버튼을 누를 때</td><td>button_position</td><td>어느 위치의 버튼이 신청서 이동을 만드는지</td></tr><tr><td>form_impression</td><td>신청서가 화면에 절반 이상 보일 때 1회</td><td>없음</td><td>신청서 도달 수</td></tr><tr><td>apply_form_start</td><td>이름 칸에 처음 입력할 때 1회</td><td>없음</td><td>입력을 시작한 방문자 수</td></tr><tr><td>apply_form_error</td><td>입력 검사에 걸리거나 저장이 실패할 때</td><td>error_type</td><td>어느 단계에서 막히는지</td></tr><tr><td>generate_lead</td><td>시트에 저장이 성공한 직후 1회</td><td>없음</td><td>신청 완료 수(핵심 지표)</td></tr></tbody></table></div>
+<ul><li>이름과 연락처는 GA로 보내지 않습니다.</li><li>남은 설정: 맞춤 측정기준 error_type과 button_position 등록, generate_lead를 키 이벤트로 표시</li></ul>

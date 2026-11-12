@@ -687,7 +687,7 @@
     if (state.q) { state.q = ""; $("q").value = ""; }
     closeDrawer();
     render();
-    if (location.hash !== lastHash) window.scrollTo(0, 0);
+    if (location.hash !== lastHash) { window.scrollTo(0, 0); document.querySelector(".main").scrollTop = 0; }
     lastHash = location.hash;
   });
 

@@ -6,8 +6,8 @@
 
 동작
   1. notes/ 아래 마크다운 중 앞부분 12줄 안에 '공개: 예' 줄이 있는 노트만 고른다.
-  2. 교안, 슬랙, 회고, 출처와 메모, 과제, 링크 모음 같은 제목의 구역은 통째로 뺀다.
-  3. 교안이나 슬랙을 언급한 줄은 뺀다. 뺀 줄은 화면에 모두 보여 주니 확인한다.
+  2. '내 실습', '내가 만든 것', '배운 점', '한계' 같은 내 작업과 생각 구역만 남긴다. 수업 내용을 옮긴 구역은 뺀다.
+  3. 회고, 출처, 메모, 과제, 링크, 강사, 교안, 슬랙 구역과 그 단어가 들어간 줄도 뺀다. 빠진 것은 화면에 모두 보여 주니 확인한다.
   4. 이메일, 전화번호, 키, 앱스 스크립트 주소 패턴이 남아 있으면 그 노트는 내보내지 않는다.
   5. notes/아이디.html 조각과 data/notes.json을 만든다.
 """
@@ -19,8 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FLAG = re.compile(r"^\s*공개\s*[:：]\s*예\s*$")
-DROP_HEADING = re.compile(r"교안|슬랙|회고|출처|메모|과제|링크 모음|다음에")
-DROP_LINE = re.compile(r"교안|슬랙|강사 안내|셀렉트웨이|비공개|미기입")
+DROP_HEADING = re.compile(r"교안|슬랙|회고|출처|메모|과제|링크|다음에|강사|피드백|정리자|참고")
+KEEP_HEADING = re.compile(r"내 실습|직접 실습|직접 해|별도 실습|실습 기록|실습 결과|내가|제가|만든|산출물|배운 점|느낀 점|해 보고 싶|겪은 문제|개선|결정")
+DROP_LINE = re.compile(r"교안|슬랙|강사|셀렉트웨이|비공개|미기입|내부|학습 저장소|multicampus-ai-product-manager")
 SENSITIVE = [
     ("이메일", re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")),
     ("전화번호", re.compile(r"01[016789][- ]?\d{3,4}[- ]?\d{4}")),
@@ -37,29 +38,43 @@ def heading(line):
 
 
 def clean(lines, report):
-    out, skip_level, fence = [], None, False
+    """내가 만든 것과 내 생각 구역만 남긴다. 수업 내용을 옮긴 구역은 저작권 때문에 뺀다."""
+    pre, secs, fence = [], [], False
+    cur = None
     for line in lines:
         if line.strip().startswith("```"):
             fence = not fence
-            if skip_level is None:
-                out.append(line)
-            continue
         h = None if fence else heading(line)
         if h:
-            level, text = h
-            if skip_level is not None and level <= skip_level:
-                skip_level = None
-            if skip_level is None and DROP_HEADING.search(text):
-                skip_level = level
-                report.append("구역 제거: " + text)
-                continue
-        if skip_level is not None:
+            cur = {"level": h[0], "text": h[1], "lines": [line]}
+            secs.append(cur)
+        elif cur is None:
+            pre.append(line)
+        else:
+            cur["lines"].append(line)
+
+    out, stack = list(pre), []
+    for sec in secs:
+        while stack and stack[-1]["level"] >= sec["level"]:
+            stack.pop()
+        stack.append(sec)
+        path = [x["text"] for x in stack]
+        if any(DROP_HEADING.search(t) for t in path):
+            report.append("구역 제거: " + sec["text"])
             continue
+        if not any(KEEP_HEADING.search(t) for t in path):
+            report.append("구역 제외(수업 내용): " + sec["text"])
+            continue
+        report.append("구역 유지: " + sec["text"])
+        out.extend(sec["lines"])
+
+    kept = []
+    for line in out:
         if DROP_LINE.search(line):
             report.append("줄 제거: " + line.strip()[:70])
             continue
-        out.append(line)
-    return drop_empty_headings(out)
+        kept.append(line)
+    return drop_empty_headings(kept)
 
 
 def drop_empty_headings(lines):
