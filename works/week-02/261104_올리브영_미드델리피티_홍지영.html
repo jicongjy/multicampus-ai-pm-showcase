@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>올리브영 온라인몰 프로토타입 (미드피델리티)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#e9e9e9}
+body{font-family:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;color:#111;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;text-align:left}
+button:focus-visible,input:focus-visible{outline:2px solid #111;outline-offset:2px}
+.wrap{display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:16px;min-height:100vh}
+.phone{width:390px;height:min(844px,calc(100vh - 32px));min-height:640px;border:1px solid #111;display:flex;flex-direction:column;position:relative;overflow:hidden;background:#fff;flex:none}
+.scr{display:flex;flex-direction:column;flex:1;min-height:0;position:relative}
+.hd{height:56px;display:flex;align-items:center;gap:4px;padding:0 4px;border-bottom:1px solid #cfcfcf;flex:none}
+.ttl{flex:1;font-size:17px;font-weight:700;padding-left:12px}
+.bd{flex:1;min-height:0;overflow-y:auto;position:relative}
+.ib{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.cb{position:absolute;right:4px;top:4px;min-width:16px;height:16px;border-radius:8px;background:#111;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.tab{height:64px;display:flex;border-top:1px solid #111;flex:none;background:#fff}
+.tab button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:#5c5c5c}
+.tab button.on{color:#111;font-weight:700}
+.ph{background:#ececec;border:1px solid #cfcfcf;display:flex;align-items:center;justify-content:center;color:#5c5c5c;font-size:11px}
+.pad{padding:16px}
+.st{font-size:14px;font-weight:700}
+.sub{font-size:12px;color:#5c5c5c}
+.row{display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border-bottom:1px solid #e4e4e4;font-size:15px;width:100%}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}
+.card{display:block;width:100%}
+.card .b{font-size:12px;color:#5c5c5c;margin-top:8px}
+.card .t{font-size:13px;line-height:1.4;height:36px;overflow:hidden}
+.card .p{font-size:15px;font-weight:700;margin-top:4px}
+.card .r{font-size:12px;color:#5c5c5c;margin-top:2px}
+.item{display:flex;gap:12px;padding:16px;border-bottom:1px solid #e4e4e4;width:100%;position:relative}
+.item .b{font-size:12px;color:#5c5c5c}
+.item .t{font-size:14px;line-height:1.4;margin-top:2px}
+.item .p{font-size:16px;font-weight:700;margin-top:6px}
+.item .r{font-size:12px;color:#5c5c5c;margin-top:4px}
+.ft{padding:12px 16px;border-top:1px solid #111;flex:none;background:#fff}
+.cta{height:52px;width:100%;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:16px;font-weight:700;text-align:center}
+.btn2{height:44px;padding:0 14px;border:1px solid #111;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none;background:#fff}
+.btn2.sm{height:36px}
+.btn2.on{background:#111;color:#fff}
+.chip{display:flex;align-items:center;gap:4px;height:32px;padding:0 12px;border:1px solid #111;font-size:13px;flex:none;background:#fff}
+.chip.on{background:#111;color:#fff}
+.fld{height:48px;border:1.5px solid #111;display:flex;align-items:center;padding:0 12px;gap:8px;font-size:14px;flex:1;min-width:0}
+.fld.thin{height:44px;border-width:1px}
+.fld input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:14px;background:transparent;height:44px;color:#111}
+.sec{padding:14px 16px;border-bottom:1px solid #e4e4e4}
+.lb{font-size:13px;font-weight:700;margin-bottom:8px}
+.opt{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;font-size:14px;width:100%;border:1px solid #bdbdbd}
+.opt.sel,.pay.sel{border:1.5px solid #111;background:#f6f6f6;font-weight:700}
+.pay{flex:1;height:44px;display:flex;align-items:center;justify-content:center;font-size:13px;text-align:center;border:1px solid #bdbdbd}
+.dot{width:16px;height:16px;border-radius:50%;border:1.5px solid #111;flex:none;display:flex;align-items:center;justify-content:center}
+.dot.on::after{content:'';width:8px;height:8px;border-radius:50%;background:#111}
+.sr{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#444;margin-top:6px}
+.sr.big{font-size:16px;font-weight:700;color:#111;margin-top:12px;padding-top:10px;border-top:1px solid #cfcfcf}
+.stp{display:flex;align-items:center;border:1px solid #111;height:36px}
+.stp span{width:32px;text-align:center;font-size:14px}
+.stp button{width:36px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.err{font-size:12px;font-weight:700;margin-top:6px}
+.toast{position:absolute;left:16px;right:16px;bottom:88px;height:44px;background:#111;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:5}
+.toast button{color:#fff;font-weight:700}
+.hot{outline:2px solid #111;outline-offset:2px}
+.item.hot,.row.hot{outline-offset:-3px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:80px 32px;text-align:center}
+.menu{border-bottom:1px solid #cfcfcf;flex:none;background:#fff}
+.menu button{display:flex;align-items:center;gap:10px;height:44px;padding:0 16px;font-size:14px;width:100%}
+.menu button.on{font-weight:700;background:#f6f6f6}
+.panel{width:300px;flex:none;font-size:12px;line-height:1.5;display:flex;flex-direction:column;gap:12px;padding-top:2px}
+.panel h2{margin:0;font-size:20px;font-weight:700}
+.pth{color:#5c5c5c;padding-bottom:10px;border-bottom:1px solid #cfcfcf}
+.sp{display:flex;gap:8px;margin-top:6px}
+.n{flex:none;width:18px;height:18px;border-radius:50%;background:#111;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.tip{border:1px solid #111;padding:8px 10px;background:#fff}
+.tip b{display:block;margin-bottom:2px}
+.stp2{display:flex;align-items:center;gap:8px;margin-top:3px;color:#6b6b6b}
+.stp2.vis{color:#111}
+.stp2.cur{color:#111;font-weight:700}
+.mk{width:18px;height:18px;border-radius:50%;border:1px solid #8a8a8a;display:flex;align-items:center;justify-content:center;font-size:10px;flex:none}
+.stp2.vis .mk{border-color:#111}
+.stp2.cur .mk{background:#111;color:#fff;border-color:#111}
+.pb{height:32px;padding:0 10px;border:1px solid #111;font-size:12px;font-weight:700;display:flex;align-items:center;background:#fff}
+@media (max-width:760px){
+  .wrap{flex-direction:column;align-items:center}
+  .phone{width:100%;max-width:390px}
+  .panel{width:100%;max-width:390px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone" id="phone" aria-live="polite"></div>
+  <aside class="panel" id="panel"></aside>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- 샘플 데이터 (흐름 확인용) ---------- */
+  var PRODUCTS = [
+    { id: 1, cat: '스킨케어', brand: '브랜드 A', name: '수분 세럼', vol: '50ml', price: 18000, rating: '4.8', rev: 1284, opts: ['본품', '기획 세트'] },
+    { id: 2, cat: '선케어', brand: '브랜드 B', name: '데일리 선크림', vol: '50ml', price: 22000, rating: '4.7', rev: 532, opts: ['본품', '기획 세트'] },
+    { id: 3, cat: '클렌징', brand: '브랜드 C', name: '약산성 클렌징 폼', vol: '150ml', price: 9000, rating: '4.6', rev: 87, opts: ['본품', '2개입'] },
+    { id: 4, cat: '메이크업', brand: '브랜드 D', name: '립밤', vol: '4g', price: 6500, rating: '4.5', rev: 2310, opts: ['본품', '2개입'] },
+    { id: 5, cat: '스킨케어', brand: '브랜드 E', name: '토너 패드', vol: '70매', price: 24000, rating: '4.7', rev: 145, opts: ['본품', '리필'] },
+    { id: 6, cat: '바디', brand: '브랜드 F', name: '핸드크림', vol: '60ml', price: 8000, rating: '4.4', rev: 66, opts: ['본품', '2개입'] }
+  ];
+  var CATS = ['스킨케어', '선케어', '클렌징', '메이크업', '바디'];
+  var SCREENS = [
+    { id: 'home', no: 1, label: '홈 화면', path: '올리브영 온라인몰' },
+    { id: 'category', no: 2, label: '카테고리 화면', path: '올리브영 온라인몰 › 카테고리' },
+    { id: 'catlist', no: 3, label: '카테고리 상품 목록 화면', path: '올리브영 온라인몰 › 카테고리 › 카테고리 상품 목록' },
+    { id: 'search', no: 4, label: '검색 화면', path: '올리브영 온라인몰 › 검색' },
+    { id: 'result', no: 5, label: '검색 결과 화면', path: '올리브영 온라인몰 › 검색 › 검색 결과' },
+    { id: 'detail', no: 6, label: '상품 상세 화면', path: '올리브영 온라인몰 › 검색 › 검색 결과 › 상품 상세' },
+    { id: 'cart', no: 7, label: '장바구니 화면', path: '올리브영 온라인몰 › 장바구니' },
+    { id: 'checkout', no: 8, label: '주문/결제 화면', path: '올리브영 온라인몰 › 장바구니 › 주문/결제' },
+    { id: 'address', no: 9, label: '배송지 변경 화면', path: '올리브영 온라인몰 › 장바구니 › 주문/결제 › 배송지 변경' },
+    { id: 'done', no: 10, label: '주문 완료 화면', path: '올리브영 온라인몰 › 장바구니 › 주문/결제 › 주문 완료' }
+  ];
+  var SPEC = {
+    home: ['검색창에 상품명 입력, 각 화면으로 이동하는 진입점'],
+    category: ['상품 분류를 골라 둘러보기', '분류를 선택하면 해당 상품 목록으로 이동'],
+    catlist: ['선택한 분류의 상품 목록 표시', '상품을 누르면 상품 상세 화면으로 이동'],
+    search: ['검색어 입력', '최근 검색어 표시'],
+    result: ['입력한 검색어와 맞는 상품을 찾아 목록으로 표시', '리뷰·가격을 비교해 상품을 선택하면 상품 상세 화면으로 이동', '정렬, 필터', '결과가 없을 때: 같은 화면의 빈 상태로 안내 문구 표시'],
+    detail: ['용량, 가격, 리뷰 등 상품 정보 확인', '옵션 선택', '장바구니 담기: 선택한 상품을 사용자의 장바구니에 저장'],
+    cart: ['담은 상품의 수량, 상품 금액 확인', '주문 버튼을 누르면 주문/결제 화면으로 이동'],
+    checkout: ['쿠폰 적용: 사용 조건을 확인하고 최종 결제 금액을 다시 계산', '포인트 사용 금액 입력: 사용 가능 여부를 확인해 반영', '배송지 확인', '결제 수단 선택, 결제'],
+    address: ['새로운 주소 검색하여 입력'],
+    done: ['주문번호와 도착 예정일 표시']
+  };
+  var TIPS = {
+    home: '굵은 테두리가 눌러야 할 곳입니다. 검색창을 눌러 보세요.',
+    category: '분류 하나를 눌러 해당 상품 목록으로 이동해 보세요.',
+    catlist: '상품을 눌러 상세 화면으로 이동해 보세요.',
+    search: '‘크림’을 입력해 검색하면 결과 2개, ‘abc’처럼 없는 단어를 입력하면 결과 없음 상태를 볼 수 있습니다.',
+    result: '정렬·필터를 바꿔 보고 상품을 눌러 보세요. 상단 검색어를 누르면 다시 검색할 수 있습니다.',
+    detail: '리뷰를 펼치고 옵션을 고른 뒤 장바구니에 담아 보세요. 여러 번 담으면 수량이 늘어납니다.',
+    cart: '수량을 바꿔 금액 변화를 보세요. 립밤 1개만 담으면 쿠폰 조건(2만원 이상) 미충족을 볼 수 있습니다.',
+    checkout: '쿠폰 적용, 포인트 입력(한도 초과 시 오류), 결제 수단 미선택 상태로 결제를 눌러 보세요.',
+    address: '주소를 검색하고 하나를 선택한 뒤 상세 주소를 입력해 변경해 보세요.',
+    done: '홈으로 가기를 누르면 장바구니가 비워지고 처음 상태로 돌아갑니다.'
+  };
+  var PAYS = ['신용·체크카드', '간편결제', '계좌이체'];
+  var ADDRS = ['서울시 ○○구 ○○로 10', '서울시 ○○구 ○○대로 25', '경기도 ○○시 ○○로 7'];
+  var SORTS = [['rec', '추천순'], ['low', '낮은 가격순'], ['high', '높은 가격순'], ['rev', '리뷰 많은 순']];
+
+  /* ---------- 유틸 ---------- */
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function num(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function fmt(n) { return num(n) + '원'; }
+  function prodOf(id) { return PRODUCTS.filter(function (p) { return p.id === id; })[0]; }
+  function svg(path, extra) { return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' + (extra || '') + '>' + path + '</svg>'; }
+  var I = {
+    back: svg('<path d="M15 5l-7 7 7 7"/>'),
+    cart: svg('<path d="M3 4h3l2.5 11h9.5l2-8H7"/><circle cx="10" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>'),
+    search: svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
+    home: svg('<path d="M4 11l8-7 8 7v9H4z"/>'),
+    grid: svg('<rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/>'),
+    chev: svg('<path d="M9 5l7 7-7 7"/>'),
+    clock: svg('<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>'),
+    check: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>')
+  };
+
+  /* ---------- 상태 ---------- */
+  function init(hints) {
+    return {
+      screen: 'home', hist: [], visited: ['home'], hints: hints,
+      query: '', term: '', recent: ['세럼', '선크림'], cat: '스킨케어',
+      sortOpen: false, sort: 'rec', filterOpen: false, fLow: false, fRev: false,
+      pid: 1, opt: 0, revOpen: false, toast: false,
+      cart: [],
+      coupon: false, couponMsg: '', pt: '', pay: null, payMsg: '',
+      addr: '[샘플] 서울시 ○○구 ○○로 12, 101동 202호',
+      aq: '', aSearched: false, aSel: null, adetail: '', aMsg: '',
+      orderNo: '', orderEta: ''
+    };
+  }
+  var S = init(true);
+
+  function set(o) { for (var k in o) { S[k] = o[k]; } render(); }
+  function go(screen, extra) {
+    var visited = S.visited.indexOf(screen) >= 0 ? S.visited : S.visited.concat([screen]);
+    var o = { toast: false };
+    for (var k in extra) { o[k] = extra[k]; }
+    o.screen = screen; o.hist = S.hist.concat([S.screen]); o.visited = visited;
+    set(o);
+  }
+  function tab(screen) {
+    var visited = S.visited.indexOf(screen) >= 0 ? S.visited : S.visited.concat([screen]);
+    set({ screen: screen, hist: [], toast: false, visited: visited });
+  }
+  function back() {
+    var h = S.hist.slice(); var prev = h.pop() || 'home';
+    set({ screen: prev, hist: h, toast: false });
+  }
+  function submit(text) {
+    var t = (text || '').trim(); if (!t) return;
+    var recent = [t].concat(S.recent.filter(function (x) { return x !== t; })).slice(0, 5);
+    go('result', { term: t, query: t, recent: recent, sortOpen: false, filterOpen: false, sort: 'rec', fLow: false, fRev: false });
+  }
+  function totals() {
+    var sub = 0, count = 0;
+    S.cart.forEach(function (c) { var p = prodOf(c.pid); sub += p.price * c.qty; count += c.qty; });
+    var ship = sub === 0 ? 0 : (sub >= 30000 ? 0 : 3000);
+    var couponOk = sub >= 20000;
+    var couponAmt = S.coupon && couponOk ? 3000 : 0;
+    var maxPt = Math.max(0, Math.min(2500, sub - couponAmt));
+    var ptNum = parseInt(String(S.pt).replace(/[^0-9]/g, ''), 10) || 0;
+    var ptErr = ptNum > maxPt;
+    var ptUse = ptErr ? 0 : ptNum;
+    return { sub: sub, count: count, ship: ship, couponOk: couponOk, couponAmt: couponAmt, maxPt: maxPt, ptErr: ptErr, ptUse: ptUse, fin: sub - couponAmt - ptUse + ship };
+  }
+
+  /* ---------- 공통 조각 ---------- */
+  function hot(on) { return on && S.hints ? ' hot' : ''; }
+  function backBtn() { return '<button type="button" class="ib" data-act="back" aria-label="뒤로">' + I.back + '</button>'; }
+  function cartBtn() {
+    var n = totals().count;
+    return '<button type="button" class="ib" data-act="go" data-a="cart" aria-label="장바구니">' + I.cart + (n ? '<span class="cb">' + n + '</span>' : '') + '</button>';
+  }
+  function card(p, h) {
+    return '<button type="button" class="card' + hot(h) + '" data-act="prod" data-a="' + p.id + '"><div class="ph" style="aspect-ratio:1/1">이미지</div><div class="b">' + esc(p.brand) + '</div><div class="t">' + esc(p.name) + '</div><div class="p">' + fmt(p.price) + '</div><div class="r">★ ' + p.rating + ' (' + p.rev + ')</div></button>';
+  }
+  function item(p, h) {
+    return '<button type="button" class="item' + hot(h) + '" data-act="prod" data-a="' + p.id + '"><div class="ph" style="width:88px;height:88px;flex:none">이미지</div><div style="flex:1;min-width:0"><div class="b">' + esc(p.brand) + '</div><div class="t">' + esc(p.name) + '</div><div class="p">' + fmt(p.price) + '</div><div class="r">★ ' + p.rating + ' · 리뷰 ' + p.rev + '</div></div></button>';
+  }
+  function tabBar() {
+    function b(id, ic, label, act, a) { return '<button type="button" class="' + (S.screen === id ? 'on' : '') + '" data-act="' + act + '" data-a="' + a + '">' + ic + label + '</button>'; }
+    return '<div class="tab">' + b('home', I.home, '홈', 'tab', 'home') + b('category', I.grid, '카테고리', 'tab', 'category') + b('search', I.search, '검색', 'go', 'search') + b('cart', I.cart, '장바구니', 'tab', 'cart') + '</div>';
+  }
+
+  /* ---------- 화면 ---------- */
+  var V = {};
+  V.home = function () {
+    var cats = CATS.map(function (c) { return '<button type="button" data-act="cat" data-a="' + c + '" style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;width:56px"><div class="ph" style="width:48px;height:48px;border-radius:50%"></div>' + c + '</button>'; }).join('');
+    var rec = PRODUCTS.slice(0, 2).map(function (p) { return '<button type="button" data-act="prod" data-a="' + p.id + '" style="flex:1;min-width:0;display:block"><div class="ph" style="height:110px">이미지</div><div class="sub" style="margin-top:6px">' + esc(p.brand) + '</div><div style="font-size:13px">' + esc(p.name) + '</div><div style="font-size:14px;font-weight:700">' + fmt(p.price) + '</div></button>'; }).join('');
+    return '<div class="scr"><div class="hd" style="padding-left:16px"><div class="ph" style="width:88px;height:32px">[로고]</div><div style="flex:1"></div>' + cartBtn() + '</div>' +
+      '<div class="bd pad" style="display:flex;flex-direction:column;gap:16px">' +
+      '<button type="button" class="' + hot(true).trim() + '" data-act="go" data-a="search" style="height:48px;border:1.5px solid #111;display:flex;align-items:center;gap:8px;padding:0 14px;color:#5c5c5c;font-size:14px">' + I.search.replace('width="24" height="24"', 'width="20" height="20"') + '상품명을 입력하세요</button>' +
+      '<div class="ph" style="height:130px;flex:none">프로모션 배너 영역</div>' +
+      '<div><div class="st" style="margin-bottom:8px">카테고리 바로가기</div><div style="display:flex;justify-content:space-between">' + cats + '</div></div>' +
+      '<div><div class="st" style="margin-bottom:8px">추천 상품</div><div style="display:flex;gap:12px">' + rec + '</div></div>' +
+      '</div></div>' + tabBar();
+  };
+  V.category = function () {
+    var rows = CATS.map(function (c, i) { return '<button type="button" class="row' + hot(i === 0) + '" data-act="cat" data-a="' + c + '"><div class="ph" style="width:36px;height:36px;border-radius:50%"></div><span style="flex:1">' + c + '</span>' + I.chev.replace('width="24" height="24"', 'width="18" height="18"') + '</button>'; }).join('');
+    return '<div class="scr"><div class="hd" style="padding-left:12px"><div class="ttl" style="padding-left:4px">카테고리</div><button type="button" class="ib" data-act="go" data-a="search" aria-label="검색">' + I.search + '</button>' + cartBtn() + '</div><div class="bd">' + rows + '</div></div>' + tabBar();
+  };
+  V.catlist = function () {
+    var list = PRODUCTS.filter(function (p) { return p.cat === S.cat; });
+    return '<div class="scr"><div class="hd">' + backBtn() + '<div class="ttl" style="padding-left:0">' + esc(S.cat) + '</div>' + cartBtn() + '</div>' +
+      '<div class="bd pad"><div class="sub" style="margin-bottom:12px">상품 ' + list.length + '개</div><div class="grid">' + list.map(function (p, i) { return card(p, i === 0); }).join('') + '</div></div></div>';
+  };
+  V.search = function () {
+    var rec = S.recent.map(function (t) {
+      return '<div style="display:flex;align-items:center;height:48px;border-bottom:1px solid #e4e4e4"><button type="button" data-act="recent" data-a="' + esc(t) + '" style="flex:1;display:flex;align-items:center;gap:12px;height:48px;font-size:15px">' + I.clock.replace('width="24" height="24"', 'width="18" height="18"') + esc(t) + '</button><button type="button" data-act="delRecent" data-a="' + esc(t) + '" aria-label="삭제" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#5c5c5c">✕</button></div>';
+    }).join('');
+    return '<div class="scr"><div class="hd" style="height:64px;padding-right:12px">' + backBtn() +
+      '<label class="fld" style="height:44px;padding-right:4px"><input id="in-query" data-input="query" data-enter="search" type="text" value="' + esc(S.query) + '" placeholder="상품명 입력 (예: 세럼, 크림)" autocomplete="off"><button type="button" class="' + hot(true).trim() + '" data-act="search" aria-label="검색" style="width:40px;height:36px;display:flex;align-items:center;justify-content:center">' + I.search + '</button></label></div>' +
+      '<div class="bd pad" style="padding-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;height:40px"><div style="font-size:15px;font-weight:700">최근 검색어</div><button type="button" class="sub" data-act="clearRecent">전체 삭제</button></div>' +
+      (S.recent.length ? rec : '<div class="sub" style="padding:24px 0">최근 검색어가 없습니다.</div>') + '</div></div>';
+  };
+  V.result = function () {
+    var q = S.term.toLowerCase();
+    var res = PRODUCTS.filter(function (p) { return q !== '' && (p.name + p.brand + p.cat).toLowerCase().indexOf(q) >= 0; });
+    if (S.fLow) res = res.filter(function (p) { return p.price <= 10000; });
+    if (S.fRev) res = res.filter(function (p) { return p.rev >= 100; });
+    if (S.sort === 'low') res = res.slice().sort(function (a, b) { return a.price - b.price; });
+    if (S.sort === 'high') res = res.slice().sort(function (a, b) { return b.price - a.price; });
+    if (S.sort === 'rev') res = res.slice().sort(function (a, b) { return b.rev - a.rev; });
+    var sortLabel = SORTS.filter(function (o) { return o[0] === S.sort; })[0][1];
+    var fc = (S.fLow ? 1 : 0) + (S.fRev ? 1 : 0);
+    var sortMenu = S.sortOpen ? '<div class="menu">' + SORTS.map(function (o) { return '<button type="button" class="' + (S.sort === o[0] ? 'on' : '') + '" data-act="sort" data-a="' + o[0] + '"><span class="dot ' + (S.sort === o[0] ? 'on' : '') + '"></span>' + o[1] + '</button>'; }).join('') + '</div>' : '';
+    var filterMenu = S.filterOpen ? '<div class="menu" style="padding:12px 16px;display:flex;gap:8px"><button type="button" class="chip ' + (S.fLow ? 'on' : '') + '" data-act="fLow">1만원 이하</button><button type="button" class="chip ' + (S.fRev ? 'on' : '') + '" data-act="fRev">리뷰 100개 이상</button></div>' : '';
+    var body = res.length ? res.map(function (p, i) { return item(p, i === 0); }).join('') :
+      '<div class="empty"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8.5 8.5l5 5M13.5 8.5l-5 5"/></svg><div style="font-size:16px;font-weight:700">‘' + esc(S.term) + '’에 대한 검색 결과가 없습니다</div><div class="sub" style="font-size:13px">철자를 확인하거나 다른 검색어로 다시 검색해 보세요.</div><button type="button" class="btn2' + hot(true) + '" data-act="go" data-a="search" style="margin-top:8px">다시 검색하기</button></div>';
+    return '<div class="scr"><div class="hd" style="height:64px">' + backBtn() +
+      '<button type="button" data-act="go" data-a="search" style="flex:1;display:flex;align-items:center;height:44px;border:1.5px solid #111;padding:0 14px;gap:8px;font-size:14px"><span style="flex:1">' + esc(S.term) + '</span>' + I.search.replace('width="24" height="24"', 'width="20" height="20"') + '</button>' + cartBtn() + '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 16px;border-bottom:1px solid #cfcfcf;flex:none"><div class="sub" style="font-size:13px">검색 결과 ' + res.length + '개</div><div style="display:flex;gap:8px"><button type="button" class="chip" data-act="sortToggle">' + sortLabel + ' ▾</button><button type="button" class="chip ' + (fc ? 'on' : '') + '" data-act="filterToggle">필터' + (fc ? ' (' + fc + ')' : '') + '</button></div></div>' +
+      sortMenu + filterMenu + '<div class="bd">' + body + '</div></div>';
+  };
+  V.detail = function () {
+    var p = prodOf(S.pid);
+    var opts = p.opts.map(function (o, i) { return '<button type="button" class="opt ' + (S.opt === i ? 'sel' : '') + '" data-act="opt" data-a="' + i + '"><span class="dot ' + (S.opt === i ? 'on' : '') + '"></span>' + esc(o) + '</button>'; }).join('');
+    return '<div class="scr"><div class="hd">' + backBtn() + '<div class="ttl" style="padding-left:0">상품 상세</div>' + cartBtn() + '</div>' +
+      '<div class="bd"><div class="ph" style="height:210px;border-width:0 0 1px 0">상품 이미지</div>' +
+      '<div class="sec"><div class="sub">' + esc(p.brand) + '</div><div style="font-size:17px;font-weight:700;line-height:1.4;margin-top:2px">' + esc(p.name) + '</div><div style="font-size:22px;font-weight:800;margin-top:10px">' + fmt(p.price) + '</div><div style="font-size:13px;color:#444;margin-top:8px">용량 · ' + esc(p.vol) + '</div></div>' +
+      '<button type="button" class="sec" data-act="revToggle" style="display:flex;align-items:center;justify-content:space-between;width:100%;font-size:14px"><span>★ ' + p.rating + ' · 리뷰 ' + p.rev + '개</span><span>' + (S.revOpen ? '▲' : '▼') + '</span></button>' +
+      (S.revOpen ? '<div class="sec" style="background:#f6f6f6;font-size:13px;line-height:1.5"><div>★ 5 · [샘플 리뷰 1] 사용감이 가볍고 좋아요.</div><div style="margin-top:6px">★ 4 · [샘플 리뷰 2] 가격 대비 만족합니다.</div></div>' : '') +
+      '<div class="sec" style="border-bottom:0"><div class="st" style="margin-bottom:10px">옵션 선택</div><div style="display:flex;flex-direction:column;gap:8px">' + opts + '</div></div></div>' +
+      (S.toast ? '<div class="toast"><span>장바구니에 담았습니다</span><button type="button" data-act="go" data-a="cart">장바구니 보기</button></div>' : '') +
+      '<div class="ft"><button type="button" class="cta' + hot(true) + '" data-act="add">장바구니 담기</button></div></div>';
+  };
+  V.cart = function () {
+    var T = totals();
+    var lines = S.cart.map(function (c, i) {
+      var p = prodOf(c.pid);
+      return '<div class="item"><div class="ph" style="width:80px;height:80px;flex:none">이미지</div><div style="flex:1;min-width:0"><div class="sub">' + esc(p.brand) + '</div><div style="font-size:14px;line-height:1.4;padding-right:28px">' + esc(p.name) + ' · ' + esc(p.opts[c.opt]) + '</div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px"><div class="stp"><button type="button" data-act="qty" data-a="' + i + ':-1" aria-label="수량 감소">−</button><span>' + c.qty + '</span><button type="button" data-act="qty" data-a="' + i + ':1" aria-label="수량 증가">+</button></div><div style="font-size:15px;font-weight:700">' + fmt(p.price * c.qty) + '</div></div></div><button type="button" data-act="del" data-a="' + i + '" aria-label="삭제" style="position:absolute;right:8px;top:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#5c5c5c">✕</button></div>';
+    }).join('');
+    var empty = '<div class="empty" style="padding-top:100px"><div style="font-size:16px;font-weight:700">장바구니가 비어 있습니다</div><div class="sub" style="font-size:13px">상품을 담으면 여기에 표시됩니다.</div><button type="button" class="btn2' + hot(true) + '" data-act="tab" data-a="home" style="margin-top:8px">쇼핑하러 가기</button></div>';
+    var sum = '<div style="padding:16px;background:#f6f6f6"><div class="sr" style="margin-top:0"><span>총 상품 금액</span><span>' + fmt(T.sub) + '</span></div><div class="sr"><span>배송비</span><span>' + (T.ship === 0 ? '무료' : fmt(T.ship)) + '</span></div><div class="sr big"><span>예상 결제 금액</span><span>' + fmt(T.sub + T.ship) + '</span></div></div>';
+    return '<div class="scr"><div class="hd" style="padding-left:12px"><div class="ttl" style="padding-left:4px">장바구니</div></div><div class="bd">' + (T.count ? lines + sum : empty) + '</div>' +
+      (T.count ? '<div class="ft"><button type="button" class="cta' + hot(true) + '" data-act="checkout">주문하기 (' + T.count + '개)</button></div>' : '') + '</div>' + tabBar();
+  };
+  V.checkout = function () {
+    var T = totals();
+    var applied = S.coupon && T.couponOk;
+    var lines = S.cart.map(function (c) { var p = prodOf(c.pid); return '<div class="sr" style="margin-top:0;margin-bottom:4px"><span>' + esc(p.name) + ' · ' + esc(p.opts[c.opt]) + ' × ' + c.qty + '</span><span>' + fmt(p.price * c.qty) + '</span></div>'; }).join('');
+    var pays = PAYS.map(function (l, i) { return '<button type="button" class="pay ' + (S.pay === i ? 'sel' : '') + '" data-act="pay" data-a="' + i + '">' + l + '</button>'; }).join('');
+    return '<div class="scr"><div class="hd">' + backBtn() + '<div class="ttl" style="padding-left:0">주문/결제</div></div><div class="bd">' +
+      '<div class="sec"><div class="lb">배송지</div><div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;font-size:13px;line-height:1.5"><div style="font-weight:700">[수령인] · [연락처]</div><div>' + esc(S.addr) + '</div></div><button type="button" class="btn2 sm' + hot(true) + '" data-act="toAddr">변경</button></div></div>' +
+      '<div class="sec"><div class="lb">주문 상품</div>' + lines + '</div>' +
+      '<div class="sec"><div class="lb">쿠폰</div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;font-size:13px">[샘플] 신규 가입 쿠폰 3,000원<div class="sub">2만원 이상 주문 시 사용</div></div><button type="button" class="btn2 sm ' + (applied ? 'on' : '') + '" data-act="coupon">' + (applied ? '해제' : '적용') + '</button></div>' + (S.couponMsg ? '<div class="err">' + esc(S.couponMsg) + '</div>' : '') + '</div>' +
+      '<div class="sec"><div class="lb">포인트</div><div style="display:flex;gap:8px"><label class="fld thin"><input id="in-pt" data-input="pt" type="text" inputmode="numeric" value="' + esc(S.pt) + '" placeholder="사용 금액 입력" autocomplete="off"></label><button type="button" class="btn2" data-act="ptAll">전액 사용</button></div><div class="sub" style="margin-top:6px">사용 가능 포인트 ' + num(T.maxPt) + 'P (보유 2,500P)</div>' + (T.ptErr ? '<div class="err">사용 가능 포인트를 초과했습니다. 반영되지 않았습니다.</div>' : '') + '</div>' +
+      '<div class="sec"><div class="lb">결제 수단</div><div style="display:flex;gap:8px">' + pays + '</div>' + (S.payMsg ? '<div class="err">' + esc(S.payMsg) + '</div>' : '') + '</div>' +
+      '<div style="padding:14px 16px;background:#f6f6f6"><div class="lb">최종 결제 금액</div><div class="sr" style="margin-top:0"><span>상품 금액</span><span>' + fmt(T.sub) + '</span></div><div class="sr"><span>쿠폰 할인</span><span>' + (T.couponAmt ? '-' + fmt(T.couponAmt) : '0원') + '</span></div><div class="sr"><span>포인트 사용</span><span>' + (T.ptUse ? '-' + num(T.ptUse) + 'P' : '0P') + '</span></div><div class="sr"><span>배송비</span><span>' + (T.ship === 0 ? '무료' : fmt(T.ship)) + '</span></div><div class="sr big"><span>최종 결제 금액</span><span>' + fmt(T.fin) + '</span></div></div>' +
+      '</div><div class="ft"><button type="button" class="cta' + hot(true) + '" data-act="order">' + fmt(T.fin) + ' 결제하기</button></div></div>';
+  };
+  V.address = function () {
+    var items = ADDRS.map(function (a, i) { return '<button type="button" data-act="aPick" data-a="' + i + '" style="display:block;width:100%;padding:12px 8px;border-bottom:1px solid #e4e4e4;font-size:13px;line-height:1.5;' + (S.aSel === i ? 'background:#f1f1f1;font-weight:700;' : '') + '">[샘플 주소 ' + (i + 1) + '] ' + a + '</button>'; }).join('');
+    return '<div class="scr"><div class="hd">' + backBtn() + '<div class="ttl" style="padding-left:0">배송지 변경</div></div>' +
+      '<div class="bd pad" style="display:flex;flex-direction:column;gap:16px"><div style="display:flex;gap:8px"><label class="fld">' + I.search.replace('width="24" height="24"', 'width="20" height="20"') + '<input id="in-aq" data-input="aq" data-enter="aSearch" type="text" value="' + esc(S.aq) + '" placeholder="도로명, 지번 또는 건물명 검색" autocomplete="off"></label><button type="button" data-act="aSearch" style="width:72px;height:48px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none">검색</button></div>' +
+      (S.aSearched ? '<div><div class="sub" style="font-size:13px;margin-bottom:4px">검색 결과 3건 (샘플)</div>' + items + '</div>' : '<div class="sub" style="font-size:13px">주소를 입력하고 검색을 눌러 주세요.</div>') +
+      (S.aSel !== null ? '<div><label for="in-adetail" style="display:block;font-size:13px;font-weight:700;margin-bottom:8px">상세 주소</label><div style="display:flex"><label class="fld"><input id="in-adetail" data-input="adetail" type="text" value="' + esc(S.adetail) + '" placeholder="동·호수 등 상세 주소 입력" autocomplete="off"></label></div></div>' : '') +
+      (S.aMsg ? '<div class="err">' + esc(S.aMsg) + '</div>' : '') +
+      '<div style="flex:1"></div><button type="button" class="cta' + hot(S.aSel !== null) + '" data-act="aConfirm">이 주소로 변경</button></div></div>';
+  };
+  V.done = function () {
+    return '<div class="scr"><div class="hd" style="justify-content:center"><div style="font-size:17px;font-weight:700">주문 완료</div></div>' +
+      '<div class="bd pad" style="display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:40px"><div style="width:64px;height:64px;border:2px solid #111;border-radius:50%;display:flex;align-items:center;justify-content:center">' + I.check.replace('width="24" height="24"', 'width="32" height="32"') + '</div>' +
+      '<div style="font-size:18px;font-weight:700">주문이 완료되었습니다</div>' +
+      '<div style="width:100%;border:1px solid #111;padding:18px 16px;text-align:center"><div class="sub">주문번호</div><div style="font-size:20px;font-weight:700;margin-top:4px">' + esc(S.orderNo) + '</div></div>' +
+      '<div style="width:100%;border:1px solid #111;padding:18px 16px;text-align:center"><div class="sub">도착 예정일</div><div style="font-size:20px;font-weight:700;margin-top:4px">' + esc(S.orderEta) + '</div></div>' +
+      '<div style="flex:1"></div><button type="button" class="cta' + hot(true) + '" data-act="finish">홈으로 가기</button></div></div>';
+  };
+
+  /* ---------- 우측 패널 ---------- */
+  function panelHtml() {
+    var cur = SCREENS.filter(function (x) { return x.id === S.screen; })[0];
+    var spec = SPEC[S.screen].map(function (t, i) { return '<div class="sp"><span class="n">' + (i + 1) + '</span><span>' + t + '</span></div>'; }).join('');
+    var steps = SCREENS.map(function (x) {
+      var isCur = S.screen === x.id, vis = S.visited.indexOf(x.id) >= 0;
+      return '<div class="stp2 ' + (isCur ? 'cur' : (vis ? 'vis' : '')) + '"><span class="mk">' + (isCur ? '●' : (vis ? '✓' : '')) + '</span><span>' + x.no + '. ' + x.label + '</span></div>';
+    }).join('');
+    return '<div class="sub">No.' + cur.no + ' · 인터랙티브 프로토타입</div><h2>' + cur.label + '</h2><div class="pth">' + cur.path + '</div>' +
+      '<div><div class="st" style="font-size:12px">이 화면의 IA 기능</div>' + spec + '</div>' +
+      '<div class="tip"><b>해 보세요</b>' + TIPS[S.screen] + '</div>' +
+      '<div><div class="st" style="font-size:12px;margin-bottom:4px">진행 현황 (✓ = 거쳐 간 화면)</div>' + steps + '</div>' +
+      '<div style="display:flex;gap:8px"><button type="button" class="pb" data-act="hints">' + (S.hints ? '클릭 힌트 끄기' : '클릭 힌트 켜기') + '</button><button type="button" class="pb" data-act="reset">처음부터 다시</button></div>' +
+      '<div class="sub" style="font-size:11px">상품·가격·쿠폰·포인트·배송비 정책은 흐름 확인용 샘플 데이터입니다.</div>';
+  }
+
+  /* ---------- 렌더 ---------- */
+  var phone = document.getElementById('phone');
+  var panel = document.getElementById('panel');
+  var lastScreen = null;
+  function render() {
+    var ae = document.activeElement, aid = ae && ae.id && phone.contains(ae) ? ae.id : null;
+    var ss = aid ? ae.selectionStart : null, se = aid ? ae.selectionEnd : null;
+    var bd = phone.querySelector('.bd'); var top = bd ? bd.scrollTop : 0;
+    phone.innerHTML = V[S.screen]();
+    panel.innerHTML = panelHtml();
+    if (S.screen === lastScreen) { var nb = phone.querySelector('.bd'); if (nb) nb.scrollTop = top; }
+    lastScreen = S.screen;
+    if (aid) { var el = document.getElementById(aid); if (el) { el.focus(); try { el.setSelectionRange(ss, se); } catch (e) {} } }
+  }
+
+  /* ---------- 이벤트 ---------- */
+  var ACT = {
+    go: function (a) { if (a === 'search') { go('search', { query: S.term }); } else { go(a); } },
+    tab: function (a) { tab(a); },
+    back: function () { back(); },
+    cat: function (a) { go('catlist', { cat: a }); },
+    prod: function (a) { go('detail', { pid: parseInt(a, 10), opt: 0, revOpen: false }); },
+    search: function () { submit(S.query); },
+    recent: function (a) { submit(a); },
+    delRecent: function (a) { set({ recent: S.recent.filter(function (x) { return x !== a; }) }); },
+    clearRecent: function () { set({ recent: [] }); },
+    sortToggle: function () { set({ sortOpen: !S.sortOpen, filterOpen: false }); },
+    filterToggle: function () { set({ filterOpen: !S.filterOpen, sortOpen: false }); },
+    sort: function (a) { set({ sort: a, sortOpen: false }); },
+    fLow: function () { set({ fLow: !S.fLow }); },
+    fRev: function () { set({ fRev: !S.fRev }); },
+    revToggle: function () { set({ revOpen: !S.revOpen }); },
+    opt: function (a) { set({ opt: parseInt(a, 10) }); },
+    add: function () {
+      var cart = S.cart.map(function (x) { return { pid: x.pid, opt: x.opt, qty: x.qty }; });
+      var f = cart.filter(function (x) { return x.pid === S.pid && x.opt === S.opt; })[0];
+      if (f) { f.qty += 1; } else { cart.push({ pid: S.pid, opt: S.opt, qty: 1 }); }
+      set({ cart: cart, toast: true });
+    },
+    qty: function (a) {
+      var p = a.split(':'), i = parseInt(p[0], 10), d = parseInt(p[1], 10);
+      var cart = S.cart.map(function (x) { return { pid: x.pid, opt: x.opt, qty: x.qty }; });
+      cart[i].qty = Math.max(1, cart[i].qty + d); set({ cart: cart });
+    },
+    del: function (a) { var i = parseInt(a, 10); set({ cart: S.cart.filter(function (x, k) { return k !== i; }) }); },
+    checkout: function () { go('checkout', { couponMsg: '', payMsg: '' }); },
+    coupon: function () {
+      if (!totals().couponOk) { set({ coupon: false, couponMsg: '사용 조건 미충족: 2만원 이상 주문 시 사용할 수 있습니다.' }); return; }
+      set({ coupon: !S.coupon, couponMsg: '' });
+    },
+    ptAll: function () { set({ pt: String(totals().maxPt) }); },
+    pay: function (a) { set({ pay: parseInt(a, 10), payMsg: '' }); },
+    order: function () {
+      if (S.pay === null) { set({ payMsg: '결제 수단을 선택해 주세요.' }); return; }
+      if (totals().ptErr) { set({ payMsg: '포인트 사용 금액을 확인해 주세요.' }); return; }
+      var dt = new Date(); dt.setDate(dt.getDate() + 2);
+      function pad(n) { return n < 10 ? '0' + n : String(n); }
+      var eta = dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate());
+      var no = 'ORD-' + String(Math.floor(10000000 + Math.random() * 89999999));
+      go('done', { orderNo: no, orderEta: eta, payMsg: '' });
+    },
+    toAddr: function () { go('address', { aq: '', aSearched: false, aSel: null, adetail: '', aMsg: '' }); },
+    aSearch: function () {
+      if (!S.aq.trim()) { set({ aMsg: '주소를 입력해 주세요.', aSearched: false }); return; }
+      set({ aSearched: true, aSel: null, aMsg: '' });
+    },
+    aPick: function (a) { set({ aSel: parseInt(a, 10), aMsg: '' }); },
+    aConfirm: function () {
+      if (S.aSel === null) { set({ aMsg: '검색 결과에서 주소를 선택해 주세요.' }); return; }
+      var text = '[샘플] ' + ADDRS[S.aSel] + (S.adetail.trim() ? ', ' + S.adetail.trim() : '');
+      S.addr = text; back();
+    },
+    finish: function () { S = init(S.hints); render(); },
+    reset: function () { S = init(S.hints); render(); },
+    hints: function () { set({ hints: !S.hints }); }
+  };
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-act]');
+    if (!t) return;
+    var fn = ACT[t.getAttribute('data-act')];
+    if (fn) fn(t.getAttribute('data-a'));
+  });
+  document.addEventListener('input', function (e) {
+    var key = e.target.getAttribute && e.target.getAttribute('data-input');
+    if (!key) return;
+    S[key] = e.target.value;
+    if (key === 'pt') render();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var en = e.target.getAttribute && e.target.getAttribute('data-enter');
+    if (en && ACT[en]) { e.preventDefault(); ACT[en](); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

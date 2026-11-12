@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello – 브라우저 데이터 모니터 프로토타입</title>
+  
+  <!-- Pretendard Font CDN -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --ink-primary: #111111;
+      --ink-secondary: #4a4a4a;
+      --ink-muted: #888888;
+      --line-light: #e5e5e5;
+      --line-dark: #2a2a2a;
+      --dark-bg: #121212;
+      --dark-surface: #1e1e1e;
+      --highlight: #ffffff;
+      --panel-height: 420px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink-primary);
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      line-height: 1.6;
+      padding-bottom: calc(var(--panel-height) + 20px);
+      transition: padding-bottom 0.2s ease;
+    }
+
+    body.panel-collapsed {
+      padding-bottom: 50px;
+    }
+
+    /* Hero Section */
+    header.hero {
+      background: var(--dark-bg);
+      color: #ffffff;
+      padding: 64px 24px;
+      text-align: center;
+      border-bottom: 1px solid var(--line-dark);
+    }
+
+    header.hero h1 {
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    header.hero p {
+      color: #aaaaaa;
+      font-size: 15px;
+      font-weight: 400;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line-light);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .card h2 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Interactive Elements */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ink-primary);
+      color: #ffffff;
+      border: 1px solid var(--ink-primary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #ffffff;
+      color: var(--ink-primary);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .count-badge {
+      margin-left: 12px;
+      font-size: 14px;
+      color: var(--ink-secondary);
+      font-weight: 500;
+    }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--line-light);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--ink-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--ink-primary);
+      font-weight: 700;
+      border-bottom-color: var(--ink-primary);
+    }
+
+    .tab-panel {
+      display: none;
+      font-size: 14px;
+      color: var(--ink-secondary);
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Select Dropdown */
+    .custom-select {
+      width: 100%;
+      max-width: 280px;
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid var(--line-light);
+      border-radius: 8px;
+      background-color: #ffffff;
+      color: var(--ink-primary);
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .custom-select:focus {
+      border-color: var(--ink-primary);
+    }
+
+    .select-output {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--ink-secondary);
+    }
+
+    /* Scroll Test Box */
+    .scroll-block {
+      height: 120px;
+      border: 1px dashed var(--line-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-muted);
+      margin: 16px 0;
+      font-size: 13px;
+      background: #fafafa;
+    }
+
+    /* Fixed Bottom Data Panel */
+    #monitorPanel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--dark-bg);
+      color: #e0e0e0;
+      border-top: 1px solid var(--line-dark);
+      z-index: 1000;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+      transition: height 0.3s ease;
+    }
+
+    #panelHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--dark-surface);
+      border-bottom: 1px solid var(--line-dark);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #ffffff;
+    }
+
+    #lastLogText {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      color: #a0a0a0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0 16px;
+      flex: 1;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: 1px solid #444444;
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-btn:hover {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    #panelContent {
+      height: var(--panel-height);
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      overflow: hidden;
+    }
+
+    #monitorPanel.collapsed #panelContent {
+      display: none;
+    }
+
+    /* Event Log List */
+    .log-section {
+      border-right: 1px solid var(--line-dark);
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .log-section h3, .data-section h3 {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #666666;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .log-list {
+      list-style: none;
+    }
+
+    .log-item {
+      padding: 6px 0;
+      border-bottom: 1px solid #222222;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: #888888;
+      display: flex;
+      gap: 8px;
+    }
+
+    .log-item:first-child {
+      color: #ffffff;
+    }
+
+    .log-time {
+      color: #555555;
+      flex-shrink: 0;
+    }
+
+    /* Data Table */
+    .data-section {
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .data-table th, .data-table td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #222222;
+      vertical-align: top;
+      word-break: break-all;
+    }
+
+    .data-table th {
+      width: 32%;
+      color: #777777;
+      font-weight: 500;
+    }
+
+    .data-table td {
+      color: #dddddd;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+    }
+
+    .data-table tr.category-row td {
+      background: #181818;
+      color: #ffffff;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 8px 10px;
+    }
+
+    .data-table td.updated {
+      background: #ffffff;
+      color: #000000;
+      transition: background 0.3s ease;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      #panelContent {
+        grid-template-columns: 1fr;
+      }
+      .log-section {
+        border-right: none;
+        border-bottom: 1px solid var(--line-dark);
+        max-height: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Header -->
+  <header class="hero">
+    <h1>Hello</h1>
+    <p>아래 버튼, 탭, 드롭다운, 스크롤을 조작해보세요. 실시간으로 하단에 데이터가 반영됩니다.</p>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Button Section -->
+    <section class="card">
+      <h2>01 · Click Event</h2>
+      <button id="actionBtn" class="btn" type="button">클릭 버튼</button>
+      <span id="clickCounter" class="count-badge">0회 클릭됨</span>
+    </section>
+
+    <!-- Tabs Section -->
+    <section class="card">
+      <h2>02 · Tab Event</h2>
+      <div class="tabs-nav" role="tablist">
+        <button class="tab-btn active" data-tab="tab1">대시보드</button>
+        <button class="tab-btn" data-tab="tab2">시스템 분석</button>
+        <button class="tab-btn" data-tab="tab3">네트워크</button>
+      </div>
+      <div id="tab1" class="tab-panel active">첫 번째 대시보드 탭입니다. 탭 전환 시 이벤트 정보가 업데이트됩니다.</div>
+      <div id="tab2" class="tab-panel">두 번째 시스템 분석 탭입니다. 브라우저의 내부 정보들을 분석하고 있습니다.</div>
+      <div id="tab3" class="tab-panel">세 번째 네트워크 탭입니다. 현재 온라인 상태 및 하드웨어 성능 정보를 모니터링합니다.</div>
+    </section>
+
+    <!-- Dropdown Section -->
+    <section class="card">
+      <h2>03 · Select Event</h2>
+      <select id="optionSelect" class="custom-select" aria-label="옵션 선택">
+        <option value="">항목을 선택하세요</option>
+        <option value="opt1">옵션 A: 모노톤 테마 설정</option>
+        <option value="opt2">옵션 B: 데이터 실시간 동기화</option>
+        <option value="opt3">옵션 C: 로그 자동 정렬</option>
+      </select>
+      <div id="selectResult" class="select-output">선택된 항목: 없음</div>
+    </section>
+
+    <!-- Scroll Section -->
+    <section class="card">
+      <h2>04 · Scroll Event</h2>
+      <p style="font-size: 14px; color: var(--ink-secondary);">페이지를 하단으로 스크롤해보세요. 스크롤 위치 및 진행률이 수집됩니다.</p>
+      <div class="scroll-block">콘텐츠 영역 Block 1</div>
+      <p style="font-size: 13px; color: var(--ink-muted);">Pretendard 폰트가 적용된 인터페이스 데모입니다.</p>
+      <div class="scroll-block">콘텐츠 영역 Block 2</div>
+      <p style="font-size: 13px; color: var(--ink-muted);">마우스 스크롤 동작에 실시간 반응하도록 최적화되어 있습니다.</p>
+      <div class="scroll-block">콘텐츠 영역 Block 3</div>
+    </section>
+  </main>
+
+  <!-- Fixed Bottom Monitor Panel -->
+  <aside id="monitorPanel" aria-live="polite">
+    <div id="panelHeader">
+      <span class="panel-title">BROWSER DATA MONITOR</span>
+      <span id="lastLogText">시스템 초기화 완료</span>
+      <button id="togglePanelBtn" class="toggle-btn" type="button">접기</button>
+    </div>
+    
+    <div id="panelContent">
+      <!-- Left: Event Log -->
+      <div class="log-section">
+        <h3>Event Log</h3>
+        <ul id="logList" class="log-list"></ul>
+      </div>
+      
+      <!-- Right: Collected Browser Data Table -->
+      <div class="data-section">
+        <h3>Collected Browser Data</h3>
+        <table class="data-table">
+          <tbody id="dataTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // Internal State
+      var asyncData = {};
+      var counters = { click: 0, tab: 0, select: 0, scroll: 0 };
+      var lastEvent = { type: '초기화', detail: '페이지 로드됨', time: getFormattedTime() };
+      var previousValues = {};
+      var mousePos = { x: 0, y: 0 };
+
+      function getFormattedTime() {
+        var d = new Date();
+        return d.toTimeString().split(' ')[0] + '.' + String(d.getMilliseconds()).padStart(3, '0');
+      }
+
+      function safeQuery(fn) {
+        try {
+          var res = fn();
+          if (res === undefined || res === null || res === '') return '(정보 없음)';
+          if (Array.isArray(res)) return res.join(', ');
+          if (typeof res === 'object') return JSON.stringify(res);
+          return String(res);
+        } catch (e) {
+          return '(접근 불가능)';
+        }
+      }
+
+      function getWebGLInfo() {
+        try {
+          var canvas = document.createElement('canvas');
+          var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (!gl) return { vendor: '(지원 안 함)', renderer: '(지원 안 함)' };
+          var ext = gl.getExtension('WEBGL_debug_renderer_info');
+          return {
+            vendor: ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR),
+            renderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)
+          };
+        } catch (e) {
+          return { vendor: '(오류)', renderer: '(오류)' };
+        }
+      }
+
+      function checkStorage(type) {
+        try {
+          var storage = window[type];
+          var key = '__test_key__';
+          storage.setItem(key, '1');
+          storage.removeItem(key);
+          return '사용 가능';
+        } catch (e) {
+          return '사용 불가';
+        }
+      }
+
+      function checkMediaQuery(query) {
+        return window.matchMedia(query).matches ? '예' : '아니오';
+      }
+
+      // Collect Browser Data
+      function collectData() {
+        var n = navigator;
+        var s = screen;
+        var w = window;
+        var d = document;
+        var conn = n.connection || n.mozConnection || n.webkitConnection || {};
+        var webgl = getWebGLInfo();
+
+        var maxScroll = Math.max(d.documentElement.scrollHeight - w.innerHeight, 1);
+        var scrollPct = Math.min(100, Math.round((w.scrollY / maxScroll) * 100));
+
+        return [
+          ['category', '최근 사용자 동작 (User Action)'],
+          ['마지막 이벤트', lastEvent.type + ' (' + lastEvent.detail + ')'],
+          ['발생 시각', lastEvent.time],
+          ['총 누적 동장 횟수', '클릭:' + counters.click + ' | 탭:' + counters.tab + ' | 선택:' + counters.select + ' | 스크롤:' + counters.scroll],
+          ['마우스 커서 위치', 'X: ' + mousePos.x + 'px, Y: ' + mousePos.y + 'px'],
+
+          ['category', '브라우저 & 시스템 정보'],
+          ['User Agent', safeQuery(function() { return n.userAgent; })],
+          ['플랫폼 (Platform)', safeQuery(function() { return n.platform; })],
+          ['브라우저 벤더 (Vendor)', safeQuery(function() { return n.vendor; })],
+          ['온라인 상태', n.onLine ? '온라인 (Online)' : '오프라인 (Offline)'],
+          ['쿠키 활성화 여부', n.cookieEnabled ? '활성화' : '비활성화'],
+          ['PDF 뷰어 지원', safeQuery(function() { return n.pdfViewerEnabled; })],
+          ['자동화 여부 (Webdriver)', safeQuery(function() { return n.webdriver; })],
+
+          ['category', '화면 & 뷰포트 (Screen & Viewport)'],
+          ['해상도 (Screen Size)', s.width + ' × ' + s.height],
+          ['사용 가능 해상도', s.availWidth + ' × ' + s.availHeight],
+          ['창 크기 (Inner Window)', w.innerWidth + ' × ' + w.innerHeight],
+          ['색상 심도 (Color Depth)', s.colorDepth + ' bit'],
+          ['픽셀 비율 (Device Pixel Ratio)', w.devicePixelRatio],
+          ['스크롤 위치 (Y-Scroll)', Math.round(w.scrollY) + 'px (' + scrollPct + '%)'],
+
+          ['category', '하드웨어 & 성능'],
+          ['CPU 코어 수', safeQuery(function() { return n.hardwareConcurrency; })],
+          ['메모리 용량 (Device Memory)', safeQuery(function() { return n.deviceMemory ? n.deviceMemory + ' GB' : null; })],
+          ['최대 터치 포인트', safeQuery(function() { return n.maxTouchPoints; })],
+          ['GPU 벤더 (WebGL)', webgl.vendor],
+          ['GPU 렌더러 (WebGL)', webgl.renderer],
+          ['배터리 정보', asyncData.battery || '(수집 중...)'],
+          ['저장소 사용량', asyncData.storage || '(수집 중...)'],
+
+          ['category', '네트워크 정보'],
+          ['네트워크 유형 (Effective Type)', safeQuery(function() { return conn.effectiveType; })],
+          ['다운로드 속도 (Downlink)', safeQuery(function() { return conn.downlink ? conn.downlink + ' Mbps' : null; })],
+          ['지연 시간 (RTT)', safeQuery(function() { return conn.rtt ? conn.rtt + ' ms' : null; })],
+
+          ['category', '언어 & 위치 / 설정'],
+          ['설정 언어 (Language)', safeQuery(function() { return n.language; })],
+          ['시간대 (Timezone)', safeQuery(function() { return Intl.DateTimeFormat().resolvedOptions().timeZone; })],
+          ['다크 모드 선호', checkMediaQuery('(prefers-color-scheme: dark)')],
+          ['모션 줄이기 선호', checkMediaQuery('(prefers-reduced-motion: reduce)')],
+          ['LocalStorage / SessionStorage', checkStorage('localStorage') + ' / ' + checkStorage('sessionStorage')]
+        ];
+      }
+
+      // Render Data to Table & Header
+      var dataTableBody = document.getElementById('dataTableBody');
+      var lastLogText = document.getElementById('lastLogText');
+      var logList = document.getElementById('logList');
+
+      function render() {
+        var rows = collectData();
+        var fragment = document.createDocumentFragment();
+
+        rows.forEach(function(row) {
+          var tr = document.createElement('tr');
+          if (row[0] === 'category') {
+            tr.className = 'category-row';
+            var td = document.createElement('td');
+            td.colSpan = 2;
+            td.textContent = row[1];
+            tr.appendChild(td);
+          } else {
+            var th = document.createElement('th');
+            th.textContent = row[0];
+            var tdVal = document.createElement('td');
+            tdVal.textContent = row[1];
+
+            // Highlight updated cells
+            if (previousValues[row[0]] !== undefined && previousValues[row[0]] !== row[1]) {
+              tdVal.classList.add('updated');
+              setTimeout(function() { tdVal.classList.remove('updated'); }, 400);
+            }
+            previousValues[row[0]] = row[1];
+
+            tr.appendChild(th);
+            tr.appendChild(tdVal);
+          }
+          fragment.appendChild(tr);
+        });
+
+        dataTableBody.innerHTML = '';
+        dataTableBody.appendChild(fragment);
+
+        lastLogText.textContent = '[' + lastEvent.time + '] ' + lastEvent.type + ' ▸ ' + lastEvent.detail;
+      }
+
+      function recordEvent(type, detail) {
+        lastEvent = { type: type, detail: detail, time: getFormattedTime() };
+
+        var li = document.createElement('li');
+        li.className = 'log-item';
+        
+        var spanTime = document.createElement('span');
+        spanTime.className = 'log-time';
+        spanTime.textContent = lastEvent.time;
+        
+        li.appendChild(spanTime);
+        li.appendChild(document.createTextNode(type + ' - ' + detail));
+
+        logList.insertBefore(li, logList.firstChild);
+        while (logList.children.length > 25) {
+          logList.removeChild(logList.lastChild);
+        }
+
+        render();
+      }
+
+      // 1. Button Click Event
+      var clickCounter = document.getElementById('clickCounter');
+      document.getElementById('actionBtn').addEventListener('click', function(e) {
+        counters.click++;
+        clickCounter.textContent = counters.click + '회 클릭됨';
+        recordEvent('버튼 클릭', '위치: (' + e.clientX + ', ' + e.clientY + ')');
+      });
+
+      // 2. Tab Switch Event
+      var tabBtns = document.querySelectorAll('.tab-btn');
+      var tabPanels = document.querySelectorAll('.tab-panel');
+
+      tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          tabBtns.forEach(function(b) { b.classList.remove('active'); });
+          tabPanels.forEach(function(p) { p.classList.remove('active'); });
+
+          btn.classList.add('active');
+          var targetId = btn.getAttribute('data-tab');
+          document.getElementById(targetId).classList.add('active');
+
+          counters.tab++;
+          recordEvent('탭 전환', '"' + btn.textContent + '" 선택');
+        });
+      });
+
+      // 3. Dropdown Select Event
+      var optionSelect = document.getElementById('optionSelect');
+      var selectResult = document.getElementById('selectResult');
+      optionSelect.addEventListener('change', function() {
+        var selectedText = optionSelect.options[optionSelect.selectedIndex].text;
+        selectResult.textContent = '선택된 항목: ' + (optionSelect.value ? selectedText : '없음');
+        counters.select++;
+        recordEvent('드롭다운 선택', selectedText);
+      });
+
+      // 4. Scroll Event (Throttled using requestAnimationFrame)
+      var isScrolling = false;
+      window.addEventListener('scroll', function() {
+        if (!isScrolling) {
+          window.requestAnimationFrame(function() {
+            counters.scroll++;
+            recordEvent('스크롤', '위치 Y=' + Math.round(window.scrollY) + 'px');
+            isScrolling = false;
+          });
+          isScrolling = true;
+        }
+      }, { passive: true });
+
+      // Track Mouse Movement
+      window.addEventListener('mousemove', function(e) {
+        mousePos.x = e.clientX;
+        mousePos.y = e.clientY;
+      }, { passive: true });
+
+      // Panel Collapse Toggle
+      var monitorPanel = document.getElementById('monitorPanel');
+      var togglePanelBtn = document.getElementById('togglePanelBtn');
+
+      togglePanelBtn.addEventListener('click', function() {
+        var isCollapsed = monitorPanel.classList.toggle('collapsed');
+        document.body.classList.toggle('panel-collapsed', isCollapsed);
+        togglePanelBtn.textContent = isCollapsed ? '펼치기' : '접기';
+      });
+
+      // Fetch Async APIs (Battery, Storage)
+      function initAsyncData() {
+        if (navigator.getBattery) {
+          navigator.getBattery().then(function(battery) {
+            asyncData.battery = Math.round(battery.level * 100) + '% (' + (battery.charging ? '충전 중' : '방전 중') + ')';
+            render();
+          }).catch(function() {});
+        }
+
+        if (navigator.storage && navigator.storage.estimate) {
+          navigator.storage.estimate().then(function(estimate) {
+            var usedMB = (estimate.usage / (1024 * 1024)).toFixed(2);
+            var quotaMB = (estimate.quota / (1024 * 1024)).toFixed(0);
+            asyncData.storage = usedMB + ' MB 사용 중 / 총 ' + quotaMB + ' MB';
+            render();
+          }).catch(function() {});
+        }
+      }
+
+      // Initial Execution
+      initAsyncData();
+      recordEvent('시스템', '모니터링 시작');
+    })();
+  </script>
+</body>
+</html>

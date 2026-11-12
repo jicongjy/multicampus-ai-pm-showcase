@@ -1,0 +1,155 @@
+{
+  "site": {
+    "title": "AI 프로덕트 매니저 학습 결과물",
+    "subtitle": "멀티캠퍼스 AI 프로덕트 매니저 과정에서 직접 만든 기획 문서와 프로토타입을 주차별로 모았습니다.",
+    "owner": "홍지영"
+  },
+  "weeks": [
+    {
+      "id": "week-01",
+      "label": "1주차",
+      "period": "2026-10-27 ~ 10-30"
+    },
+    {
+      "id": "week-02",
+      "label": "2주차",
+      "period": "2026-11-02 ~ 11-06"
+    },
+    {
+      "id": "week-03",
+      "label": "3주차",
+      "period": "2026-11-09 ~ 11-12"
+    }
+  ],
+  "works": [
+    {
+      "id": "w1-bsi-dashboard",
+      "week": "week-01",
+      "date": "2026-10-27",
+      "title": "BSI 문장 검증 대시보드",
+      "type": "프로토타입",
+      "summary": "",
+      "file": "works/week-01/bsi-verification-dashboard.html",
+      "links": []
+    },
+    {
+      "id": "w1-browser-monitor",
+      "week": "week-01",
+      "date": "2026-10-27",
+      "title": "브라우저 데이터 모니터 프로토타입",
+      "type": "프로토타입",
+      "summary": "모노톤 웹 프로토타입으로 정리한 브라우저 데이터 모니터 화면입니다.",
+      "file": "works/week-01/모노톤 웹 프로토타입 코드 수정.html",
+      "links": []
+    },
+    {
+      "id": "w2-oliveyoung-mid",
+      "week": "week-02",
+      "date": "2026-11-04",
+      "title": "올리브영 온라인몰 프로토타입",
+      "type": "프로토타입",
+      "summary": "미드 피델리티 수준으로 만든 온라인몰 구매 흐름 프로토타입입니다.",
+      "file": "works/week-02/261104_올리브영_미드델리피티_홍지영.html",
+      "links": []
+    },
+    {
+      "id": "w2-event-form",
+      "week": "week-02",
+      "date": "2026-11-06",
+      "title": "이벤트 참가 신청 폼",
+      "type": "프로토타입",
+      "summary": "입력 규칙, 예외 처리, 중복 신청 판단을 갖춘 이벤트 신청 폼입니다.",
+      "file": "works/week-02/261106_이벤트신청폼_홍지영.html",
+      "links": []
+    },
+    {
+      "id": "w3-ab-test-plan",
+      "week": "week-03",
+      "date": "2026-11-09",
+      "title": "겨울여행 얼리버드 A/B 테스트 계획서",
+      "type": "기획 문서",
+      "summary": "",
+      "file": "works/week-03/261109_AB테스트계획서_홍지영_2.html",
+      "links": []
+    },
+    {
+      "id": "w3-event-webapp",
+      "week": "week-03",
+      "date": "2026-11-10",
+      "title": "겨울여행 얼리버드 이벤트 웹앱",
+      "type": "프로토타입",
+      "summary": "",
+      "file": "works/week-03/261110_이벤트웹앱_홍지영_7.html",
+      "links": []
+    },
+    {
+      "id": "w3-book-proto",
+      "week": "week-03",
+      "date": "2026-11-11",
+      "title": "감정 책 추천 프로토타입 개선안",
+      "type": "프로토타입",
+      "summary": "감정을 입력하면 어울리는 책을 추천하는 프로토타입의 개선안입니다.",
+      "file": "works/week-03/261111_프로토타입개선안_홍지영.html",
+      "links": []
+    },
+    {
+      "id": "w3-asis-tobe",
+      "week": "week-03",
+      "date": "2026-11-11",
+      "title": "ASIS와 TOBE 순서도",
+      "type": "도식",
+      "summary": "화면이 바뀐 곳과 AI 처리가 바뀐 곳을 ASIS와 TOBE로 나누어 그린 순서도입니다.",
+      "file": "works/week-03/261111_ASISTOBE순서도_홍지영.png",
+      "links": []
+    },
+    {
+      "id": "w3-ux-slides",
+      "week": "week-03",
+      "date": "2026-11-11",
+      "title": "UX 점검 슬라이드",
+      "type": "슬라이드",
+      "summary": "",
+      "file": "works/week-03/261111_UX점검슬라이드_홍지영.html",
+      "links": []
+    },
+    {
+      "id": "w3-test-report",
+      "week": "week-03",
+      "date": "2026-11-11",
+      "title": "프로토타입 테스트 보고서",
+      "type": "보고서",
+      "summary": "",
+      "file": "works/week-03/261111_테스트보고서_홍지영.pdf",
+      "links": []
+    },
+    {
+      "id": "w3-reading-menu",
+      "week": "week-03",
+      "date": "2026-11-12",
+      "title": "오늘의 독서 메뉴",
+      "type": "웹서비스",
+      "summary": "감정에 맞는 책을 추천하는 서비스입니다. 관리자 화면에서 프롬프트와 도서 목록을 수정할 수 있고, 구글 로그인으로 관리자 페이지에 들어갑니다.",
+      "file": "",
+      "links": [
+        {
+          "label": "서비스 열기",
+          "url": "https://reading-menu.ai.studio/"
+        },
+        {
+          "label": "소스 코드",
+          "url": "https://github.com/jicongjy/multicampus-aistudio-bookservice"
+        }
+      ]
+    },
+    {
+      "id": "w3-detail-page",
+      "week": "week-03",
+      "date": "2026-11-12",
+      "title": "상품 상세페이지",
+      "type": "기획 문서",
+      "summary": "",
+      "file": "works/week-03/상세페이지_지영_20261112.html",
+      "links": []
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BSI 문장 검증 대시보드</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --text:#1c2230; --muted:#667085; --line:#e4e7ec;
+  --accent:#2563eb; --ok:#16a34a; --warn:#d97706; --track:#e8ebf0; --chip:#eef2ff;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1319; --card:#171c25; --text:#e8ecf3; --muted:#95a0b3; --line:#262d3a;
+    --accent:#6ea0ff; --ok:#4ade80; --warn:#fbbf24; --track:#262d3a; --chip:#1e2740; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.hero{display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:center}
+@media(max-width:600px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.ring{position:relative;width:140px;height:140px}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pct b{font-size:30px;line-height:1}
+.pct span{font-size:12px;color:var(--muted)}
+.verdict{display:inline-flex;gap:8px;align-items:center;background:color-mix(in srgb,var(--ok) 14%,transparent);
+  color:var(--ok);border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px}
+.hero p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.stat{background:var(--bg);border-radius:10px;padding:10px 12px}
+.stat b{font-size:20px;display:block}
+.stat span{font-size:12px;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+@media(max-width:700px){.grid3{grid-template-columns:1fr}}
+.mini h3{margin:0 0 8px;font-size:14px}
+.bar{height:8px;background:var(--track);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s}
+.bar i.full{background:var(--ok)}
+.mini small{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 14px}
+.seg button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);
+  padding:7px 14px;border-radius:999px;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:hover,.seg button:hover{border-color:var(--accent)}
+.spacer{flex:1}
+section.group{margin-bottom:16px}
+section.group>h2{font-size:15px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+section.group>h2 em{font-style:normal;font-size:12px;color:var(--muted);font-weight:400}
+.item{border:1px solid var(--line);background:var(--card);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;cursor:pointer}
+.row input{width:20px;height:20px;margin-top:2px;accent-color:var(--ok);flex:none;cursor:pointer}
+.title{flex:1}
+.title b{font-weight:600}
+.title .tag{display:inline-block;font-size:11px;background:var(--chip);color:var(--accent);
+  border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.title .tag.w{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.item.done .title b{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.chev{background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 6px}
+.detail{display:none;padding:0 14px 14px 46px;font-size:13px;color:var(--muted)}
+.item.open .detail{display:block}
+.detail dl{margin:0;display:grid;grid-template-columns:90px 1fr;gap:4px 10px}
+.detail dt{color:var(--muted)}
+.detail dd{margin:0;color:var(--text)}
+.detail a{color:var(--accent);word-break:break-all}
+.quote{margin-top:16px;border-left:4px solid var(--accent)}
+.quote p{margin:0 0 4px;font-size:15px}
+.quote small{color:var(--muted)}
+footer{margin-top:20px;font-size:12px;color:var(--muted)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>9월 소상공인 BSI 문장 검증 대시보드</h1>
+  <p class="sub">검증일 2026-10-27 · 대상: 소진공 「2026년 9월 소상공인시장 경기동향조사」(2026.10.1.) 관련 보고 문장</p>
+
+  <div class="card hero">
+    <div class="ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="60" fill="none" stroke="var(--track)" stroke-width="12"/>
+        <circle id="ringArc" cx="70" cy="70" r="60" fill="none" stroke="var(--accent)" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377" style="transition:stroke-dashoffset .5s"/>
+      </svg>
+      <div class="pct"><b id="pctNum">0%</b><span id="pctSub">0 / 0</span></div>
+    </div>
+    <div>
+      <span class="verdict">판정: 사실 <small style="font-weight:400">(원문 미열람)</small></span>
+      <p>수치와 증감폭은 모두 일치합니다. 소진공 보고서 원문은 직접 열지 못해 공단 자료를 인용한 언론 보도로 확인했습니다. 제출 전 남은 항목을 체크하세요.</p>
+      <div class="stats">
+        <div class="stat"><b id="sDone">0</b><span>완료</span></div>
+        <div class="stat"><b id="sLeft">0</b><span>남은 항목</span></div>
+        <div class="stat"><b id="sTotal">0</b><span>전체</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3" id="miniBars"></div>
+
+  <div class="toolbar">
+    <div class="seg" id="filters">
+      <button data-f="all" class="on">전체</button>
+      <button data-f="done">완료</button>
+      <button data-f="todo">미완료</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn" id="expandAll">모두 펼치기</button>
+    <button class="btn" id="resetBtn">기본값으로 되돌리기</button>
+  </div>
+
+  <div id="groups"></div>
+
+  <div class="card quote">
+    <p>"소상공인 9월 체감 BSI 76.5…전월 대비 15.9p 상승"</p>
+    <small>뉴스1 기사 제목(2026-10-01) · 기관 원문이 아닌 보도 인용</small>
+  </div>
+
+  <footer>체크 상태는 이 브라우저에만 저장됩니다. 기본값은 제가 확인을 마친 항목이 체크된 상태입니다.</footer>
+</div>
+
+<script>
+const GROUPS = [
+  { id:"num", title:"수치 대조", items:[
+    { id:"n1", t:"9월 소상공인 체감 BSI 76.5 (+15.9p)", done:true,
+      d:{ "문장":"76.5 (+15.9p)", "확인":"76.5 (+15.9p)", "기준값":"전월 60.6", "산술":"60.6 + 15.9 = 76.5", "출처":"뉴스1, 스페셜경제" }},
+    { id:"n2", t:"소상공인 체감 BSI 올해 최고치", tag:"범위 주의", warn:true, done:true,
+      d:{ "문장":"올해 최고치", "확인":"올해 들어 가장 높은 수준 (스페셜경제)", "주의":"소상공인 체감 BSI에만 해당. 전통시장 92.1이 올해 최고라는 근거는 못 찾음" }},
+    { id:"n3", t:"9월 전통시장 체감 BSI 92.1 (+35.1p)", done:true,
+      d:{ "문장":"92.1 (+35.1p)", "확인":"92.1 (+35.1p)", "기준값":"전월 57.0", "산술":"57.0 + 35.1 = 92.1", "출처":"뉴스1, 울산제일일보" }},
+    { id:"n4", t:"10월 소상공인 전망 BSI 93.7 (-1.4p)", done:true,
+      d:{ "문장":"93.7 (-1.4p)", "확인":"93.7 (-1.4p)", "기준값":"전월 전망 95.1", "산술":"95.1 - 1.4 = 93.7", "출처":"스페셜경제, 울산제일일보" }},
+    { id:"n5", t:"10월 전통시장 전망 BSI 90.9 (-14.1p)", done:true,
+      d:{ "문장":"90.9 (-14.1p)", "확인":"90.9 (-14.1p)", "기준값":"전월 전망 105.0", "산술":"105.0 - 14.1 = 90.9", "출처":"뉴스1, 스페셜경제" }},
+    { id:"n6", t:"추석 효과 소멸로 10월 전망 하락", done:true,
+      d:{ "확인":"뉴스1, 스페셜경제 모두 같은 취지로 보도" }}
+  ]},
+  { id:"src", title:"출처 확인", items:[
+    { id:"s1", t:"뉴스1 · 2026-10-01", tag:"직접 열람", done:true,
+      d:{ "내용":"소진공 제공 자료 인용", "링크":"<a href='https://www.news1.kr/industry/sb-founded/6306466' target='_blank' rel='noopener'>https://www.news1.kr/industry/sb-founded/6306466</a>" }},
+    { id:"s2", t:"스페셜경제 · 2026-10-01", done:true,
+      d:{ "내용":"소진공 조사결과 인용", "링크":"<a href='https://www.speconomy.com/news/articleView.html?idxno=418452' target='_blank' rel='noopener'>https://www.speconomy.com/news/articleView.html?idxno=418452</a>" }},
+    { id:"s3", t:"울산제일일보 · 2026-10-01", done:true,
+      d:{ "내용":"전국 수치 교차 확인", "링크":"<a href='http://www.ujeil.com/news/articleView.html?idxno=392958' target='_blank' rel='noopener'>http://www.ujeil.com/news/articleView.html?idxno=392958</a>" }},
+    { id:"s4", t:"중기부 통계 목록 · 2026-10-01 등록", tag:"검색 결과 기준", warn:true, done:true,
+      d:{ "내용":"'2026년 9월 소상공인시장 경기동향조사' 등록 확인", "한계":"자동 접근 차단으로 첨부 보고서는 열지 못함", "링크":"<a href='https://mss.go.kr/site/smba/foffice/ex/statDB/stReportRoList.do?gb=1&nodeId=&roCode=' target='_blank' rel='noopener'>중기부 통계 목록</a>" }}
+  ]},
+  { id:"todo", title:"반영 전 확인 (남은 작업)", items:[
+    { id:"t1", t:"'올해 최고치'가 소상공인 체감 BSI에만 걸리도록 문장 수정", done:false,
+      d:{ "이유":"전통시장 92.1이 올해 최고로 읽힐 수 있음" }},
+    { id:"t2", t:"출처 표기: 소상공인시장진흥공단, 2026년 9월 소상공인시장 경기동향조사(2026.10.1.)", done:false,
+      d:{ "이유":"언론 보도가 아닌 기관 원출처로 표기" }},
+    { id:"t3", t:"소진공 또는 중기부 사이트에서 보고서 PDF를 열어 수치 대조", tag:"원문 미열람", warn:true, done:false,
+      d:{ "이유":"이번 검증은 보도 인용 기준이라 원문 직접 대조가 남아 있음" }}
+  ]}
+];
+
+const KEY = "bsi-verify-v1";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){}
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(e){} }
+function isDone(it){ return it.id in saved ? saved[it.id] : it.done; }
+
+let filter = "all";
+const open = new Set();
+
+function render(){
+  const all = GROUPS.flatMap(g => g.items);
+  const done = all.filter(isDone).length;
+  const pct = all.length ? Math.round(done / all.length * 100) : 0;
+
+  document.getElementById("pctNum").textContent = pct + "%";
+  document.getElementById("pctSub").textContent = done + " / " + all.length;
+  document.getElementById("sDone").textContent = done;
+  document.getElementById("sLeft").textContent = all.length - done;
+  document.getElementById("sTotal").textContent = all.length;
+  const arc = document.getElementById("ringArc");
+  arc.style.strokeDashoffset = 377 * (1 - pct / 100);
+  arc.style.stroke = pct === 100 ? "var(--ok)" : "var(--accent)";
+
+  document.getElementById("miniBars").innerHTML = GROUPS.map(g => {
+    const d = g.items.filter(isDone).length, p = Math.round(d / g.items.length * 100);
+    return `<div class="card mini"><h3>${g.title}</h3>
+      <div class="bar"><i class="${p===100?'full':''}" style="width:${p}%"></i></div>
+      <small>${d} / ${g.items.length} 완료 (${p}%)</small></div>`;
+  }).join("");
+
+  document.getElementById("groups").innerHTML = GROUPS.map(g => {
+    const rows = g.items.filter(it => filter === "all" || (filter === "done") === isDone(it));
+    const d = g.items.filter(isDone).length;
+    if (!rows.length) return "";
+    return `<section class="group"><h2>${g.title}<em>${d}/${g.items.length}</em></h2>` +
+      rows.map(it => {
+        const dd = Object.entries(it.d || {}).map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+        return `<div class="item ${isDone(it)?'done':''} ${open.has(it.id)?'open':''}" data-id="${it.id}">
+          <div class="row">
+            <input type="checkbox" ${isDone(it)?'checked':''} aria-label="${it.t}">
+            <div class="title"><b>${it.t}</b>${it.tag?`<span class="tag ${it.warn?'w':''}">${it.tag}</span>`:''}</div>
+            <button class="chev" aria-label="상세">${open.has(it.id)?'▲':'▼'}</button>
+          </div>
+          <div class="detail"><dl>${dd}</dl></div></div>`;
+      }).join("") + `</section>`;
+  }).join("") || `<div class="card" style="text-align:center;color:var(--muted)">해당하는 항목이 없습니다.</div>`;
+}
+
+document.getElementById("groups").addEventListener("click", e => {
+  const item = e.target.closest(".item"); if (!item) return;
+  const id = item.dataset.id;
+  const it = GROUPS.flatMap(g => g.items).find(x => x.id === id);
+  if (e.target.closest(".chev")) { open.has(id) ? open.delete(id) : open.add(id); render(); return; }
+  if (e.target.closest("a")) return;
+  if (e.target.closest(".row")) {
+    if (e.target.tagName !== "INPUT") e.preventDefault();
+    saved[id] = !isDone(it); persist(); render();
+  }
+});
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  filter = b.dataset.f;
+  document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+document.getElementById("expandAll").addEventListener("click", e => {
+  const all = GROUPS.flatMap(g => g.items);
+  if (open.size < all.length) all.forEach(i => open.add(i.id)); else open.clear();
+  e.target.textContent = open.size ? "모두 접기" : "모두 펼치기";
+  render();
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  saved = {}; persist(); render();
+});
+render();
+</script>
+</body>
+</html>

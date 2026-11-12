@@ -1,0 +1,6 @@
+.DS_Store
+.omc/
+.vercel/
+node_modules/
+.env
+.env.*
