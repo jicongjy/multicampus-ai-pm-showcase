@@ -664,10 +664,7 @@ a { color: inherit; }
 
 .lcard { gap: 12px; padding: 14px; }
 .lhead { display: flex; align-items: center; gap: 10px; }
-.lhead .who { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-.lhead .who b { font-size: 12px; font-weight: 500; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lhead .who small { font-size: 11px; color: var(--ink-3); }
-.tile { display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 8px; color: #fff; font-size: 14px; font-weight: 700; }
+.lhead .lmeta { font-size: 11.5px; color: var(--ink-3); font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lcard .go { margin: 0 0 0 auto; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--soft); font-size: 12px; }
 .lcard:hover .go { background: var(--ink); color: #fff; }
 .lcard h3 { font-size: 15px; line-height: 1.4; }
@@ -704,7 +701,7 @@ a { color: inherit; }
 
 /* stat: 큰 숫자 + 짙은 면 */
 .v-stat { background: #111113; border-color: #111113; color: #fff; }
-.v-stat .phead .who small, .v-stat .psum, .v-stat .mrow, .v-stat .dwrap small { color: rgba(255, 255, 255, 0.62); }
+\.v-stat .phead .who small, .v-stat .psum, .v-stat .mrow { color: rgba(255, 255, 255, 0.62); }
 .v-stat .phead .pill { background: rgba(255, 255, 255, 0.14); color: #fff; }
 .v-stat .phead .sq { background: #fff; color: #111113; }
 .v-stat .bigstat { display: flex; flex-direction: column; gap: 2px; padding: 8px 4px 4px; }
@@ -717,15 +714,6 @@ a { color: inherit; }
 .v-stat .mrows { border-color: rgba(255, 255, 255, 0.16); }
 .v-stat .mrow .ico { color: rgba(255, 255, 255, 0.5); }
 .v-stat .chipline span { border-color: rgba(255, 255, 255, 0.28); color: rgba(255, 255, 255, 0.85); }
-.v-stat .dstrip i { background: rgba(255, 255, 255, 0.28); }
-.v-stat .dstrip i.on { background: #fff; }
-
-/* 수업일 막대 */
-.dwrap { display: flex; flex-direction: column; gap: 5px; }
-.dwrap small { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
-.dstrip { display: flex; align-items: flex-end; gap: 3px; height: 26px; }
-.dstrip i { flex: 1; min-width: 0; border-radius: 2px; background: var(--line-2); }
-.dstrip i.on { background: var(--ink); }
 
 /* notes variants */
 .n-dark { background: #111113; border-color: #111113; color: #fff; }

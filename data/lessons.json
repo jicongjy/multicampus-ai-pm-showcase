@@ -1,0 +1,32 @@
+{
+  "lessons": [
+    {
+      "id": "ls-d3-deploy",
+      "title": "2주차 DAY3 교안: 배포와 로컬 저장 (후반부)",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261102-ai-pm-week2/d3-deploy-localdb.html#s7",
+      "week": "week-02",
+      "date": "2026-11-04"
+    },
+    {
+      "id": "ls-d4-bolt",
+      "title": "2주차 DAY4 교안: 도구 비교와 볼트",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261102-ai-pm-week2/d4-vibe-tools-bolt.html",
+      "week": "week-02",
+      "date": "2026-11-05"
+    },
+    {
+      "id": "ls-w3d1-sheet",
+      "title": "3주차 DAY1 교안: 시트와 앱스 스크립트",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261109-ai-pm-week3/d1-sheet-appsscript.html#s5-1",
+      "week": "week-03",
+      "date": "2026-11-09"
+    },
+    {
+      "id": "ls-w3d2-crawl",
+      "title": "3주차 DAY2 교안: 웹 크롤링",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261109-ai-pm-week3/d2-web-crawling.html",
+      "week": "week-03",
+      "date": "2026-11-10"
+    }
+  ]
+}

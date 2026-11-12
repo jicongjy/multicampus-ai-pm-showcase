@@ -12,7 +12,8 @@
 ├── tools/export_notes.py # 공개 노트 내보내기
 ├── tools/make_meta.py    # 결과물 파일 크기를 works.json에 채움
 ├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
-├── data/links.json    # 링크 모음
+├── data/links.json    # 링크 모음 (강사님이 "이런 건 좋아요" 하고 알려 준 사이트만)
+├── data/lessons.json  # 교안 링크 (주차별, 내용은 옮기지 않고 링크만)
 ├── data/glossary.json # 용어
 ├── data/notes.json    # 공개한 노트 (비어 있으면 안내 화면)
 └── works/             # 결과물 파일, 주차별 폴더

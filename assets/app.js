@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  var state = { q: "", type: "all", view: "card", linkSource: "all" };
-  var data = null, works = [], links = [], terms = [], notes = [];
+  var state = { q: "", type: "all", view: "card" };
+  var data = null, works = [], links = [], lessons = [], terms = [], notes = [];
   var view = document.getElementById("view");
 
   function $(id) { return document.getElementById(id); }
@@ -141,17 +141,6 @@
   }
   function notesOn(date) { return notes.filter(function (n) { return n.date === date; }); }
 
-  /* 수업일 막대: 이 결과물을 만든 날을 표시 */
-  function dayStrip(w) {
-    var box = el("div", { class: "dstrip" });
-    classDays().forEach(function (d) {
-      var n = worksOn(d.date).length;
-      box.appendChild(el("i", { class: d.date === w.date ? "on" : "", style: "height:" + Math.min(100, n ? 34 + n * 14 : 16) + "%", title: koDay(d.date) + " " + n + "개" }));
-    });
-    var cnt = worksOn(w.date).length;
-    return el("div", { class: "dwrap" }, [box, el("small", { text: mmdd(w.date) + " · 이날 " + cnt + "개" })]);
-  }
-
   function chips(w) {
     var rel = glossaryFor(w.id);
     return rel.length ? el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })) : null;
@@ -187,18 +176,18 @@
       tb.appendChild(el("div", { class: "over" }, [el("h3", { text: w.title })]));
       tb.appendChild(el("div", { class: "ovtop " + wcls(w.week) }, [el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }), el("span", { text: weekOf(w.week).label + " · No." + pad(w.no) }), el("span", { class: "pill", text: w.type })]));
       kids = [tb, el("div", { class: "pbody" }, [
-        w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), dayStrip(w), infoRows(w)
+        w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), infoRows(w)
       ])];
     } else if (v === "doc") {
       kids = [pheadFor(w), el("div", { class: "dtop" }, [
         el("div", {}, [el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null]),
         thumbBox(w, false)
-      ]), el("div", { class: "pbody" }, [chips(w), dayStrip(w), infoRows(w)])];
+      ]), el("div", { class: "pbody" }, [chips(w), infoRows(w)])];
     } else {
       kids = [pheadFor(w), el("div", { class: "bigstat" }, [
         el("strong", { text: w.metric.value }), el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null
       ]), thumbBox(w, false), el("div", { class: "pbody" }, [
-        el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), dayStrip(w), infoRows(w)
+        el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), infoRows(w)
       ])];
     }
     return el("a", { class: "card pcard v-" + v, href: url, "aria-label": w.title }, kids);
@@ -219,23 +208,17 @@
     ]);
   }
 
-  function lcard(l) {
+  function lcard(l, meta) {
     return el("a", { class: "card lcard", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
       el("div", { class: "lhead" }, [
-        el("span", { class: "tile", style: "background:" + srcColor(l.source), text: host(l.url).charAt(0).toUpperCase() }),
-        el("div", { class: "who" }, [el("b", { text: host(l.url) }), el("small", { text: l.source + (l.date ? " · " + mmdd(l.date) : "") })]),
+        el("span", { class: "lmeta", text: meta || host(l.url) }),
         el("span", { class: "go", "aria-hidden": "true", text: "↗" })
       ]),
-      el("h3", { text: l.title })
+      el("h3", { text: l.title }),
+      meta ? el("div", { class: "host", text: host(l.url) }) : null
     ]);
   }
 
-  function srcColor(s) {
-    var order = [];
-    links.forEach(function (l) { if (order.indexOf(l.source) === -1) order.push(l.source); });
-    var cols = ["var(--teal)", "var(--ochre)", "var(--clay)", "var(--sage)"];
-    return cols[order.indexOf(s) % cols.length] || cols[0];
-  }
 
   function tcard(t) {
     var rel = el("div", { class: "rel" });
@@ -500,7 +483,6 @@
     lp.appendChild(el("div", { class: "section" }, [el("h2", { text: "링크 모음" }), el("a", { href: href(["links"]), text: "전체" })]));
     if (links.length) links.slice(0, 4).forEach(function (l) {
       lp.appendChild(el("a", { class: "lrow", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
-        el("span", { class: "srcdot", style: "background:" + srcColor(l.source) }),
         el("b", { text: l.title }),
         el("small", { text: host(l.url) })
       ]));
@@ -623,7 +605,6 @@
       metricBlock(w),
       actions,
       props,
-      el("div", { class: "dblock" }, [el("h4", { text: "수업 기간 중 위치" }), dayStrip(w)]),
       block("같은 날 쓴 노트", sameNotes),
       block("같은 날 만든 결과물", sameDay),
       related.length ? el("div", { class: "dblock" }, [el("h4", { text: "관련 용어" }), el("div", { class: "chipline" }, related.map(function (t) { return el("a", { href: href(["glossary"]), text: t.term }); }))]) : null,
@@ -696,23 +677,31 @@
 
   function viewLinks() {
     var frag = document.createDocumentFragment();
-    frag.appendChild(head("링크 모음", "강사님이 수업에서 안내한 교안, 예시 사이트, 도구 링크입니다. 내가 만든 링크는 프로젝트에서 볼 수 있습니다."));
+    frag.appendChild(head("링크 모음", "강사님이 수업에서 \"이런 건 좋아요\" 하고 알려 준 사이트를 모았습니다."));
     if (!links.length) {
-      frag.appendChild(empty("저장한 링크가 없습니다", "data/links.json에 강사님이 안내한 링크를 추가하면 이곳에 카드로 나타납니다."));
+      frag.appendChild(empty("저장한 링크가 없습니다", "data/links.json에 링크를 추가하면 이곳에 카드로 나타납니다."));
       return frag;
     }
-    var sources = [];
-    links.forEach(function (l) { if (sources.indexOf(l.source) === -1) sources.push(l.source); });
-    var chips = el("div", { class: "chips bar", role: "group", "aria-label": "출처" });
-    [{ label: "전체", value: "all" }].concat(sources.map(function (s) { return { label: s, value: s }; })).forEach(function (it) {
-      var b = el("button", { type: "button", class: "chip", text: it.label, "aria-pressed": String(state.linkSource === it.value) });
-      b.addEventListener("click", function () { state.linkSource = it.value; render(); });
-      chips.appendChild(b);
-    });
-    frag.appendChild(chips);
     var cards = el("div", { class: "cards" });
-    links.filter(function (l) { return state.linkSource === "all" || l.source === state.linkSource; }).forEach(function (l) { cards.appendChild(lcard(l)); });
+    links.forEach(function (l) { cards.appendChild(lcard(l)); });
     frag.appendChild(cards);
+    return frag;
+  }
+
+  function viewLessons() {
+    var frag = document.createDocumentFragment();
+    frag.appendChild(head("교안", "수업 교안 링크를 주차별로 모았습니다. 내용은 옮기지 않고 원본 페이지로 연결합니다."));
+    if (!lessons.length) {
+      frag.appendChild(empty("등록한 교안이 없습니다", "data/lessons.json에 교안 링크를 추가해 주세요."));
+      return frag;
+    }
+    data.weeks.forEach(function (wk) {
+      var items = lessons.filter(function (l) { return l.week === wk.id; });
+      if (!items.length) return;
+      var cards = el("div", { class: "cards" });
+      items.forEach(function (l) { cards.appendChild(lcard(l, koDay(l.date))); });
+      frag.appendChild(el("section", { class: "group" }, [el("h2", { text: wk.label + " · " + wk.period }), cards]));
+    });
     return frag;
   }
 
@@ -802,12 +791,13 @@
     function hit(arr) { var h = arr.join(" ").toLowerCase(); return terms_.every(function (t) { return h.indexOf(t) !== -1; }); }
 
     var w = works.filter(function (x) { return hit([x.title, x.summary, x.type, x.date, mmdd(x.date), weekOf(x.week).label]); });
-    var l = links.filter(function (x) { return hit([x.title, x.url, x.source].concat(x.tags || [])); });
+    var l = links.filter(function (x) { return hit([x.title, x.url]); });
+    var ls = lessons.filter(function (x) { return hit([x.title, x.url, "교안"]); });
     var t = terms.filter(function (x) { return hit([x.term, x.full || "", x.def]); });
     var n = notes.filter(function (x) { return hit([x.title, x.summary || ""]); });
 
-    frag.appendChild(head("검색 결과", "\"" + qs + "\" " + (w.length + l.length + t.length + n.length) + "건"));
-    if (!(w.length + l.length + t.length + n.length)) {
+    frag.appendChild(head("검색 결과", "\"" + qs + "\" " + (w.length + l.length + ls.length + t.length + n.length) + "건"));
+    if (!(w.length + l.length + ls.length + t.length + n.length)) {
       frag.appendChild(empty("찾는 항목이 없습니다", "다른 검색어로 다시 찾아 보세요."));
       return frag;
     }
@@ -818,7 +808,8 @@
       frag.appendChild(el("section", { class: "group" }, [el("h2", { text: title + " " + items.length }), cards]));
     }
     group("프로젝트", w, pcard);
-    group("링크", l, lcard);
+    group("링크", l, function (x) { return lcard(x); });
+    group("교안", ls, function (x) { return lcard(x, koDay(x.date)); });
     group("용어", t, tcard);
     group("노트", n, ncard);
     return frag;
@@ -836,6 +827,7 @@
       ["folder", "프로젝트", href(["projects"]), "projects", works.length],
       ["note", "노트", href(["notes"]), "notes", notes.length],
       ["link", "링크 모음", href(["links"]), "links", links.length],
+      ["note", "교안", href(["lessons"]), "lessons", lessons.length],
       ["calendar", "캘린더", href(["calendar"]), "calendar", null],
       ["book", "용어", href(["glossary"]), "glossary", terms.length]
     ];
@@ -889,6 +881,7 @@
     else if (top === "projects") node = r.path[1] ? viewDetail(r.path[1]) : viewProjects(r.q);
     else if (top === "notes") node = r.path[1] ? viewNote(r.path[1]) : viewNotes();
     else if (top === "links") node = viewLinks();
+    else if (top === "lessons") node = viewLessons();
     else if (top === "calendar") node = viewCalendar(r.q);
     else if (top === "glossary") node = viewGlossary();
     else node = empty("없는 페이지입니다", "왼쪽 메뉴에서 다시 선택해 주세요.");
@@ -897,7 +890,7 @@
     view.textContent = "";
     view.appendChild(node);
     buildSide(active);
-    var t = { "": "홈", projects: "프로젝트", notes: "노트", links: "링크 모음", calendar: "캘린더", glossary: "용어" }[top];
+    var t = { "": "홈", projects: "프로젝트", notes: "노트", links: "링크 모음", lessons: "교안", calendar: "캘린더", glossary: "용어" }[top];
     document.title = (t && top ? t + " | " : "") + data.site.title;
   }
 
@@ -949,7 +942,8 @@
     fetch("data/works.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }),
     getJson("data/links.json", { links: [] }),
     getJson("data/glossary.json", { terms: [] }),
-    getJson("data/notes.json", { notes: [] })
+    getJson("data/notes.json", { notes: [] }),
+    getJson("data/lessons.json", { lessons: [] })
   ]).then(function (res) {
     data = res[0];
     works = data.works.slice().sort(function (a, b) {
@@ -968,6 +962,7 @@
     (res[3].notes || []).forEach(function (n) { if (!local(n.html)) n.html = ""; });
     works.forEach(function (w) { w.links = (w.links || []).filter(function (l) { return safe(l.url); }); });
     links = (res[1].links || []).filter(function (l) { return safe(l.url); });
+    lessons = (res[4].lessons || []).filter(function (l) { return safe(l.url); });
     terms = res[2].terms || [];
     notes = res[3].notes || [];
     var d = parts(TODAY);
