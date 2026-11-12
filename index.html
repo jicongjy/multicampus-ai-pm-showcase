@@ -12,11 +12,11 @@
 <body>
   <div class="app" id="app">
     <aside class="side" id="side" aria-label="메뉴">
-      <a class="brand" href="#/">AI PM Archive</a>
-      <div class="profile" id="profile"></div>
+      <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>AI PM Archive</a>
+      <a class="profile" id="profile" href="#/"></a>
       <nav class="nav" id="nav" aria-label="주 메뉴"></nav>
       <div class="side-foot">
-        <a class="ext" href="https://github.com/jicongjy/pm-archive" target="_blank" rel="noopener noreferrer">깃허브 ↗</a>
+        <a class="ext" href="https://github.com/jicongjy/pm-archive" target="_blank" rel="noopener noreferrer">깃허브 <span aria-hidden="true">↗</span></a>
       </div>
     </aside>
 
@@ -27,7 +27,8 @@
         <button class="menu-btn" id="menu-btn" type="button" aria-label="메뉴 열기">메뉴</button>
         <label class="search">
           <span class="sr">검색</span>
-          <input id="q" type="search" placeholder="결과물, 노트, 용어, 링크 찾기" autocomplete="off">
+          <input id="q" type="search" placeholder="결과물, 노트, 용어, 링크 검색" autocomplete="off">
+          <kbd aria-hidden="true">/</kbd>
         </label>
         <p class="today" id="today"></p>
       </header>
