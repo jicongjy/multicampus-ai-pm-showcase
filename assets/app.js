@@ -510,9 +510,9 @@
 
   function viewLinks() {
     var frag = document.createDocumentFragment();
-    frag.appendChild(head("링크 모음", "수업과 실습에서 쓴 서비스와 참고 링크입니다."));
+    frag.appendChild(head("링크 모음", "강사님이 수업에서 안내한 교안, 예시 사이트, 도구 링크입니다. 내가 만든 링크는 프로젝트에서 볼 수 있습니다."));
     if (!links.length) {
-      frag.appendChild(empty("저장한 링크가 없습니다", "data/links.json에 항목을 추가하면 이곳에 카드로 나타납니다."));
+      frag.appendChild(empty("저장한 링크가 없습니다", "data/links.json에 강사님이 안내한 링크를 추가하면 이곳에 카드로 나타납니다."));
       return frag;
     }
     var sources = [];

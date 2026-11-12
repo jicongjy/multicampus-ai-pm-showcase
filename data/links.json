@@ -1,26 +1,140 @@
 {
   "links": [
     {
-      "id": "l-reading-menu",
-      "title": "오늘의 독서 메뉴",
-      "url": "https://reading-menu.ai.studio/",
-      "source": "실습",
-      "tags": [
-        "웹서비스"
-      ],
-      "date": "2026-11-12",
-      "work": "w3-reading-menu"
+      "id": "l-d3-deploy",
+      "title": "2주차 DAY3 교안: 배포와 로컬 저장 (후반부)",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261102-ai-pm-week2/d3-deploy-localdb.html#s7",
+      "source": "교안",
+      "tags": [],
+      "date": "2026-11-04"
     },
     {
-      "id": "l-bookservice-repo",
-      "title": "오늘의 독서 메뉴 소스 코드",
-      "url": "https://github.com/jicongjy/multicampus-aistudio-bookservice",
-      "source": "실습",
-      "tags": [
-        "깃허브"
-      ],
-      "date": "2026-11-12",
-      "work": "w3-reading-menu"
+      "id": "l-d4-bolt",
+      "title": "2주차 DAY4 교안: 도구 비교와 볼트",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261102-ai-pm-week2/d4-vibe-tools-bolt.html",
+      "source": "교안",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-w3d1-sheet",
+      "title": "3주차 DAY1 교안: 시트와 앱스 스크립트",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261109-ai-pm-week3/d1-sheet-appsscript.html#s5-1",
+      "source": "교안",
+      "tags": [],
+      "date": "2026-11-09"
+    },
+    {
+      "id": "l-w3d2-crawl",
+      "title": "3주차 DAY2 교안: 웹 크롤링",
+      "url": "https://loreenkim0301.github.io/swy-lecturenote/261109-ai-pm-week3/d2-web-crawling.html",
+      "source": "교안",
+      "tags": [],
+      "date": "2026-11-10"
+    },
+    {
+      "id": "l-ex-netlify1",
+      "title": "예시 사이트 1 (넷리파이)",
+      "url": "https://celadon-strudel-c778a3.netlify.app",
+      "source": "강사 예시",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-ex-netlify2",
+      "title": "예시 사이트 2 (넷리파이)",
+      "url": "https://fabulous-choux-0652ad.netlify.app",
+      "source": "강사 예시",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-ex-selectmarket",
+      "title": "셀렉트마켓 이벤트 페이지 (넷리파이)",
+      "url": "https://selectmarket-event-page.netlify.app",
+      "source": "강사 예시",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-ex-ab",
+      "title": "A/B 실습 사이트 (버셀)",
+      "url": "https://swy-ab-practice.vercel.app",
+      "source": "강사 예시",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-ex-locallink",
+      "title": "로컬링크 홈페이지 (버셀)",
+      "url": "https://locallink-homepage.vercel.app",
+      "source": "강사 예시",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-art-waterfall",
+      "title": "워터폴과 애자일 사고 범위 도식",
+      "url": "https://claude.ai/artifact/5tRWqLLTbD1JJVP3Vn2Lx4#waterfall",
+      "source": "강사 자료",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-art-testreport",
+      "title": "테스트 보고서 예시",
+      "url": "https://claude.ai/artifact/HtyV8db8XZa6g8zDrkcR3E",
+      "source": "강사 자료",
+      "tags": [],
+      "date": "2026-11-11"
+    },
+    {
+      "id": "l-netlify-drop",
+      "title": "Netlify Drop",
+      "url": "https://app.netlify.com/drop",
+      "source": "수업 도구",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-vercel-new",
+      "title": "Vercel 새 프로젝트",
+      "url": "https://vercel.com/new",
+      "source": "수업 도구",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-bolt",
+      "title": "bolt.new",
+      "url": "https://bolt.new",
+      "source": "수업 도구",
+      "tags": [],
+      "date": "2026-11-05"
+    },
+    {
+      "id": "l-zapier",
+      "title": "Zapier",
+      "url": "https://zapier.com/",
+      "source": "수업 도구",
+      "tags": [],
+      "date": "2026-11-06"
+    },
+    {
+      "id": "l-appsscript",
+      "title": "구글 앱스 스크립트 문서",
+      "url": "https://developers.google.com/apps-script?hl=ko",
+      "source": "수업 도구",
+      "tags": [],
+      "date": "2026-11-06"
+    },
+    {
+      "id": "l-wrtn",
+      "title": "뤼튼 상세페이지 도구",
+      "url": "https://wrtn.ai/tools/67b2e7901b44a4d864b127b5",
+      "source": "수업 도구",
+      "tags": [],
+      "date": "2026-11-12"
     }
   ]
 }
