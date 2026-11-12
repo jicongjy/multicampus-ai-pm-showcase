@@ -118,17 +118,35 @@
     return box;
   }
 
+  function sizeText(kb) { return kb >= 1024 ? (kb / 1024).toFixed(1) + "MB" : kb + "KB"; }
+  function kindOf(w) {
+    var m = /\.([a-z0-9]+)$/i.exec(w.file || ""), e = m ? m[1].toLowerCase() : "";
+    if (!w.file) return "외부 서비스";
+    return { html: "웹 문서", htm: "웹 문서", pdf: "PDF", png: "이미지", jpg: "이미지", jpeg: "이미지", webp: "이미지" }[e] || e.toUpperCase();
+  }
+  function mrow(ic, text) { return el("div", { class: "mrow" }, [icon(ic), el("span", { text: text })]); }
+
   function pcard(w) {
-    return el("a", { class: "card pcard", href: href(["projects", w.id]), "aria-label": w.title }, [
-      thumbBox(w, true),
-      el("div", { class: "pbody" }, [
-        el("h3", { text: w.title }),
-        el("div", { class: "pmeta" }, [
-          el("span", { class: "no", text: "No." + pad(w.no) }),
-          el("span", { text: mmdd(w.date) }),
-          el("span", { class: "tag", text: w.type })
-        ])
-      ])
+    var tall = /\.(pdf|png)$/i.test(w.file || "");
+    var rel = glossaryFor(w.id);
+    var body = [el("h3", { text: w.title })];
+    if (w.summary) body.push(el("p", { class: "psum", text: w.summary }));
+    if (w.metric) body.push(el("div", { class: "metric" }, [
+      el("strong", { text: w.metric.value }),
+      el("div", {}, [el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null])
+    ]));
+    if (rel.length) body.push(el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })));
+    var rows = el("div", { class: "mrows" }, [mrow("note", kindOf(w) + (w.kb ? " · " + sizeText(w.kb) : ""))]);
+    if ((w.links || []).length) rows.appendChild(mrow("link", "링크 " + w.links.length + "개"));
+    body.push(rows);
+    return el("a", { class: "card pcard" + (tall ? " tall" : ""), href: href(["projects", w.id]), "aria-label": w.title }, [
+      el("div", { class: "phead " + wcls(w.week) }, [
+        el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }),
+        el("div", { class: "who" }, [el("b", { text: weekOf(w.week).label }), el("small", { text: "No." + pad(w.no) + " · " + mmdd(w.date) })]),
+        el("span", { class: "pill", text: w.type })
+      ]),
+      thumbBox(w, false),
+      el("div", { class: "pbody" }, body)
     ]);
   }
 
@@ -149,13 +167,12 @@
 
   function lcard(l) {
     return el("a", { class: "card lcard", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
-      el("div", { class: "src" }, [
-        el("span", { class: "srcdot", style: "background:" + srcColor(l.source) }),
-        el("span", { text: l.source + (l.date ? " / " + mmdd(l.date) : "") })
+      el("div", { class: "lhead" }, [
+        el("span", { class: "tile", style: "background:" + srcColor(l.source), text: host(l.url).charAt(0).toUpperCase() }),
+        el("div", { class: "who" }, [el("b", { text: host(l.url) }), el("small", { text: l.source + (l.date ? " · " + mmdd(l.date) : "") })]),
+        el("span", { class: "go", "aria-hidden": "true", text: "↗" })
       ]),
-      el("h3", { text: l.title }),
-      el("div", { class: "host", text: host(l.url) }),
-      el("span", { class: "go", text: "열기 ↗" })
+      el("h3", { text: l.title })
     ]);
   }
 
@@ -181,12 +198,17 @@
   }
 
   function ncard(n) {
-    var inner = [
-      el("div", { class: "src" }, [el("span", { text: (n.week ? weekOf(n.week).label : "") + (n.date ? " / " + mmdd(n.date) : "") })]),
-      el("h3", { text: n.title })
-    ];
-    if (n.summary) inner.push(el("div", { class: "host", text: n.summary }));
-    return el("a", { class: "card lcard", href: href(["notes", n.id]) }, inner);
+    var d = n.date || "", p = d ? parts(d) : null;
+    var body = [el("h3", { text: n.title })];
+    if (n.summary) body.push(el("p", { class: "psum", text: n.summary }));
+    if ((n.headings || []).length) body.push(el("div", { class: "chipline" }, n.headings.slice(0, 3).map(function (h) { return el("span", { text: h }); })));
+    if (n.mins) body.push(el("div", { class: "mrows" }, [mrow("book", "약 " + n.mins + "분 · 구역 " + (n.sections || 0) + "개")]));
+    return el("a", { class: "card ncard", href: href(["notes", n.id]) }, [
+      el("div", { class: "leaf " + (n.week ? wcls(n.week) : "") }, p ? [
+        el("small", { text: p.m + "월" }), el("strong", { text: String(p.d) }), el("small", { text: DOW[dowOf(d)] })
+      ] : []),
+      el("div", { class: "pbody" }, body)
+    ]);
   }
 
   function empty(title, text) {
@@ -228,6 +250,91 @@
 
   function worksOn(date) { return works.filter(function (w) { return w.date === date; }); }
 
+  /* ---------- masonry: 가로 순서를 지키는 벽돌형 배치 ---------- */
+  function colCount(reserve) {
+    var w = (view.clientWidth || 900) - (reserve && window.innerWidth > 1200 ? reserve : 0);
+    return Math.max(1, Math.min(4, Math.floor((w + 16) / 286)));
+  }
+  var lastCols = 0;
+  function masonry(items, reserve) {
+    var n = colCount(reserve);
+    lastCols = n;
+    var box = el("div", { class: "mason", style: "grid-template-columns:repeat(" + n + ",minmax(0,1fr))" });
+    var cols = [];
+    for (var i = 0; i < n; i++) { var c = el("div", { class: "mcol" }); cols.push(c); box.appendChild(c); }
+    items.forEach(function (it, i) { cols[i % n].appendChild(it); });
+    return box;
+  }
+  var rzTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(function () {
+      if (lastCols && colCount(document.querySelector('.home') ? 324 : 0) !== lastCols && document.querySelector(".mason")) render();
+    }, 150);
+  });
+
+  /* ---------- home pieces ---------- */
+  function featured(w) {
+    var rel = glossaryFor(w.id);
+    var info = [
+      el("div", { class: "phead " + wcls(w.week) }, [
+        el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }),
+        el("div", { class: "who" }, [el("b", { text: weekOf(w.week).label }), el("small", { text: "No." + pad(w.no) + " · " + koDay(w.date) })]),
+        el("span", { class: "pill", text: w.type })
+      ]),
+      el("h3", { text: w.title })
+    ];
+    if (w.summary) info.push(el("p", { class: "psum", text: w.summary }));
+    if (w.metric) info.push(el("div", { class: "metric" }, [el("strong", { text: w.metric.value }), el("div", {}, [el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null])]));
+    if (rel.length) info.push(el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })));
+    info.push(el("span", { class: "open", text: "열어 보기 →" }));
+    return el("a", { class: "card feat", href: href(["projects", w.id]) }, [thumbBox(w, false), el("div", { class: "pbody" }, info)]);
+  }
+
+  var SHADES = ["#111113", "#5c5c61", "#98989d", "#c8c8cc", "#e2e2e5"];
+  function typeChart() {
+    var counts = {}, order = [];
+    works.forEach(function (w) { if (!counts[w.type]) { counts[w.type] = 0; order.push(w.type); } counts[w.type]++; });
+    order.sort(function (a, b) { return counts[b] - counts[a]; });
+    var bar = el("div", { class: "stack" }), legend = el("ul", { class: "legend" });
+    order.forEach(function (t, i) {
+      var c = SHADES[Math.min(i, SHADES.length - 1)];
+      bar.appendChild(el("i", { style: "flex:" + counts[t] + ";background:" + c, title: t + " " + counts[t] }));
+      legend.appendChild(el("li", {}, [el("span", { class: "srcdot", style: "background:" + c }), el("span", { text: t }), el("b", { text: String(counts[t]) })]));
+    });
+    return el("section", { class: "card chart" }, [
+      el("header", {}, [el("h3", { text: "종류별 구성" }), el("small", { text: works.length + "개" })]), bar, legend
+    ]);
+  }
+
+  function dayChart() {
+    var wk = data.weeks, cols = [], max = 1;
+    var cur = wk[0].start, end = wk[wk.length - 1].end;
+    var guard = 0;
+    while (cur <= end && guard++ < 60) {
+      var dw = dowOf(cur);
+      if (dw !== 0 && dw !== 6) {
+        var on = works.filter(function (w) { return w.date === cur; });
+        var wid = (wk.filter(function (x) { return cur >= x.start && cur <= x.end; })[0] || wk[0]).id;
+        cols.push({ date: cur, n: on.length, week: wid });
+        max = Math.max(max, on.length);
+      }
+      var p = parts(cur), nx = new Date(Date.UTC(p.y, p.m - 1, p.d + 1));
+      cur = iso(nx.getUTCFullYear(), nx.getUTCMonth() + 1, nx.getUTCDate());
+    }
+    var box = el("div", { class: "bars" });
+    cols.forEach(function (c) {
+      box.appendChild(el("div", { class: "col" }, [
+        el("span", { class: "n", text: c.n ? String(c.n) : "" }),
+        el("i", { class: wcls(c.week), style: "height:" + (c.n ? Math.max(10, Math.round(c.n / max * 100)) : 3) + "%" + (c.n ? "" : ";opacity:.25"), title: koDay(c.date) + " " + c.n + "개" }),
+        el("small", { text: mmdd(c.date).replace(/^0/, "") })
+      ]));
+    });
+    return el("section", { class: "card chart" }, [
+      el("header", {}, [el("h3", { text: "날짜별 결과물" }), el("small", { text: "수업일 기준" })]), box
+    ]);
+  }
+
   /* ---------- views ---------- */
   function viewHome() {
     var frag = document.createDocumentFragment();
@@ -267,9 +374,10 @@
     var wk = el("div", { class: "weeks" });
     data.weeks.forEach(function (w) {
       var items = works.filter(function (x) { return x.week === w.id; });
-      var ul = el("ul");
-      items.slice(0, 3).forEach(function (x) { ul.appendChild(el("li", { text: x.title })); });
-      if (items.length > 3) ul.appendChild(el("li", { text: "외 " + (items.length - 3) + "개" }));
+      var ul = el("div", { class: "strip" });
+      newest(items).slice(0, 4).forEach(function (x) {
+        ul.appendChild(x.thumb ? el("img", { src: enc(x.thumb), alt: "", loading: "lazy" }) : el("span"));
+      });
       var bar = el("div", { class: "meter base" }, [el("i", { class: wcls(w.id), style: "width:" + Math.round(items.length / max * 100) + "%" })]);
       wk.appendChild(el("a", { class: "card wcard " + wcls(w.id), href: href(["projects"], { week: w.id }) }, [
         el("header", {}, [el("span", { class: "sq", text: String(weekIndex(w.id) + 1) }), el("h3", { text: w.label }), el("span", { text: w.period })]),
@@ -280,13 +388,20 @@
     });
     main.appendChild(wk);
 
-    main.appendChild(el("div", { class: "section" }, [
-      el("h2", { text: "최근 결과물" }),
-      el("a", { href: href(["projects"]), text: "전체 보기" })
-    ]));
-    var cards = el("div", { class: "cards" });
-    newest(works).slice(0, 4).forEach(function (w) { cards.appendChild(pcard(w)); });
-    main.appendChild(cards);
+    var latest = newest(works);
+    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "가장 최근에 만든 것" }), el("a", { href: href(["projects"]), text: "전체 보기" })]));
+    main.appendChild(featured(latest[0]));
+
+    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "한눈에 보기" })]));
+    main.appendChild(el("div", { class: "charts" }, [typeChart(), dayChart()]));
+
+    if (notes.length) {
+      main.appendChild(el("div", { class: "section" }, [el("h2", { text: "최근 학습 노트" }), el("a", { href: href(["notes"]), text: "전체 보기" })]));
+      main.appendChild(masonry(notes.slice(0, 3).map(ncard), 324));
+    }
+
+    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "이어서 보기" }), el("a", { href: href(["projects"]), text: "전체 보기" })]));
+    main.appendChild(masonry(latest.slice(1, 5).map(pcard), 324));
 
     /* aside */
     var aside = el("div", { class: "aside" });
@@ -382,9 +497,7 @@
       list.forEach(function (w) { rows.appendChild(prow(w)); });
       frag.appendChild(rows);
     } else {
-      var cards = el("div", { class: "cards" });
-      list.forEach(function (w) { cards.appendChild(pcard(w)); });
-      frag.appendChild(cards);
+      frag.appendChild(masonry(list.map(pcard)));
     }
     return frag;
   }
@@ -550,9 +663,7 @@
       frag.appendChild(empty("공개한 노트가 아직 없습니다", "공개 표시한 노트를 정리해서 옮기면 이곳에 나타납니다."));
       return frag;
     }
-    var cards = el("div", { class: "cards" });
-    notes.forEach(function (n) { cards.appendChild(ncard(n)); });
-    frag.appendChild(cards);
+    frag.appendChild(masonry(notes.map(ncard)));
     return frag;
   }
 

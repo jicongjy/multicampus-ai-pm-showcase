@@ -5,64 +5,120 @@
       "title": "2026-11-12 14일차 학습 노트",
       "week": "week-03",
       "date": "2026-11-12",
-      "summary": "",
-      "html": "notes/n-w3-day-04-admin-page-claude-desktop.html"
+      "summary": "관리자 콘솔에서 감정 분석과 도서 추천 이유의 프롬프트를 수정",
+      "html": "notes/n-w3-day-04-admin-page-claude-desktop.html",
+      "headings": [
+        "3-2. 만든 서비스: 오늘의 독서 메뉴",
+        "3-3. 로컬 테스트에서 겪은 문제"
+      ],
+      "sections": 2,
+      "mins": 1
     },
     {
       "id": "n-w3-day-03-emotion-book-recommendation",
       "title": "3주차 DAY3 감정 책 추천 학습노트",
       "week": "week-03",
       "date": "2026-11-11",
-      "summary": "",
-      "html": "notes/n-w3-day-03-emotion-book-recommendation.html"
+      "summary": "261111_프로토타입_홍지영.html (프로토타입 원본)",
+      "html": "notes/n-w3-day-03-emotion-book-recommendation.html",
+      "headings": [
+        "내가 만든 산출물"
+      ],
+      "sections": 1,
+      "mins": 1
     },
     {
       "id": "n-w3-day-02-web-crawling-event-taxonomy",
       "title": "AI 프로덕트 매니저 3주차 DAY 2 학습 노트: 외부 데이터 모으기(웹 크롤링)",
       "week": "week-03",
       "date": "2026-11-10",
-      "summary": "",
-      "html": "notes/n-w3-day-02-web-crawling-event-taxonomy.html"
+      "summary": "전처리 코드(클로드 보고): 드라이브의 원본 CSV를 읽어 점검하고, 원본은 그대로 둔 채 개선본을 별도 파일로 저장하는 코드를 만들었습니다. 가짜 200권…",
+      "html": "notes/n-w3-day-02-web-crawling-event-taxonomy.html",
+      "headings": [
+        "4-7. 실습 결과",
+        "5-1. 실습 결과 (클로드 보고)",
+        "6-3. 내가 만든 겨울 여행 신청 페이지의 이벤트 6개 (클로드 보고)"
+      ],
+      "sections": 3,
+      "mins": 2
     },
     {
       "id": "n-w2-day-05-google-ai-studio-firebase",
       "title": "AI 프로덕트 매니저 2주차 DAY 5 학습 노트",
       "week": "week-02",
       "date": "2026-11-06",
-      "summary": "",
-      "html": "notes/n-w2-day-05-google-ai-studio-firebase.html"
+      "summary": "신청서와 관리자 페이지를 한 HTML 파일로 합쳐 만들었습니다. 한 번에 다 넣지 않고 기능을 하나씩 추가하며 확인했습니다.",
+      "html": "notes/n-w2-day-05-google-ai-studio-firebase.html",
+      "headings": [
+        "직접 실습: 이벤트 신청폼 관리자 페이지",
+        "4-1. 만든 것",
+        "4-2. 개선하면서 내린 결정",
+        "4-3. 고민하고 정한 기준",
+        "겪은 문제"
+      ],
+      "sections": 5,
+      "mins": 2
     },
     {
       "id": "n-w2-day-04-deployment-storage-bolt",
       "title": "AI PM 캠프 9일차 노트: 필드 정의, 배포, 저장 위치, 볼트",
       "week": "week-02",
       "date": "2026-11-05",
-      "summary": "",
-      "html": "notes/n-w2-day-04-deployment-storage-bolt.html"
+      "summary": "수업 질문에 맞춰 제 신청 폼을 단계별로 고쳐 보았습니다.",
+      "html": "notes/n-w2-day-04-deployment-storage-bolt.html",
+      "headings": [
+        "제가 만든 이벤트 신청 폼 실습 기록",
+        "오늘 느낀 점",
+        "해 보고 싶은 것"
+      ],
+      "sections": 3,
+      "mins": 1
     },
     {
       "id": "n-w2-day-03-data-deployment",
       "title": "AI 프로덕트 매니저 2주차 DAY 3 학습 노트",
       "week": "week-02",
       "date": "2026-11-04",
-      "summary": "",
-      "html": "notes/n-w2-day-03-data-deployment.html"
+      "summary": "같은 질문을 프로젝트 안과 밖의 새 대화에서 던져 답을 비교하는 질문을 만들었습니다. 비교 항목은 파일명 형식, 가설 표기 여부, 화면 이름 사용 여부 세 가…",
+      "html": "notes/n-w2-day-03-data-deployment.html",
+      "headings": [
+        "내가 직접 해 본 것",
+        "프로젝트 지침과 안/밖 비교",
+        "컴퓨터 연결 실습",
+        "올리브영 온라인몰 개선 제안서 (학습용 가정)"
+      ],
+      "sections": 4,
+      "mins": 1
     },
     {
       "id": "n-w2-day-02-scenario-prd",
       "title": "AI 프로덕트 매니저 2주차 · DAY 2 학습 노트",
       "week": "week-02",
       "date": "2026-11-03",
-      "summary": "",
-      "html": "notes/n-w2-day-02-scenario-prd.html"
+      "summary": "버전 이력: 3차(13단계, 본인 인증 줄 포함) → 4차(12단계, 본인 인증 삭제) → 5차(19단계, 시스템 처리 7줄 추가)",
+      "html": "notes/n-w2-day-02-scenario-prd.html",
+      "headings": [
+        "내 실습 — 올리브영 앱 구매 흐름 [실습]",
+        "3-1. 성공 시나리오 5차 (사용자 행동 + 시스템 처리, 19단계)",
+        "3-2. IA (엑셀, v0.1 → v0.2)",
+        "3-3. 프로토타입 HTML 4종 (클로드 디자인 대화) [미검증]"
+      ],
+      "sections": 4,
+      "mins": 4
     },
     {
       "id": "n-w2-day-01-problem-definition",
       "title": "AI 프로덕트 매니저 2주차 DAY 1: 문제부터 정의하고, 화면은 하나씩 고친다",
       "week": "week-02",
       "date": "2026-11-02",
-      "summary": "",
-      "html": "notes/n-w2-day-01-problem-definition.html"
+      "summary": "만든 이벤트 페이지의 혜택 카드 3장(할인·쿠폰·사은품)과 이벤트 기간 줄을 계속 고쳤습니다.",
+      "html": "notes/n-w2-day-01-problem-definition.html",
+      "headings": [
+        "내 실습: 혜택 구간(C파트) 개선",
+        "별도 실습: 다낭 연말 여행 상품 비교표"
+      ],
+      "sections": 2,
+      "mins": 2
     }
   ]
 }

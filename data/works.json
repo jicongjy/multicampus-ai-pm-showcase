@@ -35,10 +35,11 @@
       "date": "2026-10-27",
       "title": "BSI 문장 검증 대시보드",
       "type": "프로토타입",
-      "summary": "",
+      "summary": "소상공인 BSI 문장 검증 결과를 한 화면에서 확인하는 대시보드입니다.",
       "file": "works/week-01/bsi-verification-dashboard.html",
       "links": [],
-      "thumb": "assets/thumbs/w1-bsi-dashboard.jpg"
+      "thumb": "assets/thumbs/w1-bsi-dashboard.jpg",
+      "kb": 14
     },
     {
       "id": "w1-browser-monitor",
@@ -49,7 +50,8 @@
       "summary": "모노톤 웹 프로토타입으로 정리한 브라우저 데이터 모니터 화면입니다.",
       "file": "works/week-01/모노톤 웹 프로토타입 코드 수정.html",
       "links": [],
-      "thumb": "assets/thumbs/w1-browser-monitor.jpg"
+      "thumb": "assets/thumbs/w1-browser-monitor.jpg",
+      "kb": 23
     },
     {
       "id": "w2-oliveyoung-mid",
@@ -69,7 +71,8 @@
           "url": "https://docs.google.com/spreadsheets/d/1AmqNaCtE07ADmD7S9FTpfo2QIdk4h_NS-0486pGTVI4/edit"
         }
       ],
-      "thumb": "assets/thumbs/w2-oliveyoung-mid.jpg"
+      "thumb": "assets/thumbs/w2-oliveyoung-mid.jpg",
+      "kb": 42
     },
     {
       "id": "w2-event-form",
@@ -80,7 +83,8 @@
       "summary": "입력 규칙, 예외 처리, 중복 신청 판단을 갖춘 이벤트 신청 폼입니다.",
       "file": "works/week-02/261106_이벤트신청폼_홍지영.html",
       "links": [],
-      "thumb": "assets/thumbs/w2-event-form.jpg"
+      "thumb": "assets/thumbs/w2-event-form.jpg",
+      "kb": 744
     },
     {
       "id": "w3-ab-test-plan",
@@ -88,10 +92,11 @@
       "date": "2026-11-09",
       "title": "겨울여행 얼리버드 A/B 테스트 계획서",
       "type": "기획 문서",
-      "summary": "",
+      "summary": "겨울여행 얼리버드 신청 페이지의 목적, 가설, 측정 지표와 기기별 신청서 위치를 정리한 A/B 테스트 계획서입니다.",
       "file": "works/week-03/261109_AB테스트계획서_홍지영_2.html",
       "links": [],
-      "thumb": "assets/thumbs/w3-ab-test-plan.jpg"
+      "thumb": "assets/thumbs/w3-ab-test-plan.jpg",
+      "kb": 3251
     },
     {
       "id": "w3-event-webapp",
@@ -99,10 +104,11 @@
       "date": "2026-11-10",
       "title": "겨울여행 얼리버드 이벤트 웹앱",
       "type": "프로토타입",
-      "summary": "",
+      "summary": "겨울여행 얼리버드 신청, 쿠폰 안내, 예약 흐름을 한 화면에서 이어 보는 이벤트 웹앱입니다.",
       "file": "works/week-03/261110_이벤트웹앱_홍지영_7.html",
       "links": [],
-      "thumb": "assets/thumbs/w3-event-webapp.jpg"
+      "thumb": "assets/thumbs/w3-event-webapp.jpg",
+      "kb": 2720
     },
     {
       "id": "w3-book-proto",
@@ -113,7 +119,8 @@
       "summary": "감정을 입력하면 어울리는 책을 추천하는 프로토타입의 개선안입니다.",
       "file": "works/week-03/261111_프로토타입개선안_홍지영.html",
       "links": [],
-      "thumb": "assets/thumbs/w3-book-proto.jpg"
+      "thumb": "assets/thumbs/w3-book-proto.jpg",
+      "kb": 55
     },
     {
       "id": "w3-asis-tobe",
@@ -124,7 +131,13 @@
       "summary": "화면이 바뀐 곳과 AI 처리가 바뀐 곳을 ASIS와 TOBE로 나누어 그린 순서도입니다.",
       "file": "works/week-03/261111_ASISTOBE순서도_홍지영.png",
       "links": [],
-      "thumb": "assets/thumbs/w3-asis-tobe.jpg"
+      "thumb": "assets/thumbs/w3-asis-tobe.jpg",
+      "kb": 1140,
+      "metric": {
+        "value": "5곳",
+        "label": "화면이 바뀐 곳",
+        "note": "AI 처리 3곳 포함"
+      }
     },
     {
       "id": "w3-ux-slides",
@@ -132,10 +145,16 @@
       "date": "2026-11-11",
       "title": "UX 점검 슬라이드",
       "type": "슬라이드",
-      "summary": "",
+      "summary": "12개 화면 상태를 5개 기준으로 점검하고, 양호 항목과 우선 개선 항목을 나눈 슬라이드입니다.",
       "file": "works/week-03/261111_UX점검슬라이드_홍지영.html",
       "links": [],
-      "thumb": "assets/thumbs/w3-ux-slides.jpg"
+      "thumb": "assets/thumbs/w3-ux-slides.jpg",
+      "kb": 1872,
+      "metric": {
+        "value": "9건",
+        "label": "개선 필요 항목",
+        "note": "12개 화면 · 5개 기준"
+      }
     },
     {
       "id": "w3-test-report",
@@ -143,10 +162,16 @@
       "date": "2026-11-11",
       "title": "프로토타입 테스트 보고서",
       "type": "보고서",
-      "summary": "",
+      "summary": "개발본을 자동 브라우저로 직접 눌러 보며 요구사항 7개와 기능 52개를 모두 확인한 보고서입니다.",
       "file": "works/week-03/261111_테스트보고서_홍지영.pdf",
       "links": [],
-      "thumb": "assets/thumbs/w3-test-report.jpg"
+      "thumb": "assets/thumbs/w3-test-report.jpg",
+      "kb": 289,
+      "metric": {
+        "value": "59/59",
+        "label": "검증 항목 통과",
+        "note": "요구사항 7 + 기능 52"
+      }
     },
     {
       "id": "w3-reading-menu",
@@ -174,10 +199,11 @@
       "date": "2026-11-12",
       "title": "상품 상세페이지",
       "type": "기획 문서",
-      "summary": "",
+      "summary": "스툴과 선반 위에 놓는 진주 소품(화이트, 실버)을 소개하는 상품 상세페이지 기획입니다.",
       "file": "works/week-03/상세페이지_지영_20261112.html",
       "links": [],
-      "thumb": "assets/thumbs/w3-detail-page.jpg"
+      "thumb": "assets/thumbs/w3-detail-page.jpg",
+      "kb": 1632
     }
   ]
 }

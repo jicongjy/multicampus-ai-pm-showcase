@@ -230,6 +230,31 @@ def summary_of(lines):
     return ""
 
 
+def first_text(lines):
+    """요약 구역이 없을 때 남은 본문의 첫 문장을 요약으로 쓴다."""
+    idx = next((i for i, l in enumerate(lines) if heading(l)), 0)
+    for line in lines[idx:]:
+        t = line.strip()
+        if not t or heading(line) or t.startswith(("```", "|", ">", "---")):
+            continue
+        t = re.sub(r"^[-*+]\s+|^\d+[.)]\s+", "", t)
+        t = re.sub(r"[*`]|\[([^\]]+)\]\([^)]*\)", lambda m: m.group(1) or "", t).strip()
+        if len(t) >= 12 and "http" not in t and not re.match(r"^[^:：]{1,14}[:：]\s*\S{0,20}$", t):
+            return t if len(t) <= 90 else t[:88].rstrip() + "…"
+    return ""
+
+
+def headings_of(lines):
+    out = []
+    for line in lines:
+        h = heading(line)
+        if h and h[0] in (2, 3):
+            t = re.sub(r"[*`]", "", re.sub(r"^\d+[.)]\s*", "", h[1])).strip()
+            if t and t not in out:
+                out.append(t)
+    return out
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     dry = "--dry-run" in sys.argv
@@ -259,10 +284,13 @@ def main():
             print("  ! 내보내지 않음. 남아 있는 민감 패턴: " + ", ".join(hits))
             continue
         nid = "n-%s-%s" % (wk.replace("week-0", "w") if wk else "x", path.stem)
-        summary = summary_of(body_lines)
+        summary = summary_of(body_lines) or first_text(body_lines)
+        heads = headings_of(body_lines)
+        chars = len(re.sub(r"\s+", "", text))
         entries.append({
             "id": nid, "title": re.sub(r"^\d{6}\s+", "", title), "week": wk, "date": date,
             "summary": summary, "html": "notes/%s.html" % nid,
+            "headings": heads[:5], "sections": len(heads), "mins": max(1, round(chars / 500)),
         })
         if not dry:
             out = ROOT / "notes" / ("%s.html" % nid)

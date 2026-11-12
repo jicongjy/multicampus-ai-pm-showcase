@@ -10,6 +10,7 @@
 ├── assets/            # style.css, app.js, thumbs/ (썸네일 이미지)
 ├── tools/make_thumbs.py  # 썸네일 자동 생성
 ├── tools/export_notes.py # 공개 노트 내보내기
+├── tools/make_meta.py    # 결과물 파일 크기를 works.json에 채움
 ├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
 ├── data/links.json    # 링크 모음
 ├── data/glossary.json # 용어
@@ -35,6 +36,8 @@
 | summary | 한두 문장 설명. 모르면 비워 둡니다 |
 | file | 열어 볼 파일 경로. 파일이 없으면 비워 둡니다 |
 | links | `{ "label": "서비스 열기", "url": "..." }` 목록 |
+| metric | 선택. `{ "value": "59/59", "label": "검증 항목 통과", "note": "..." }` 카드에 큰 숫자로 표시. 직접 확인한 숫자만 적습니다 |
+| kb | `python3 tools/make_meta.py`가 자동으로 채움 |
 
 새 주차가 생기면 `weeks` 배열(start, end 날짜 포함)에도 추가합니다.
 
