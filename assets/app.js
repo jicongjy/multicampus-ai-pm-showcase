@@ -1,11 +1,9 @@
 (function () {
   "use strict";
 
-  var state = { q: "", type: "all", view: "card" };
   var data = null, works = [], links = [], lessons = [], terms = [], notes = [];
   var view = document.getElementById("view");
-
-  function $(id) { return document.getElementById(id); }
+  var $ = function (id) { return document.getElementById(id); };
 
   function el(tag, attrs, kids) {
     var n = document.createElement(tag);
@@ -18,77 +16,58 @@
     (kids || []).forEach(function (c) { if (c) n.appendChild(c); });
     return n;
   }
-
+  function txt(s) { return document.createTextNode(s); }
   function enc(path) { return path.split("/").map(encodeURIComponent).join("/"); }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function iso(y, m, d) { return y + "-" + pad(m) + "-" + pad(d); }
   var DOW = ["일", "월", "화", "수", "목", "금", "토"];
   function parts(date) { var a = date.split("-"); return { y: +a[0], m: +a[1], d: +a[2] }; }
-  function dowOf(date) { var p = parts(date); return new Date(Date.UTC(p.y, p.m - 1, p.d)).getUTCDay(); }
-  function mmdd(date) { return date.slice(5).replace("-", "."); }
+  function utc(date) { var p = parts(date); return Date.UTC(p.y, p.m - 1, p.d); }
+  function dowOf(date) { return new Date(utc(date)).getUTCDay(); }
+  function addDays(date, n) { var t = new Date(utc(date) + n * 86400000); return iso(t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()); }
+  function diffDays(a, b) { return Math.round((utc(a) - utc(b)) / 86400000); }
   function koDay(date) { var p = parts(date); return p.m + "월 " + p.d + "일 (" + DOW[dowOf(date)] + ")"; }
+  function mmdd(date) { var p = parts(date); return p.m + "." + p.d; }
   function host(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; } }
 
   var now = new Date();
   var TODAY = iso(now.getFullYear(), now.getMonth() + 1, now.getDate());
 
-  function store(key, val) {
-    try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch (e) { return null; }
-    return null;
-  }
-
-  /* ---------- icons ---------- */
-  var ICONS = {
-    home: "M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z",
-    folder: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
-    note: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7",
-    link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1",
-    calendar: "M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM4 10h16M8 3v4M16 3v4",
-    book: "M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"
-  };
-
-  function icon(name) {
-    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    s.setAttribute("viewBox", "0 0 24 24");
-    s.setAttribute("class", "ico");
-    s.setAttribute("aria-hidden", "true");
-    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    p.setAttribute("d", ICONS[name]);
-    p.setAttribute("fill", "none");
-    p.setAttribute("stroke", "currentColor");
-    p.setAttribute("stroke-width", "1.8");
-    p.setAttribute("stroke-linecap", "round");
-    p.setAttribute("stroke-linejoin", "round");
-    s.appendChild(p);
-    return s;
-  }
-
   /* ---------- data helpers ---------- */
-  function weekIndex(id) {
-    for (var i = 0; i < data.weeks.length; i++) if (data.weeks[i].id === id) return i;
-    return 0;
+  function weekOf(id) { return data.weeks.filter(function (w) { return w.id === id; })[0] || data.weeks[0]; }
+  function workById(id) { return works.filter(function (w) { return w.id === id; })[0]; }
+  function noteById(id) { return notes.filter(function (n) { return n.id === id; })[0]; }
+  function termByName(n) { return terms.filter(function (t) { return t.name === n; })[0]; }
+  function isNew(date) { var d = diffDays(TODAY, date); return d >= 0 && d <= 3; }
+  function termsOfWork(id) { return terms.filter(function (t) { return t.works.indexOf(id) !== -1; }); }
+  function notesOfWork(id) { return notes.filter(function (n) { return n.works.indexOf(id) !== -1; }); }
+
+  function noteTitle(n) {
+    var t = n.title
+      .replace(/^\d{4}-\d{2}-\d{2}\s*/, "")
+      .replace(/^AI\s*(프로덕트\s*매니저|PM\s*캠프)\s*(과정,?)?\s*/, "")
+      .replace(/^\d+주차\s*[·]?\s*/, "")
+      .replace(/^DAY\s*\d+\s*[·:]?\s*/i, "")
+      .replace(/^\d+일차\s*/, "")
+      .replace(/^학습\s*노트\s*[:：]?\s*/, "")
+      .replace(/^노트\s*[:：]?\s*/, "")
+      .replace(/\s*학습\s*노트$/, "")
+      .trim();
+    return t.length >= 3 ? t : koDay(n.date) + " 노트";
   }
-  function weekOf(id) { return data.weeks[weekIndex(id)]; }
-  function wcls(id) { return "w" + ((weekIndex(id) % 3) + 1); }
-  function wcolor(id) { return "var(--w" + ((weekIndex(id) % 3) + 1) + ")"; }
-  function byId(id) { return works.filter(function (w) { return w.id === id; })[0]; }
-  function newest(list) { return list.slice().sort(function (a, b) { return a.no < b.no ? 1 : -1; }); }
 
   /* ---------- hash routing ---------- */
   function parseHash() {
     var h = location.hash.replace(/^#/, "");
-    if (h && h.charAt(0) !== "/") return { path: ["projects", h], q: {}, legacy: true };
     var qi = h.indexOf("?");
     var pathStr = qi === -1 ? h : h.slice(0, qi);
     var q = {};
     if (qi !== -1) h.slice(qi + 1).split("&").forEach(function (kv) {
       var p = kv.split("=");
-      if (p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || "");
+      if (p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " "));
     });
-    var path = pathStr.split("/").filter(Boolean).map(decodeURIComponent);
-    return { path: path, q: q };
+    return { path: pathStr.split("/").filter(Boolean).map(decodeURIComponent), q: q };
   }
-
   function href(path, q) {
     var s = "#/" + path.map(encodeURIComponent).join("/");
     var ks = Object.keys(q || {}).filter(function (k) { return q[k] !== "" && q[k] !== undefined; });
@@ -97,879 +76,495 @@
   }
 
   /* ---------- shared pieces ---------- */
-  function wtag(w) {
-    return el("span", { class: "wtag " + wcls(w.week), text: weekOf(w.week).label });
+  function chip(text) { return el("span", { class: "chip", text: text }); }
+  function termChip(name) { return el("a", { class: "chip link", href: href(["terms", name]), text: name }); }
+  function dot() { return el("span", { class: "newdot", title: "최근에 추가했습니다" }); }
+  function empty(msg) { return el("p", { class: "empty", text: msg }); }
+  function secHead(title, more) {
+    return el("div", { class: "sec-head" }, [el("h2", { text: title }), more ? el("a", { class: "more", href: more[1], text: more[0] }) : null]);
   }
 
-  function thumbBox(w, withTag) {
+  function thumbBox(w) {
     var box = el("div", { class: "thumb" });
+    function ph() { box.textContent = ""; box.appendChild(el("div", { class: "ph", text: w.title.charAt(0) })); }
     if (w.thumb) {
       var img = el("img", { src: enc(w.thumb), alt: "", loading: "lazy", decoding: "async" });
-      img.addEventListener("error", function () {
-        box.textContent = "";
-        box.appendChild(el("div", { class: "ph", text: w.title.charAt(0) }));
-        if (withTag) box.appendChild(wtag(w));
-      });
+      img.addEventListener("error", ph);
       box.appendChild(img);
-    } else {
-      box.appendChild(el("div", { class: "ph", text: w.title.charAt(0) }));
-    }
-    if (withTag) box.appendChild(wtag(w));
+    } else ph();
     return box;
   }
 
-  function sizeText(kb) { return kb >= 1024 ? (kb / 1024).toFixed(1) + "MB" : kb + "KB"; }
-  function kindOf(w) {
-    var m = /\.([a-z0-9]+)$/i.exec(w.file || ""), e = m ? m[1].toLowerCase() : "";
-    if (!w.file) return "외부 서비스";
-    return { html: "웹 문서", htm: "웹 문서", pdf: "PDF", png: "이미지", jpg: "이미지", jpeg: "이미지", webp: "이미지" }[e] || e.toUpperCase();
-  }
-  function mrow(ic, text) { return el("div", { class: "mrow" }, [icon(ic), el("span", { text: text })]); }
-
-  function classDays() {
-    var wk = data.weeks, out = [], cur = wk[0].start, end = wk[wk.length - 1].end, guard = 0;
-    while (cur <= end && guard++ < 60) {
-      var dw = dowOf(cur);
-      if (dw !== 0 && dw !== 6) {
-        var wid = (wk.filter(function (x) { return cur >= x.start && cur <= x.end; })[0] || wk[0]).id;
-        out.push({ date: cur, week: wid });
-      }
-      var p = parts(cur), nx = new Date(Date.UTC(p.y, p.m - 1, p.d + 1));
-      cur = iso(nx.getUTCFullYear(), nx.getUTCMonth() + 1, nx.getUTCDate());
-    }
-    return out;
-  }
-  function notesOn(date) { return notes.filter(function (n) { return n.date === date; }); }
-
-  function chips(w) {
-    var rel = glossaryFor(w.id);
-    return rel.length ? el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })) : null;
-  }
-  function metricBlock(w) {
-    return w.metric ? el("div", { class: "metric" }, [
-      el("strong", { text: w.metric.value }),
-      el("div", {}, [el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null])
-    ]) : null;
-  }
-  function infoRows(w) {
-    var rows = el("div", { class: "mrows" }, [mrow("note", kindOf(w) + (w.kb ? " · " + sizeText(w.kb) : ""))]);
-    if ((w.links || []).length) rows.appendChild(mrow("link", w.links.map(function (l) { return l.label; }).join(" · ")));
-    var nn = notesOn(w.date).length;
-    if (nn) rows.appendChild(mrow("book", "같은 날 학습 노트 " + nn + "개"));
-    return rows;
-  }
-  function pheadFor(w, cls) {
-    return el("div", { class: "phead " + wcls(w.week) + (cls ? " " + cls : "") }, [
-      el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }),
-      el("div", { class: "who" }, [el("b", { text: weekOf(w.week).label }), el("small", { text: "No." + pad(w.no) + " · " + mmdd(w.date) })]),
-      el("span", { class: "pill", text: w.type })
-    ]);
-  }
-
-  function pcard(w) {
-    var url = href(["projects", w.id]);
-    var visual = w.type === "프로토타입" || w.type === "웹서비스";
-    var v = w.metric ? "stat" : (visual ? "shot" : "doc");
-    var kids;
-    if (v === "shot") {
-      var tb = thumbBox(w, false);
-      tb.appendChild(el("div", { class: "over" }, [el("h3", { text: w.title })]));
-      tb.appendChild(el("div", { class: "ovtop " + wcls(w.week) }, [el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }), el("span", { text: weekOf(w.week).label + " · No." + pad(w.no) }), el("span", { class: "pill", text: w.type })]));
-      kids = [tb, el("div", { class: "pbody" }, [
-        w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), infoRows(w)
-      ])];
-    } else if (v === "doc") {
-      kids = [pheadFor(w), el("div", { class: "dtop" }, [
-        el("div", {}, [el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null]),
-        thumbBox(w, false)
-      ]), el("div", { class: "pbody" }, [chips(w), infoRows(w)])];
-    } else {
-      kids = [pheadFor(w), el("div", { class: "bigstat" }, [
-        el("strong", { text: w.metric.value }), el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null
-      ]), thumbBox(w, false), el("div", { class: "pbody" }, [
-        el("h3", { text: w.title }), w.summary ? el("p", { class: "psum", text: w.summary }) : null, chips(w), infoRows(w)
-      ])];
-    }
-    return el("a", { class: "card pcard v-" + v, href: url, "aria-label": w.title }, kids);
-  }
-
-  function prow(w) {
-    return el("a", { class: "card row", href: href(["projects", w.id]) }, [
-      thumbBox(w, false),
-      el("div", {}, [
+  /* 결과물 카드: 그림, 제목, 무엇을 했는지, 날짜·주차, 쓴 용어 */
+  function workCard(w) {
+    var used = termsOfWork(w.id);
+    return el("a", { class: "card wcard", href: href(["projects", w.id]) }, [
+      thumbBox(w),
+      el("div", { class: "cbody" }, [
         el("h3", { text: w.title }),
-        el("div", { class: "pmeta" }, [
-          el("span", { class: "no", text: "No." + pad(w.no) }),
-          el("span", { text: mmdd(w.date) }),
-          el("span", { text: w.type })
-        ])
-      ]),
-      wtag(w)
+        el("p", { class: "did", text: w.did || "" }),
+        el("p", { class: "meta" }, [isNew(w.date) ? dot() : null, txt(mmdd(w.date) + " · " + weekOf(w.week).label + " · " + w.type)]),
+        used.length ? el("div", { class: "chips" }, used.slice(0, 4).map(function (t) { return chip(t.name); })) : null
+      ])
     ]);
   }
 
-  function lcard(l, meta) {
-    return el("a", { class: "card lcard", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
-      el("div", { class: "lhead" }, [
-        el("span", { class: "lmeta", text: meta || host(l.url) }),
-        el("span", { class: "go", "aria-hidden": "true", text: "↗" })
-      ]),
-      el("h3", { text: l.title }),
-      meta ? el("div", { class: "host", text: host(l.url) }) : null
+  /* 노트 행: 날짜·주차, 제목, 이날 한 것, 배운 용어 */
+  function noteRow(n) {
+    return el("a", { class: "row", href: href(["notes", n.id]) }, [
+      el("p", { class: "meta" }, [isNew(n.date) ? dot() : null, txt(koDay(n.date) + " · " + weekOf(n.week).label)]),
+      el("h3", { text: noteTitle(n) }),
+      n.one ? el("p", { class: "did", text: n.one }) : null,
+      n.terms.length ? el("div", { class: "chips" }, n.terms.map(chip)) : null
     ]);
   }
 
-
-  function tcard(t) {
-    var rel = el("div", { class: "rel" });
-    (t.works || []).forEach(function (id) {
-      var w = byId(id);
-      if (w) rel.appendChild(el("a", { href: href(["projects", id]), text: w.title }));
-    });
-    return el("article", { class: "card tcard" }, [
-      el("h3", { text: t.term }),
-      t.full ? el("div", { class: "full", text: t.full }) : null,
-      el("p", { text: t.def }),
-      rel.childNodes.length ? rel : null
-    ]);
-  }
-
-  var ncount = 0;
-  function partsBar(n) {
-    var ps = n.parts || [], total = ps.reduce(function (a, x) { return a + x.n; }, 0) || 1;
-    var bar = el("div", { class: "pbar" });
-    ps.forEach(function (x, i) { bar.appendChild(el("i", { style: "flex:" + x.n + ";opacity:" + (1 - Math.min(i, 4) * 0.2), title: x.t + " · 약 " + Math.round(x.n / 500 * 10) / 10 + "분" })); });
-    return ps.length ? bar : null;
-  }
-  function ncard(n, idx) {
-    var d = n.date || "", p = d ? parts(d) : null;
-    var variant = idx === 0 ? "dark" : (idx % 3 === 1 ? "soft" : "plain");
-    var rel = d ? worksOn(d) : [];
-    var body = [el("h3", { text: n.title })];
-    if (n.summary) body.push(el("p", { class: "psum", text: n.summary }));
-    var pb = partsBar(n);
-    if (pb) body.push(el("div", { class: "pwrap" }, [pb, el("small", { text: "구성 " + (n.parts || []).length + "개 구역 · 약 " + (n.mins || 1) + "분" })]));
-    if ((n.headings || []).length) body.push(el("div", { class: "chipline" }, n.headings.slice(0, 3).map(function (h) { return el("span", { text: h }); })));
-    var rows = el("div", { class: "mrows" });
-    if (rel.length) rows.appendChild(mrow("folder", "같은 날 결과물 " + rel.length + "개"));
-    if (rows.childNodes.length) body.push(rows);
-    return el("a", { class: "card ncard n-" + variant, href: href(["notes", n.id]) }, [
-      el("div", { class: "leaf " + (n.week ? wcls(n.week) : "") }, p ? [
-        el("small", { text: p.m + "월" }), el("strong", { text: String(p.d) }), el("small", { text: DOW[dowOf(d)] })
-      ] : []),
-      el("div", { class: "pbody" }, body)
-    ]);
-  }
-
-  function empty(title, text) {
-    return el("div", { class: "card empty" }, [el("strong", { text: title }), el("p", { text: text })]);
-  }
-
-  function head(title, sub, right) {
-    return el("div", { class: "head" }, [
-      el("div", {}, [el("h1", { text: title }), sub ? el("p", { text: sub }) : null]),
-      right || null
-    ]);
-  }
-
-  function segOf(items, current, onPick, cls) {
-    var box = el("div", { class: "seg" + (cls ? " " + cls : ""), role: "group" });
-    items.forEach(function (it) {
-      var b = el("button", { type: "button", text: it.label, "aria-pressed": String(current === it.value) });
-      b.addEventListener("click", function () { onPick(it.value); });
-      box.appendChild(b);
-    });
-    return box;
-  }
-
-  /* ---------- month grid ---------- */
-  function monthCells(y, m) {
-    var first = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();
-    var days = new Date(Date.UTC(y, m, 0)).getUTCDate();
-    var prevDays = new Date(Date.UTC(y, m - 1, 0)).getUTCDate();
-    var cells = [];
-    for (var i = 0; i < first; i++) {
-      var pm = m === 1 ? 12 : m - 1, py = m === 1 ? y - 1 : y;
-      cells.push({ date: iso(py, pm, prevDays - first + 1 + i), d: prevDays - first + 1 + i, off: true });
+  /* 벽돌 배치: 카드를 열마다 순서대로 놓는다 */
+  function masonry(items, build) {
+    var box = el("div", { class: "mason" });
+    var cols = 0;
+    function layout() {
+      var w = box.clientWidth || view.clientWidth || 900;
+      var n = w >= 820 ? 3 : w >= 520 ? 2 : 1;
+      if (n === cols) return;
+      cols = n;
+      box.textContent = "";
+      var cs = [];
+      for (var i = 0; i < n; i++) { var c = el("div", { class: "mcol" }); cs.push(c); box.appendChild(c); }
+      items.forEach(function (it, i2) { cs[i2 % n].appendChild(build(it)); });
     }
-    for (var d = 1; d <= days; d++) cells.push({ date: iso(y, m, d), d: d, off: false });
-    var nm = m === 12 ? 1 : m + 1, ny = m === 12 ? y + 1 : y;
-    for (var k = 1; cells.length % 7 !== 0; k++) cells.push({ date: iso(ny, nm, k), d: k, off: true });
-    return cells;
-  }
-
-  function worksOn(date) { return works.filter(function (w) { return w.date === date; }); }
-
-  /* ---------- masonry: 가로 순서를 지키는 벽돌형 배치 ---------- */
-  function colCount(reserve) {
-    var w = (view.clientWidth || 900) - (reserve && window.innerWidth > 1200 ? reserve : 0);
-    return Math.max(1, Math.min(4, Math.floor((w + 16) / 286)));
-  }
-  var lastCols = 0;
-  function masonry(items, reserve) {
-    var n = colCount(reserve);
-    lastCols = n;
-    var box = el("div", { class: "mason", style: "grid-template-columns:repeat(" + n + ",minmax(0,1fr))" });
-    var cols = [];
-    for (var i = 0; i < n; i++) { var c = el("div", { class: "mcol" }); cols.push(c); box.appendChild(c); }
-    items.forEach(function (it, i) { cols[i % n].appendChild(it); });
+    box._layout = layout;
+    masonry.hosts.push(box);
+    setTimeout(layout, 0);
     return box;
   }
-  var rzTimer = null;
+  masonry.hosts = [];
   window.addEventListener("resize", function () {
-    clearTimeout(rzTimer);
-    rzTimer = setTimeout(function () {
-      if (lastCols && colCount(document.querySelector('.home') ? 324 : 0) !== lastCols && document.querySelector(".mason")) render();
-    }, 150);
+    masonry.hosts = masonry.hosts.filter(function (h) { return document.body.contains(h); });
+    masonry.hosts.forEach(function (h) { h._layout(); });
   });
 
-  /* ---------- home pieces ---------- */
-  function featured(w) {
-    var rel = glossaryFor(w.id);
-    var info = [
-      el("div", { class: "phead " + wcls(w.week) }, [
-        el("span", { class: "sq", text: String(weekIndex(w.week) + 1) }),
-        el("div", { class: "who" }, [el("b", { text: weekOf(w.week).label }), el("small", { text: "No." + pad(w.no) + " · " + koDay(w.date) })]),
-        el("span", { class: "pill", text: w.type })
-      ]),
-      el("h3", { text: w.title })
-    ];
-    if (w.summary) info.push(el("p", { class: "psum", text: w.summary }));
-    if (w.metric) info.push(el("div", { class: "metric" }, [el("strong", { text: w.metric.value }), el("div", {}, [el("b", { text: w.metric.label }), w.metric.note ? el("small", { text: w.metric.note }) : null])]));
-    if (rel.length) info.push(el("div", { class: "chipline" }, rel.map(function (t) { return el("span", { text: t.term }); })));
-    info.push(el("span", { class: "open", text: "열어 보기 →" }));
-    return el("a", { class: "card feat", href: href(["projects", w.id]) }, [thumbBox(w, false), el("div", { class: "pbody" }, info)]);
+  /* ---------- 잔디 ---------- */
+  function activity() {
+    var map = {};
+    function at(d) { return map[d] || (map[d] = { works: [], notes: [], terms: [] }); }
+    works.forEach(function (w) { at(w.date).works.push(w); });
+    notes.forEach(function (n) { at(n.date).notes.push(n); });
+    terms.forEach(function (t) { at(t.first).terms.push(t); });
+    return map;
+  }
+  function total(a) { return a ? a.works.length + a.notes.length + a.terms.length : 0; }
+  function level(c) { return c === 0 ? 0 : c <= 1 ? 1 : c <= 3 ? 2 : c <= 5 ? 3 : 4; }
+  var COLS = 12;
+
+  function grass(map, onPick) {
+    var first = data.weeks[0].start;
+    var start = addDays(first, -((dowOf(first) + 6) % 7));
+    var wrap = el("div", { class: "grass-wrap" });
+    var days = el("div", { class: "g-days" }, ["월", "", "수", "", "금", "", ""].map(function (d) { return el("span", { text: d }); }));
+    var months = el("div", { class: "g-months" });
+    var grid = el("div", { class: "grass", role: "group", "aria-label": "날짜별 기록량" });
+    var cells = {};
+    var lastMonth = 0;
+    for (var c = 0; c < COLS; c++) {
+      var colStart = addDays(start, c * 7);
+      var mo = parts(colStart).m;
+      months.appendChild(el("span", { text: mo !== lastMonth ? mo + "월" : "" }));
+      lastMonth = mo;
+      for (var r = 0; r < 7; r++) {
+        var d = addDays(colStart, r);
+        var n = total(map[d]);
+        var future = d > TODAY && n === 0;
+        var cell = el("button", {
+          type: "button",
+          class: "cell l" + level(n) + (d === TODAY ? " today" : "") + (future ? " future" : ""),
+          "aria-label": koDay(d) + " 기록 " + n + "개",
+          title: koDay(d) + " · 기록 " + n + "개"
+        });
+        if (!future) cell.addEventListener("click", (function (dd) { return function () { onPick(dd); }; })(d));
+        cells[d] = cell;
+        grid.appendChild(cell);
+      }
+    }
+    wrap.appendChild(el("div", { class: "g-top" }, [el("span", { class: "g-sp" }), months]));
+    wrap.appendChild(el("div", { class: "g-body" }, [days, grid]));
+    wrap.appendChild(el("div", { class: "g-legend" }, [
+      txt("적음"),
+      el("i", { class: "cell l0" }), el("i", { class: "cell l1" }), el("i", { class: "cell l2" }), el("i", { class: "cell l3" }), el("i", { class: "cell l4" }),
+      txt("많음"),
+      el("span", { class: "g-today" }, [el("i", { class: "cell l0 today" }), txt("오늘")])
+    ]));
+    wrap._cells = cells;
+    return wrap;
   }
 
-  var SHADES = ["#111113", "#5c5c61", "#98989d", "#c8c8cc", "#e2e2e5"];
-  function typeChart() {
-    var counts = {}, order = [];
-    works.forEach(function (w) { if (!counts[w.type]) { counts[w.type] = 0; order.push(w.type); } counts[w.type]++; });
-    order.sort(function (a, b) { return counts[b] - counts[a]; });
-    var bar = el("div", { class: "stack" }), legend = el("ul", { class: "legend" });
-    order.forEach(function (t, i) {
-      var c = SHADES[Math.min(i, SHADES.length - 1)];
-      bar.appendChild(el("i", { style: "flex:" + counts[t] + ";background:" + c, title: t + " " + counts[t] }));
-      legend.appendChild(el("li", {}, [el("span", { class: "srcdot", style: "background:" + c }), el("span", { text: t }), el("b", { text: String(counts[t]) })]));
-    });
-    return el("section", { class: "card chart" }, [
-      el("header", {}, [el("h3", { text: "종류별 구성" }), el("small", { text: works.length + "개" })]), bar, legend
+  function dayPanel(map, date) {
+    var a = map[date];
+    var box = el("div", { class: "daypanel" });
+    box.appendChild(el("h3", { text: koDay(date) }));
+    if (!total(a)) { box.appendChild(el("p", { class: "sub", text: "이날은 기록이 없습니다." })); return box; }
+    var rows = [];
+    a.works.forEach(function (w) { rows.push(["결과물", w.title, href(["projects", w.id])]); });
+    a.notes.forEach(function (n) { rows.push(["노트", noteTitle(n), href(["notes", n.id])]); });
+    a.terms.forEach(function (t) { rows.push(["용어", t.name, href(["terms", t.name])]); });
+    box.appendChild(el("ul", { class: "dlist" }, rows.map(function (r) {
+      return el("li", {}, [el("span", { class: "kind", text: r[0] }), el("a", { href: r[2], text: r[1] })]);
+    })));
+    return box;
+  }
+
+  function counts(w) {
+    return {
+      w: works.filter(function (x) { return x.week === w.id; }).length,
+      n: notes.filter(function (x) { return x.week === w.id; }).length,
+      t: terms.filter(function (x) { return x.first >= w.start && x.first <= w.end; }).length
+    };
+  }
+  function nums(c, big) {
+    return el("p", { class: "nums" + (big ? " big" : "") }, [
+      el("span", {}, [el("b", { text: "" + c.w }), txt(" 결과물")]),
+      el("span", {}, [el("b", { text: "" + c.n }), txt(" 노트")]),
+      el("span", {}, [el("b", { text: "" + c.t }), txt(" 용어")])
     ]);
   }
 
-  function dayChart() {
-    var cols = [], max = 1;
-    classDays().forEach(function (d) {
-      var n = worksOn(d.date).length;
-      cols.push({ date: d.date, n: n, week: d.week });
-      max = Math.max(max, n);
-    });
-    var box = el("div", { class: "bars" });
-    cols.forEach(function (c) {
-      box.appendChild(el("div", { class: "col" }, [
-        el("span", { class: "n", text: c.n ? String(c.n) : "" }),
-        el("i", { class: wcls(c.week), style: "height:" + (c.n ? Math.max(10, Math.round(c.n / max * 100)) : 3) + "%" + (c.n ? "" : ";opacity:.25"), title: koDay(c.date) + " " + c.n + "개" }),
-        el("small", { text: mmdd(c.date).replace(/^0/, "") })
-      ]));
-    });
-    return el("section", { class: "card chart" }, [
-      el("header", {}, [el("h3", { text: "날짜별 결과물" }), el("small", { text: "수업일 기준" })]), box
-    ]);
-  }
-
-  /* ---------- views ---------- */
+  /* ---------- 홈 ---------- */
   function viewHome() {
-    var frag = document.createDocumentFragment();
-    var days = {};
-    works.forEach(function (w) { days[w.date] = true; });
-    var max = 1;
-    data.weeks.forEach(function (wk) {
-      max = Math.max(max, works.filter(function (w) { return w.week === wk.id; }).length);
-    });
+    var map = activity();
+    var page = el("div", { class: "page" });
+    page.appendChild(el("h1", { text: "학습 기록" }));
+    page.appendChild(el("p", { class: "lead", text: "결과물 " + works.length + "개 · 노트 " + notes.length + "개 · 용어 " + terms.length + "개" }));
 
-    var main = el("div", {}, []);
-    main.appendChild(el("div", { class: "hello" }, [
-      el("h1", { text: "안녕하세요, " + data.site.owner + "님" }),
-      el("p", { text: data.site.subtitle })
-    ]));
+    var dates = Object.keys(map).filter(function (d) { return total(map[d]) > 0; }).sort();
+    var pick = dates.filter(function (d) { return d <= TODAY; }).pop() || dates[dates.length - 1];
+    var panelHost = el("div");
+    var g = grass(map, function (d) { select(d); });
+    function select(d) {
+      Object.keys(g._cells).forEach(function (k) { g._cells[k].classList.toggle("sel", k === d); });
+      panelHost.textContent = "";
+      panelHost.appendChild(dayPanel(map, d));
+    }
+    page.appendChild(el("section", { class: "block" }, [secHead("잔디"), el("div", { class: "card pad" }, [g, panelHost])]));
+    if (pick) select(pick);
 
-    var stats = el("div", { class: "stats" });
-    var perWeek = data.weeks.map(function (w) { return works.filter(function (x) { return x.week === w.id; }).length; });
-    var seg = el("div", { class: "meter" });
-    data.weeks.forEach(function (w, i) { seg.appendChild(el("i", { class: wcls(w.id), style: "flex:" + perWeek[i] })); });
-    function stat(cls, mark, label, val, unit, extra) {
-      return el("div", { class: "card stat " + cls }, [
-        el("header", {}, [el("span", { class: "sq", text: mark }), el("span", { text: label })]),
-        el("div", { class: "val" }, [el("strong", { text: String(val) }), el("small", { text: unit })]),
-        extra
+    var wk = el("section", { class: "block" }, [secHead("주차별 변화", ["주차 보기", href(["weeks"])])]);
+    wk.appendChild(el("div", { class: "grid3" }, data.weeks.slice().reverse().map(function (w) {
+      return el("a", { class: "card pad wk", href: href(["weeks"]) }, [
+        el("h3", { text: w.label }),
+        el("p", { class: "sub", text: w.period }),
+        nums(counts(w))
       ]);
-    }
-    var first = data.weeks[0].start, last = data.weeks[data.weeks.length - 1].end;
-    var span = el("div", { class: "meter base" }, [el("i", { class: "w2", style: "width:100%" })]);
-    var dayBar = el("div", { class: "meter base" }, [el("i", { class: "w3", style: "width:" + Math.round(Object.keys(days).length / 12 * 100) + "%" })]);
-    stats.appendChild(stat("w1", "P", "프로젝트", works.length, "개", seg));
-    stats.appendChild(stat("w2", "W", "학습 주차", data.weeks.length, mmdd(first) + " ~ " + mmdd(last), span));
-    stats.appendChild(stat("w3", "D", "결과물을 만든 날", Object.keys(days).length, "일", dayBar));
-    main.appendChild(stats);
+    })));
+    page.appendChild(wk);
 
-    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "주차별 진행" })]));
-    var wk = el("div", { class: "weeks" });
-    data.weeks.forEach(function (w) {
-      var items = works.filter(function (x) { return x.week === w.id; });
-      var ul = el("div", { class: "strip" });
-      newest(items).slice(0, 4).forEach(function (x) {
-        ul.appendChild(x.thumb ? el("img", { src: enc(x.thumb), alt: "", loading: "lazy" }) : el("span"));
+    var recent = [];
+    works.forEach(function (w) { recent.push({ date: w.date, kind: "결과물", title: w.title, sub: w.did, href: href(["projects", w.id]) }); });
+    notes.forEach(function (n) { recent.push({ date: n.date, kind: "노트", title: noteTitle(n), sub: n.one, href: href(["notes", n.id]) }); });
+    recent.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    page.appendChild(el("section", { class: "block" }, [secHead("최근 추가"), el("div", { class: "card list" }, recent.slice(0, 6).map(function (r) {
+      return el("a", { class: "li", href: r.href }, [
+        el("span", { class: "kind", text: r.kind }),
+        el("span", { class: "li-main" }, [el("b", {}, [isNew(r.date) ? dot() : null, txt(r.title)]), r.sub ? el("span", { class: "sub", text: r.sub }) : null]),
+        el("span", { class: "sub date", text: mmdd(r.date) })
+      ]);
+    }))]));
+
+    var rt = terms.slice().sort(function (a, b) { return a.first < b.first ? 1 : a.first > b.first ? -1 : a.name < b.name ? -1 : 1; }).slice(0, 6);
+    page.appendChild(el("section", { class: "block" }, [secHead("최근 배운 용어", ["용어 전체", href(["terms"])]), el("div", { class: "grid3" }, rt.map(function (t) {
+      return el("a", { class: "card pad tcard", href: href(["terms", t.name]) }, [
+        el("h3", {}, [isNew(t.first) ? dot() : null, txt(t.name)]),
+        el("p", { class: "did", text: t.def }),
+        el("p", { class: "meta", text: mmdd(t.first) + " 처음" })
+      ]);
+    }))]));
+    view.appendChild(page);
+  }
+
+  /* ---------- 주차 ---------- */
+  function viewWeeks() {
+    var page = el("div", { class: "page" });
+    page.appendChild(el("h1", { text: "주차" }));
+    var jump = el("div", { class: "pills jump" }, data.weeks.slice().reverse().map(function (w) {
+      var a = el("a", { class: "pill", href: "#/weeks", text: w.label });
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var t = document.getElementById("wk-" + w.id);
+        if (t) t.scrollIntoView({ block: "start" });
       });
-      var bar = el("div", { class: "meter base" }, [el("i", { class: wcls(w.id), style: "width:" + Math.round(items.length / max * 100) + "%" })]);
-      wk.appendChild(el("a", { class: "card wcard " + wcls(w.id), href: href(["projects"], { week: w.id }) }, [
-        el("header", {}, [el("span", { class: "sq", text: String(weekIndex(w.id) + 1) }), el("h3", { text: w.label }), el("span", { text: w.period })]),
-        ul,
-        bar,
-        el("footer", {}, [el("span", { text: "프로젝트 " + items.length + "개" }), el("span", { text: "보기 →" })])
-      ]));
+      return a;
+    }));
+    page.appendChild(jump);
+    data.weeks.slice().reverse().forEach(function (w) {
+      var sec = el("section", { class: "block weeksec", id: "wk-" + w.id });
+      sec.appendChild(el("div", { class: "sec-head" }, [el("h2", { text: w.label }), el("span", { class: "sub", text: w.period })]));
+      sec.appendChild(nums(counts(w), true));
+
+      var ws = works.filter(function (x) { return x.week === w.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      if (ws.length) { sec.appendChild(el("h3", { class: "sub-h", text: "결과물" })); sec.appendChild(masonry(ws, workCard)); }
+      var ns = notes.filter(function (x) { return x.week === w.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      sec.appendChild(el("h3", { class: "sub-h", text: "노트" }));
+      sec.appendChild(ns.length ? el("div", { class: "card list rows" }, ns.map(noteRow)) : el("p", { class: "sub", text: "이 주차에는 공개한 노트가 없습니다." }));
+      var ts = terms.filter(function (x) { return x.first >= w.start && x.first <= w.end; });
+      if (ts.length) {
+        sec.appendChild(el("h3", { class: "sub-h", text: "처음 나온 용어" }));
+        sec.appendChild(el("div", { class: "chips wide" }, ts.map(function (t) { return termChip(t.name); })));
+      }
+      var ls = lessons.filter(function (x) { return x.week === w.id; });
+      if (ls.length) {
+        sec.appendChild(el("h3", { class: "sub-h", text: "교안" }));
+        sec.appendChild(el("ul", { class: "plain" }, ls.map(function (l) {
+          return el("li", {}, [el("a", { href: l.url, target: "_blank", rel: "noopener noreferrer", text: l.title + " ↗" })]);
+        })));
+      }
+      page.appendChild(sec);
     });
-    main.appendChild(wk);
+    view.appendChild(page);
+  }
 
-    var latest = newest(works);
-    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "가장 최근에 만든 것" }), el("a", { href: href(["projects"]), text: "전체 보기" })]));
-    main.appendChild(featured(latest[0]));
-
-    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "한눈에 보기" })]));
-    main.appendChild(el("div", { class: "charts" }, [typeChart(), dayChart()]));
-
-    if (notes.length) {
-      main.appendChild(el("div", { class: "section" }, [el("h2", { text: "최근 학습 노트" }), el("a", { href: href(["notes"]), text: "전체 보기" })]));
-      main.appendChild(masonry(notes.slice(0, 3).map(function (n, i) { return ncard(n, i); }), 324));
-    }
-
-    main.appendChild(el("div", { class: "section" }, [el("h2", { text: "이어서 보기" }), el("a", { href: href(["projects"]), text: "전체 보기" })]));
-    main.appendChild(masonry(latest.slice(1, 5).map(function (w) { return pcard(w); }), 324));
-
-    /* aside */
-    var aside = el("div", { class: "aside" });
-    var cur = parts(TODAY);
-    var cal = el("section", { class: "card panel" });
-    cal.appendChild(el("div", { class: "section" }, [
-      el("h2", { text: cur.y + "년 " + cur.m + "월" }),
-      el("a", { href: href(["calendar"]), text: "캘린더" })
-    ]));
-    var table = el("table", { class: "mini" });
-    var tr = el("tr");
-    DOW.forEach(function (d) { tr.appendChild(el("th", { text: d })); });
-    table.appendChild(el("thead", {}, [tr]));
-    var tb = el("tbody");
-    var cells = monthCells(cur.y, cur.m);
-    for (var r = 0; r < cells.length; r += 7) {
-      var row = el("tr");
-      cells.slice(r, r + 7).forEach(function (c) {
-        var td = el("td", { class: (c.off ? "off " : "") + (c.date === TODAY ? "today" : "") });
-        td.appendChild(el("span", { text: String(c.d) }));
-        var on = worksOn(c.date);
-        if (on.length && !c.off) {
-          var pip = el("div", { class: "pip" });
-          on.slice(0, 3).forEach(function (w) { pip.appendChild(el("i", { style: "background:" + wcolor(w.week) })); });
-          td.appendChild(pip);
-          td.appendChild(el("a", { href: href(["calendar"], { m: c.date.slice(0, 7) }), "aria-label": koDay(c.date) }));
-        }
-        row.appendChild(td);
-      });
-      tb.appendChild(row);
-    }
-    table.appendChild(tb);
-    cal.appendChild(table);
-    aside.appendChild(cal);
-
-    var lp = el("section", { class: "card panel" });
-    lp.appendChild(el("div", { class: "section" }, [el("h2", { text: "링크 모음" }), el("a", { href: href(["links"]), text: "전체" })]));
-    if (links.length) links.slice(0, 4).forEach(function (l) {
-      lp.appendChild(el("a", { class: "lrow", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
-        el("b", { text: l.title }),
-        el("small", { text: host(l.url) })
-      ]));
-    });
-    else lp.appendChild(el("p", { class: "count", text: "저장한 링크가 없습니다." }));
-    aside.appendChild(lp);
-
-    var tp = el("section", { class: "card panel" });
-    tp.appendChild(el("div", { class: "section" }, [el("h2", { text: "용어" }), el("a", { href: href(["glossary"]), text: "전체" })]));
-    terms.slice(0, 4).forEach(function (t) {
-      tp.appendChild(el("a", { class: "lrow", href: href(["glossary"]) }, [el("b", { text: t.term }), el("small", { text: t.full || "" })]));
-    });
-    aside.appendChild(tp);
-
-    frag.appendChild(el("div", { class: "home" }, [main, aside]));
-    return frag;
+  /* ---------- 결과물 ---------- */
+  function filterBar(label, values, current, mk) {
+    return el("div", { class: "filter" }, [
+      el("span", { class: "flabel", text: label }),
+      el("div", { class: "pills" }, [{ id: "", t: "전체" }].concat(values).map(function (v) {
+        return el("a", { class: "pill" + (current === v.id ? " on" : ""), href: mk(v.id), text: v.t });
+      }))
+    ]);
   }
 
   function viewProjects(q) {
-    var frag = document.createDocumentFragment();
-    var week = q.week || "all";
+    var page = el("div", { class: "page" });
+    page.appendChild(el("h1", { text: "결과물" }));
     var types = [];
     works.forEach(function (w) { if (types.indexOf(w.type) === -1) types.push(w.type); });
-    var list = works.filter(function (w) {
-      return (week === "all" || w.week === week) && (state.type === "all" || w.type === state.type);
-    });
-    list = newest(list).reverse();
-
-    frag.appendChild(head("프로젝트", "수업에서 만든 기획 문서와 프로토타입을 모아 둔 곳입니다."));
-
-    var weekItems = [{ label: "전체", value: "all" }].concat(data.weeks.map(function (w) { return { label: w.label, value: w.id }; }));
-    var bar = el("div", { class: "bar" });
-    bar.appendChild(segOf(weekItems, week, function (v) { location.hash = href(["projects"], { week: v === "all" ? "" : v }); }));
-
-    var chips = el("div", { class: "chips", role: "group", "aria-label": "종류" });
-    [{ label: "모든 종류", value: "all" }].concat(types.map(function (t) { return { label: t, value: t }; })).forEach(function (it) {
-      var b = el("button", { type: "button", class: "chip", text: it.label, "aria-pressed": String(state.type === it.value) });
-      b.addEventListener("click", function () { state.type = it.value; render(); });
-      chips.appendChild(b);
-    });
-    bar.appendChild(chips);
-
-    bar.appendChild(el("div", { class: "grow" }, [
-      el("p", { class: "count", text: list.length + " / " + works.length }),
-      segOf([{ label: "카드", value: "card" }, { label: "목록", value: "list" }], state.view, function (v) { state.view = v; render(); })
-    ]));
-    frag.appendChild(bar);
-
-    if (!list.length) {
-      frag.appendChild(empty("조건에 맞는 프로젝트가 없습니다", "주차나 종류 필터를 바꿔 보세요."));
-    } else if (state.view === "list") {
-      var rows = el("div", { class: "rows" });
-      list.forEach(function (w) { rows.appendChild(prow(w)); });
-      frag.appendChild(rows);
-    } else {
-      frag.appendChild(masonry(list.map(function (w) { return pcard(w); })));
-    }
-    return frag;
+    page.appendChild(filterBar("주차", data.weeks.map(function (w) { return { id: w.id, t: w.label }; }), q.week || "", function (v) { return href(["projects"], { week: v, type: q.type }); }));
+    page.appendChild(filterBar("종류", types.map(function (t) { return { id: t, t: t }; }), q.type || "", function (v) { return href(["projects"], { week: q.week, type: v }); }));
+    var list = works.filter(function (w) { return (!q.week || w.week === q.week) && (!q.type || w.type === q.type); })
+      .sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    page.appendChild(el("p", { class: "sub count", text: list.length + "개" }));
+    page.appendChild(list.length ? masonry(list, workCard) : empty("조건에 맞는 결과물이 없습니다."));
+    view.appendChild(page);
   }
 
-  function stageFor(w) {
-    var stage = el("div", { class: "card stage" });
-    function ext(p) { var m = /\.([a-z0-9]+)$/i.exec(p || ""); return m ? m[1].toLowerCase() : ""; }
-    if (w.file) {
-      var e = ext(w.file), url = enc(w.file);
-      if (e === "png" || e === "jpg" || e === "jpeg" || e === "webp") {
-        stage.appendChild(el("div", { class: "scroll" }, [el("img", { src: url, alt: w.title })]));
-      } else {
-        var wait = el("span", { class: "wait", text: "불러오는 중" });
-        var frame = el("iframe", { src: url, title: w.title, sandbox: "allow-scripts allow-same-origin allow-forms allow-popups allow-modals" });
-        frame.addEventListener("load", function () { if (wait.parentNode) wait.parentNode.removeChild(wait); });
-        stage.appendChild(wait);
-        stage.appendChild(frame);
-      }
-    } else {
-      var note = el("div", { class: "note" });
-      if (w.thumb) note.appendChild(el("img", { src: enc(w.thumb), alt: "" }));
-      note.appendChild(el("p", { text: "이 프로젝트는 외부 주소에서 열립니다. 왼쪽의 버튼으로 이동하세요." }));
-      stage.appendChild(note);
-    }
-    return stage;
+  function viewWork(id) {
+    var w = workById(id);
+    if (!w) { view.appendChild(el("div", { class: "page" }, [el("h1", { text: "찾을 수 없습니다" }), el("a", { class: "pill", href: href(["projects"]), text: "결과물 목록" })])); return; }
+    var page = el("div", { class: "page narrow" });
+    page.appendChild(el("a", { class: "back", href: href(["projects"]), text: "← 결과물" }));
+    page.appendChild(el("p", { class: "meta" }, [isNew(w.date) ? dot() : null, txt(koDay(w.date) + " · " + weekOf(w.week).label + " · " + w.type)]));
+    page.appendChild(el("h1", { text: w.title }));
+    page.appendChild(el("p", { class: "lead", text: w.did || "" }));
+    var btns = el("div", { class: "btns" });
+    if (w.file) btns.appendChild(el("a", { class: "btn primary", href: enc(w.file), target: "_blank", rel: "noopener noreferrer", text: "열어 보기 ↗" }));
+    (w.links || []).forEach(function (l) { btns.appendChild(el("a", { class: "btn", href: l.url, target: "_blank", rel: "noopener noreferrer", text: l.label + " ↗" })); });
+    if (btns.childNodes.length) page.appendChild(btns);
+    if (w.thumb) page.appendChild(el("div", { class: "card shot" }, [thumbBox(w)]));
+
+    var used = termsOfWork(w.id);
+    if (used.length) page.appendChild(el("section", { class: "block" }, [secHead("쓴 용어"), el("div", { class: "chips wide" }, used.map(function (t) { return termChip(t.name); }))]));
+    var ns = notesOfWork(w.id);
+    if (ns.length) page.appendChild(el("section", { class: "block" }, [secHead("관련 노트"), el("div", { class: "card list rows" }, ns.map(noteRow))]));
+
+    var sorted = works.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1; });
+    var i = sorted.indexOf(w);
+    var nav = el("div", { class: "pn" });
+    if (sorted[i - 1]) nav.appendChild(el("a", { class: "card pad pn-item", href: href(["projects", sorted[i - 1].id]) }, [el("span", { class: "sub", text: "← 이전" }), el("b", { text: sorted[i - 1].title })]));
+    if (sorted[i + 1]) nav.appendChild(el("a", { class: "card pad pn-item next", href: href(["projects", sorted[i + 1].id]) }, [el("span", { class: "sub", text: "다음 →" }), el("b", { text: sorted[i + 1].title })]));
+    page.appendChild(nav);
+    view.appendChild(page);
   }
 
-  function viewDetail(id) {
-    var w = byId(id);
-    if (!w) return empty("찾을 수 없는 프로젝트입니다", "목록으로 돌아가 다시 선택해 주세요.");
-    var frag = document.createDocumentFragment();
-    var order = works.slice();
-    var idx = order.indexOf(w);
-    frag.appendChild(el("a", { class: "back", href: href(["projects"], { week: w.week }), text: "← 프로젝트 목록" }));
+  /* ---------- 노트 (목록 + 읽기) ---------- */
+  function isDesktop() { return window.matchMedia("(min-width: 961px)").matches; }
 
-    var actions = el("div", { class: "actions" });
-    if (w.file) actions.appendChild(el("a", { class: "btn", href: enc(w.file), target: "_blank", rel: "noopener", text: "새 창에서 열기 ↗" }));
-    (w.links || []).forEach(function (l, i) {
-      actions.appendChild(el("a", { class: "btn" + (w.file || i > 0 ? " ghost" : ""), href: l.url, target: "_blank", rel: "noopener noreferrer", text: l.label + " ↗" }));
+  function viewNotes(id) {
+    var sorted = notes.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    var cur = id ? noteById(id) : null;
+    if (!cur && isDesktop() && sorted.length) cur = sorted[0];
+    var split = el("div", { class: "split" + (cur ? " has-sel" : "") });
+    var list = el("div", { class: "split-list" });
+    list.appendChild(el("h1", { class: "split-h", text: "노트" }));
+    if (!sorted.length) list.appendChild(empty("공개한 노트가 아직 없습니다."));
+    sorted.forEach(function (n) {
+      list.appendChild(el("a", { class: "item" + (cur && cur.id === n.id ? " on" : ""), href: href(["notes", n.id]) }, [
+        el("p", { class: "meta" }, [isNew(n.date) ? dot() : null, txt(koDay(n.date) + " · " + weekOf(n.week).label)]),
+        el("h3", { text: noteTitle(n) }),
+        n.one ? el("p", { class: "did", text: n.one }) : null
+      ]));
     });
-
-    var prev = idx > 0 ? order[idx - 1] : null, next = idx < order.length - 1 ? order[idx + 1] : null;
-    function navBtn(label, target) {
-      return target ? el("a", { class: "btn ghost", href: href(["projects", target.id]), text: label }) : el("span", { class: "btn ghost", style: "opacity:.35", text: label });
-    }
-
-    var related = glossaryFor(w.id);
-    function prop(k, v) { return el("div", { class: "prop" }, [el("span", { text: k }), el("b", { text: v })]); }
-    var props = el("div", { class: "props" }, [
-      prop("종류", w.type), prop("주차", weekOf(w.week).label + " · " + weekOf(w.week).period), prop("만든 날", koDay(w.date)),
-      prop("형식", kindOf(w) + (w.kb ? " · " + sizeText(w.kb) : "")), prop("순서", "No." + pad(w.no) + " / " + works.length)
-    ]);
-    function block(title, kids) { return kids.length ? el("div", { class: "dblock" }, [el("h4", { text: title })].concat(kids)) : null; }
-    var sameNotes = notesOn(w.date).map(function (n) {
-      return el("a", { class: "xlink", href: href(["notes", n.id]) }, [icon("book"), el("span", { text: n.title }), el("em", { text: "노트" })]);
-    });
-    var sameDay = worksOn(w.date).filter(function (x) { return x.id !== w.id; }).map(function (x) {
-      return el("a", { class: "xlink", href: href(["projects", x.id]) }, [icon("folder"), el("span", { text: x.title }), el("em", { text: x.type })]);
-    });
-    var info = el("aside", { class: "card dinfo" }, [
-      el("div", { class: "meta" }, [wtag(w), el("span", { text: w.date + " / " + w.type })]),
-      el("h1", { text: w.title }),
-      w.summary ? el("p", { class: "sum", text: w.summary }) : null,
-      metricBlock(w),
-      actions,
-      props,
-      block("같은 날 쓴 노트", sameNotes),
-      block("같은 날 만든 결과물", sameDay),
-      related.length ? el("div", { class: "dblock" }, [el("h4", { text: "관련 용어" }), el("div", { class: "chipline" }, related.map(function (t) { return el("a", { href: href(["glossary"]), text: t.term }); }))]) : null,
-      el("div", { class: "dnav" }, [navBtn("← 이전", prev), el("span", { class: "pos", text: (idx + 1) + " / " + order.length }), navBtn("다음 →", next)])
-    ]);
-    frag.appendChild(el("div", { class: "detail" }, [info, stageFor(w)]));
-    return frag;
+    var read = el("article", { class: "split-read" });
+    if (cur) {
+      read.appendChild(el("a", { class: "back only-m", href: href(["notes"]), text: "← 노트 목록" }));
+      read.appendChild(el("p", { class: "meta", text: koDay(cur.date) + " · " + weekOf(cur.week).label }));
+      read.appendChild(el("h1", { text: noteTitle(cur) }));
+      if (cur.one) read.appendChild(el("p", { class: "lead", text: cur.one }));
+      var tt = cur.terms.map(function (n) { return termByName(n) ? termChip(n) : chip(n); });
+      if (tt.length) read.appendChild(el("div", { class: "rel" }, [el("span", { class: "flabel", text: "배운 용어" }), el("div", { class: "chips" }, tt)]));
+      var ws = cur.works.map(workById).filter(Boolean);
+      if (ws.length) read.appendChild(el("div", { class: "rel" }, [el("span", { class: "flabel", text: "만든 결과물" }), el("div", { class: "chips" }, ws.map(function (w) { return el("a", { class: "chip link", href: href(["projects", w.id]), text: w.title }); }))]));
+      var body = el("div", { class: "prose" }, [el("p", { class: "sub", text: "불러오는 중입니다." })]);
+      read.appendChild(body);
+      fetch(cur.html).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(function (h) { body.innerHTML = h; })
+        .catch(function () { body.textContent = "노트를 불러오지 못했습니다."; });
+    } else read.appendChild(empty("노트를 고르면 여기에 보입니다."));
+    split.appendChild(list);
+    split.appendChild(read);
+    view.appendChild(split);
+    view.classList.add("flush");
   }
 
-  function glossaryFor(id) {
-    return terms.filter(function (t) { return (t.works || []).indexOf(id) !== -1; });
+  /* ---------- 용어 (목록 + 상세) ---------- */
+  function viewTerms(name) {
+    var sorted = terms.slice().sort(function (a, b) { return a.name.localeCompare(b.name, "ko"); });
+    var cur = name ? termByName(name) : null;
+    if (!cur && isDesktop() && sorted.length) cur = sorted[0];
+    var split = el("div", { class: "split" + (cur ? " has-sel" : "") });
+    var list = el("div", { class: "split-list" });
+    list.appendChild(el("h1", { class: "split-h", text: "용어" }));
+    list.appendChild(el("p", { class: "sub pad-s", text: terms.length + "개 · 가나다 순" }));
+    sorted.forEach(function (t) {
+      list.appendChild(el("a", { class: "item compact" + (cur && cur.name === t.name ? " on" : ""), href: href(["terms", t.name]) }, [
+        el("h3", {}, [isNew(t.first) ? dot() : null, txt(t.name)]),
+        el("p", { class: "did", text: t.def })
+      ]));
+    });
+    var read = el("article", { class: "split-read" });
+    if (cur) {
+      read.appendChild(el("a", { class: "back only-m", href: href(["terms"]), text: "← 용어 목록" }));
+      read.appendChild(el("p", { class: "meta", text: koDay(cur.first) + " 처음 나옴 · " + cur.notes.length + "곳에 나옴" }));
+      read.appendChild(el("h1", { text: cur.name }));
+      read.appendChild(el("p", { class: "lead", text: cur.def }));
+      var ns = cur.notes.map(noteById).filter(Boolean).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      read.appendChild(el("section", { class: "block" }, [secHead("나온 곳"), ns.length ? el("div", { class: "card list rows" }, ns.map(noteRow)) : empty("노트가 없습니다.")]));
+      var ws = cur.works.map(workById).filter(Boolean);
+      if (ws.length) read.appendChild(el("section", { class: "block" }, [secHead("함께 만든 결과물"), el("div", { class: "chips wide" }, ws.map(function (w) { return el("a", { class: "chip link", href: href(["projects", w.id]), text: w.title }); }))]));
+    } else read.appendChild(empty("용어를 고르면 여기에 보입니다."));
+    split.appendChild(list);
+    split.appendChild(read);
+    view.appendChild(split);
+    view.classList.add("flush");
   }
 
-  function viewCalendar(q) {
-    var frag = document.createDocumentFragment();
-    var mode = q.v === "timeline" ? "timeline" : "month";
-    var dates = works.map(function (w) { return w.date; }).sort();
-    var minM = dates[0].slice(0, 7), maxM = dates[dates.length - 1].slice(0, 7);
-    var curM = TODAY.slice(0, 7);
-    var m = q.m || (curM >= minM && curM <= maxM ? curM : maxM);
-    if (m < minM) m = minM;
-    if (m > maxM) m = maxM;
-
-    var toggle = segOf([{ label: "월간", value: "month" }, { label: "타임라인", value: "timeline" }], mode, function (v) {
-      location.hash = href(["calendar"], { v: v === "month" ? "" : v, m: v === "month" ? m : "" });
-    });
-    frag.appendChild(head("캘린더", "결과물을 만든 날짜를 달력과 타임라인으로 봅니다.", toggle));
-
-    if (mode === "timeline") {
-      var byDate = {};
-      works.forEach(function (w) { (byDate[w.date] = byDate[w.date] || []).push(w); });
-      var ul = el("ul", { class: "tl" });
-      Object.keys(byDate).sort().reverse().forEach(function (d) {
-        ul.appendChild(el("li", { class: "d" }, [document.createTextNode(koDay(d)), el("small", { text: d })]));
-        byDate[d].forEach(function (w) {
-          var li = el("li", { class: "i", style: "--c:" + wcolor(w.week) });
-          li.appendChild(el("a", { href: href(["projects", w.id]) }, [document.createTextNode(w.title), el("small", { text: weekOf(w.week).label + " / " + w.type })]));
-          ul.appendChild(li);
-        });
-      });
-      frag.appendChild(el("div", { class: "card cal" }, [ul]));
-      return frag;
-    }
-
-    var p = m.split("-"), y = +p[0], mo = +p[1];
-    function shift(n) {
-      var t = new Date(Date.UTC(y, mo - 1 + n, 1));
-      return t.getUTCFullYear() + "-" + pad(t.getUTCMonth() + 1);
-    }
-    var prevB = el("a", { class: "icon-btn", href: href(["calendar"], { m: shift(-1) }), "aria-label": "이전 달", text: "‹" });
-    var nextB = el("a", { class: "icon-btn", href: href(["calendar"], { m: shift(1) }), "aria-label": "다음 달", text: "›" });
-    if (shift(-1) < minM) prevB.setAttribute("style", "opacity:.3;pointer-events:none");
-    if (shift(1) > maxM) nextB.setAttribute("style", "opacity:.3;pointer-events:none");
-    var cal = el("div", { class: "card cal" }, [
-      el("div", { class: "calhead" }, [el("h2", { text: y + "년 " + mo + "월" }), el("div", { class: "calnav" }, [prevB, nextB])])
-    ]);
-    var grid = el("div", { class: "grid7" });
-    DOW.forEach(function (d) { grid.appendChild(el("div", { class: "dow", text: d })); });
-    monthCells(y, mo).forEach(function (c) {
-      var cell = el("div", { class: "day" + (c.off ? " off" : "") + (c.date === TODAY ? " today" : "") }, [el("span", { class: "dn", text: String(c.d) })]);
-      worksOn(c.date).forEach(function (w) {
-        cell.appendChild(el("a", { class: "ev " + wcls(w.week), href: href(["projects", w.id]), title: w.title, text: w.title }));
-      });
-      grid.appendChild(cell);
-    });
-    cal.appendChild(grid);
-    frag.appendChild(cal);
-    return frag;
-  }
-
+  /* ---------- 링크 모음 ---------- */
   function viewLinks() {
-    var frag = document.createDocumentFragment();
-    frag.appendChild(head("링크 모음", "강사님이 수업에서 \"이런 건 좋아요\" 하고 알려 준 사이트를 모았습니다."));
-    if (!links.length) {
-      frag.appendChild(empty("저장한 링크가 없습니다", "data/links.json에 링크를 추가하면 이곳에 카드로 나타납니다."));
-      return frag;
-    }
-    var cards = el("div", { class: "cards" });
-    links.forEach(function (l) { cards.appendChild(lcard(l)); });
-    frag.appendChild(cards);
-    return frag;
+    var page = el("div", { class: "page" });
+    page.appendChild(el("h1", { text: "링크 모음" }));
+    page.appendChild(el("p", { class: "lead", text: "강사님이 \"이런 건 좋아요\" 하고 알려 준 사이트를 모아 둡니다." }));
+    var sorted = links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    page.appendChild(sorted.length ? el("div", { class: "grid3" }, sorted.map(function (l) {
+      return el("a", { class: "card pad lcard", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
+        el("h3", { text: l.title }),
+        el("p", { class: "sub", text: host(l.url) }),
+        l.note ? el("p", { class: "did", text: l.note }) : null
+      ]);
+    })) : empty("아직 모은 링크가 없습니다."));
+    view.appendChild(page);
   }
 
-  function viewLessons() {
-    var frag = document.createDocumentFragment();
-    frag.appendChild(head("교안", "수업 교안 링크를 주차별로 모았습니다. 내용은 옮기지 않고 원본 페이지로 연결합니다."));
-    if (!lessons.length) {
-      frag.appendChild(empty("등록한 교안이 없습니다", "data/lessons.json에 교안 링크를 추가해 주세요."));
-      return frag;
-    }
-    data.weeks.forEach(function (wk) {
-      var items = lessons.filter(function (l) { return l.week === wk.id; });
-      if (!items.length) return;
-      var cards = el("div", { class: "cards" });
-      items.forEach(function (l) { cards.appendChild(lcard(l, koDay(l.date))); });
-      frag.appendChild(el("section", { class: "group" }, [el("h2", { text: wk.label + " · " + wk.period }), cards]));
+  /* ---------- 검색 ---------- */
+  function viewSearch(q) {
+    var s = (q.q || "").trim().toLowerCase();
+    var page = el("div", { class: "page" });
+    page.appendChild(el("h1", { text: "검색" }));
+    page.appendChild(el("p", { class: "lead", text: s ? "\"" + q.q + "\"" : "검색어를 입력하세요." }));
+    if (!s) { view.appendChild(page); return; }
+    function has() { return Array.prototype.slice.call(arguments).join(" ").toLowerCase().indexOf(s) !== -1; }
+    var groups = [
+      ["결과물", works.filter(function (w) { return has(w.title, w.did, w.summary, w.type); }).map(function (w) { return { t: w.title, sub: w.did, h: href(["projects", w.id]) }; })],
+      ["노트", notes.filter(function (n) { return has(n.title, n.one, n.terms.join(" ")); }).map(function (n) { return { t: noteTitle(n), sub: n.one, h: href(["notes", n.id]) }; })],
+      ["용어", terms.filter(function (t) { return has(t.name, t.def); }).map(function (t) { return { t: t.name, sub: t.def, h: href(["terms", t.name]) }; })],
+      ["링크", links.filter(function (l) { return has(l.title, l.url, l.note || ""); }).map(function (l) { return { t: l.title, sub: host(l.url), h: l.url, ext: true }; })]
+    ];
+    var any = false;
+    groups.forEach(function (g) {
+      if (!g[1].length) return;
+      any = true;
+      page.appendChild(el("section", { class: "block" }, [secHead(g[0] + " " + g[1].length), el("div", { class: "card list" }, g[1].map(function (r) {
+        return el("a", { class: "li", href: r.h, target: r.ext ? "_blank" : null, rel: r.ext ? "noopener noreferrer" : null }, [
+          el("span", { class: "li-main" }, [el("b", { text: r.t }), r.sub ? el("span", { class: "sub", text: r.sub }) : null])
+        ]);
+      }))]));
     });
-    return frag;
+    if (!any) page.appendChild(empty("찾은 것이 없습니다."));
+    view.appendChild(page);
   }
 
-  function viewGlossary() {
-    var frag = document.createDocumentFragment();
-    frag.appendChild(head("용어", "수업에서 자주 쓰는 PM 용어를 짧게 정리했습니다."));
-    if (!terms.length) {
-      frag.appendChild(empty("등록한 용어가 없습니다", "data/glossary.json에 항목을 추가해 주세요."));
-      return frag;
-    }
-    var cards = el("div", { class: "cards" });
-    terms.slice().sort(function (a, b) { return a.term.localeCompare(b.term, "ko"); }).forEach(function (t) { cards.appendChild(tcard(t)); });
-    frag.appendChild(cards);
-    return frag;
-  }
-
-  function viewNotes() {
-    var frag = document.createDocumentFragment();
-    frag.appendChild(head("노트", "공개로 정리한 학습 노트를 모아 보여 줍니다."));
-    if (!notes.length) {
-      frag.appendChild(empty("공개한 노트가 아직 없습니다", "공개 표시한 노트를 정리해서 옮기면 이곳에 나타납니다."));
-      return frag;
-    }
-    frag.appendChild(masonry(notes.map(function (n, i) { return ncard(n, i); })));
-    return frag;
-  }
-
-  function viewNote(id) {
-    var n = notes.filter(function (x) { return x.id === id; })[0];
-    if (!n) return empty("찾을 수 없는 노트입니다", "목록으로 돌아가 다시 선택해 주세요.");
-    var frag = document.createDocumentFragment();
-    frag.appendChild(el("a", { class: "back", href: href(["notes"]), text: "← 노트 목록" }));
-    var body = el("div", { class: "reader-body" }, [el("p", { class: "count", text: "불러오는 중" })]);
-    var toc = el("div", { class: "toc" });
-    var idx = notes.indexOf(n), prev = notes[idx + 1], next = notes[idx - 1];
-    var rel = n.date ? worksOn(n.date) : [];
-
-    var side = el("aside", { class: "nside" }, [
-      el("section", { class: "card panel" }, [
-        el("div", { class: "section" }, [el("h2", { text: "이 노트의 구성" })]),
-        partsBar(n),
-        el("p", { class: "count", text: "약 " + (n.mins || 1) + "분 · " + (n.parts || []).length + "개 구역" }),
-        toc
-      ]),
-      rel.length ? el("section", { class: "card panel" }, [
-        el("div", { class: "section" }, [el("h2", { text: "같은 날 만든 결과물" })])
-      ].concat(rel.map(function (w) {
-        return el("a", { class: "lrow", href: href(["projects", w.id]) }, [el("span", { class: "srcdot", style: "background:" + wcolor(w.week) }), el("b", { text: w.title }), el("small", { text: w.type })]);
-      }))) : null,
-      el("section", { class: "card panel" }, [
-        el("div", { class: "section" }, [el("h2", { text: "다른 노트" })]),
-        next ? el("a", { class: "lrow", href: href(["notes", next.id]) }, [el("b", { text: "다음 · " + next.title }), el("small", { text: mmdd(next.date) })]) : null,
-        prev ? el("a", { class: "lrow", href: href(["notes", prev.id]) }, [el("b", { text: "이전 · " + prev.title }), el("small", { text: mmdd(prev.date) })]) : null
-      ])
-    ]);
-
-    frag.appendChild(el("div", { class: "nlayout" }, [
-      el("article", { class: "card reader" }, [
-        el("div", { class: "meta" }, [n.week ? wtagInline(n.week) : null, el("span", { text: n.date || "" })]),
-        el("h1", { text: n.title }),
-        body
-      ]),
-      side
-    ]));
-    fetch(enc(n.html)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .then(function (t) {
-        body.innerHTML = t;
-        var hs = body.querySelectorAll("h2, h3");
-        Array.prototype.forEach.call(hs, function (h, i) {
-          h.id = "sec" + i;
-          var a = el("a", { class: "toc-" + h.tagName.toLowerCase(), href: "#", text: h.textContent });
-          a.addEventListener("click", function (e) { e.preventDefault(); h.scrollIntoView({ behavior: "smooth", block: "start" }); });
-          toc.appendChild(a);
-        });
-      })
-      .catch(function () { body.textContent = "노트를 불러오지 못했습니다."; });
-    return frag;
-  }
-
-  function wtagInline(wid) {
-    return el("span", { class: "wtag " + wcls(wid), style: "position:static;box-shadow:0 0 0 1px var(--line-2)", text: weekOf(wid).label });
-  }
-
-  function viewSearch(qs) {
-    var frag = document.createDocumentFragment();
-    var terms_ = qs.toLowerCase().split(/\s+/).filter(Boolean);
-    function hit(arr) { var h = arr.join(" ").toLowerCase(); return terms_.every(function (t) { return h.indexOf(t) !== -1; }); }
-
-    var w = works.filter(function (x) { return hit([x.title, x.summary, x.type, x.date, mmdd(x.date), weekOf(x.week).label]); });
-    var l = links.filter(function (x) { return hit([x.title, x.url]); });
-    var ls = lessons.filter(function (x) { return hit([x.title, x.url, "교안"]); });
-    var t = terms.filter(function (x) { return hit([x.term, x.full || "", x.def]); });
-    var n = notes.filter(function (x) { return hit([x.title, x.summary || ""]); });
-
-    frag.appendChild(head("검색 결과", "\"" + qs + "\" " + (w.length + l.length + ls.length + t.length + n.length) + "건"));
-    if (!(w.length + l.length + ls.length + t.length + n.length)) {
-      frag.appendChild(empty("찾는 항목이 없습니다", "다른 검색어로 다시 찾아 보세요."));
-      return frag;
-    }
-    function group(title, items, fn) {
-      if (!items.length) return;
-      var cards = el("div", { class: "cards" });
-      items.forEach(function (i) { cards.appendChild(fn(i)); });
-      frag.appendChild(el("section", { class: "group" }, [el("h2", { text: title + " " + items.length }), cards]));
-    }
-    group("프로젝트", w, pcard);
-    group("링크", l, function (x) { return lcard(x); });
-    group("교안", ls, function (x) { return lcard(x, koDay(x.date)); });
-    group("용어", t, tcard);
-    group("노트", n, ncard);
-    return frag;
-  }
-
-  /* ---------- sidebar ---------- */
-  function buildSide(active) {
+  /* ---------- 사이드바 ---------- */
+  var MENU = [["", "홈"], ["weeks", "주차"], ["projects", "결과물"], ["notes", "노트"], ["terms", "용어"], ["links", "링크 모음"]];
+  function buildSide() {
     var p = $("profile");
     p.textContent = "";
-    p.appendChild(el("span", { class: "avatar", text: data.site.owner.charAt(0) }));
-    p.appendChild(el("div", {}, [el("strong", { text: data.site.owner }), el("span", { text: data.site.tagline || "" })]));
-
-    var items = [
-      ["home", "홈", href([]), "", null],
-      ["folder", "프로젝트", href(["projects"]), "projects", works.length],
-      ["note", "노트", href(["notes"]), "notes", notes.length],
-      ["link", "링크 모음", href(["links"]), "links", links.length],
-      ["note", "교안", href(["lessons"]), "lessons", lessons.length],
-      ["calendar", "캘린더", href(["calendar"]), "calendar", null],
-      ["book", "용어", href(["glossary"]), "glossary", terms.length]
-    ];
+    p.appendChild(el("p", { class: "pname", text: data.site.owner }));
+    p.appendChild(el("p", { class: "ptag", text: data.site.tagline }));
     var nav = $("nav");
     nav.textContent = "";
-    items.forEach(function (it) {
-      var a = el("a", { href: it[2] }, [icon(it[0]), el("span", { text: it[1] })]);
-      if (it[4] !== null) a.appendChild(el("span", { class: "badge", text: String(it[4]) }));
-      if ((it[3] || "") === active.top) a.setAttribute("aria-current", "page");
-      nav.appendChild(a);
-    });
-
-    var wn = $("weeknav");
-    wn.textContent = "";
-    data.weeks.forEach(function (w) {
-      var n = works.filter(function (x) { return x.week === w.id; }).length;
-      var a = el("a", { href: href(["projects"], { week: w.id }) }, [
-        el("span", { class: "dot " + wcls(w.id) }),
-        el("span", { text: w.label }),
-        el("span", { class: "badge", text: String(n) })
-      ]);
-      if (active.top === "projects" && active.week === w.id) a.setAttribute("aria-current", "page");
-      wn.appendChild(a);
-    });
-
-    var rc = $("recent");
-    rc.textContent = "";
-    newest(works).slice(0, 3).forEach(function (w) {
-      rc.appendChild(el("a", { href: href(["projects", w.id]) }, [el("span", { text: w.title })]));
+    MENU.forEach(function (m) { nav.appendChild(el("a", { class: "nav-item", href: "#/" + m[0], "data-k": m[0], text: m[1] })); });
+  }
+  function setActive(key) {
+    Array.prototype.forEach.call($("nav").children, function (a) {
+      var on = a.getAttribute("data-k") === key;
+      a.classList.toggle("on", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
   }
 
   /* ---------- render ---------- */
-  function closeDrawer() {
-    $("side").classList.remove("open");
-    $("scrim").hidden = true;
-  }
+  var TITLES = { weeks: "주차", projects: "결과물", notes: "노트", terms: "용어", links: "링크 모음", search: "검색" };
 
   function render() {
     var r = parseHash();
-    var top = r.path[0] || "";
-    var node, active = { top: top, week: r.q.week || "" };
-
-    if (r.legacy) {
-      location.replace(href(["projects", r.path[1]]));
-      return;
-    }
-
-    if (state.q) { node = viewSearch(state.q); active.top = "search"; }
-    else if (top === "") node = viewHome();
-    else if (top === "projects") node = r.path[1] ? viewDetail(r.path[1]) : viewProjects(r.q);
-    else if (top === "notes") node = r.path[1] ? viewNote(r.path[1]) : viewNotes();
-    else if (top === "links") node = viewLinks();
-    else if (top === "lessons") node = viewLessons();
-    else if (top === "calendar") node = viewCalendar(r.q);
-    else if (top === "glossary") node = viewGlossary();
-    else node = empty("없는 페이지입니다", "왼쪽 메뉴에서 다시 선택해 주세요.");
-
-    if (top === "projects" && r.path[1]) active.week = "";
+    var p = r.path;
+    var key = p[0] || "";
+    if (key === "glossary") { location.replace(href(["terms"].concat(p.slice(1)))); return; }
+    if (key === "lessons" || key === "calendar") { location.replace("#/weeks"); return; }
     view.textContent = "";
-    view.appendChild(node);
-    buildSide(active);
-    var t = { "": "홈", projects: "프로젝트", notes: "노트", links: "링크 모음", lessons: "교안", calendar: "캘린더", glossary: "용어" }[top];
-    document.title = (t && top ? t + " | " : "") + data.site.title;
+    view.classList.remove("flush");
+    masonry.hosts = [];
+    setActive(key === "search" ? "" : key);
+    $("side").classList.remove("open");
+    $("scrim").hidden = true;
+    if (key === "weeks") viewWeeks();
+    else if (key === "projects") { if (p[1]) viewWork(p[1]); else viewProjects(r.q); }
+    else if (key === "notes") viewNotes(p[1]);
+    else if (key === "terms") viewTerms(p[1]);
+    else if (key === "links") viewLinks();
+    else if (key === "search") viewSearch(r.q);
+    else viewHome();
+    $("main").scrollTop = 0;
+    window.scrollTo(0, 0);
+    document.title = (TITLES[key] ? TITLES[key] + " · " : "") + "AI PM Archive";
   }
-
-  var lastHash = null;
-  window.addEventListener("hashchange", function () {
-    if (state.q) { state.q = ""; $("q").value = ""; }
-    closeDrawer();
-    render();
-    if (location.hash !== lastHash) { window.scrollTo(0, 0); document.querySelector(".main").scrollTop = 0; }
-    lastHash = location.hash;
-  });
-
-  /* ---------- chrome events ---------- */
-  $("menu-btn").addEventListener("click", function () {
-    $("side").classList.add("open");
-    $("scrim").hidden = false;
-  });
-  $("scrim").addEventListener("click", closeDrawer);
-
-  $("q").addEventListener("input", function (e) {
-    state.q = e.target.value.trim();
-    render();
-  });
-
-  document.addEventListener("keydown", function (e) {
-    var tag = document.activeElement && document.activeElement.tagName;
-    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(tag);
-    if (e.key === "Escape") {
-      if ($("side").classList.contains("open")) closeDrawer();
-      else if (typing) { if (state.q) { $("q").value = ""; state.q = ""; render(); } document.activeElement.blur(); }
-      return;
-    }
-    if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key === "/") { e.preventDefault(); $("q").focus(); return; }
-    var r = parseHash();
-    if (r.path[0] === "projects" && r.path[1] && !state.q) {
-      var i = works.map(function (w) { return w.id; }).indexOf(r.path[1]);
-      if (e.key === "ArrowLeft" && i > 0) location.hash = href(["projects", works[i - 1].id]);
-      if (e.key === "ArrowRight" && i >= 0 && i < works.length - 1) location.hash = href(["projects", works[i + 1].id]);
-    }
-  });
 
   /* ---------- init ---------- */
-  function getJson(url, fallback) {
-    return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).catch(function () { return fallback; });
-  }
+  function load(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(url + " " + r.status); return r.json(); }); }
 
-  Promise.all([
-    fetch("data/works.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }),
-    getJson("data/links.json", { links: [] }),
-    getJson("data/glossary.json", { terms: [] }),
-    getJson("data/notes.json", { notes: [] }),
-    getJson("data/lessons.json", { lessons: [] })
-  ]).then(function (res) {
-    data = res[0];
-    works = data.works.slice().sort(function (a, b) {
-      return a.date === b.date ? (a.id < b.id ? -1 : 1) : a.date < b.date ? -1 : 1;
-    }).map(function (w, i) { w.no = i + 1; return w; });
-    function safe(u) {
-      try { return /^https?:$/.test(new URL(u).protocol); } catch (e) { return false; }
-    }
-    function local(p) {
-      return typeof p === "string" && p && !/^[a-z][a-z0-9+.-]*:/i.test(p) && p.charAt(0) !== "/" && p.indexOf("\\") === -1 && p.split("/").indexOf("..") === -1;
-    }
-    works.forEach(function (w) {
-      if (w.file && !local(w.file)) w.file = "";
-      if (w.thumb && !local(w.thumb)) w.thumb = "";
+  Promise.all([load("data/works.json"), load("data/links.json"), load("data/lessons.json"), load("data/notes.json"), load("data/terms.json")])
+    .then(function (a) {
+      data = a[0]; works = data.works; links = a[1].links; lessons = a[2].lessons; notes = a[3].notes; terms = a[4].terms;
+      $("today").textContent = koDay(TODAY);
+      buildSide();
+      window.addEventListener("hashchange", render);
+      render();
+    })
+    .catch(function (e) {
+      view.textContent = "";
+      view.appendChild(el("p", { class: "empty", text: "데이터를 불러오지 못했습니다. 웹 서버로 열어야 합니다. (" + e.message + ")" }));
     });
-    (res[3].notes || []).forEach(function (n) { if (!local(n.html)) n.html = ""; });
-    works.forEach(function (w) { w.links = (w.links || []).filter(function (l) { return safe(l.url); }); });
-    links = (res[1].links || []).filter(function (l) { return safe(l.url); });
-    lessons = (res[4].lessons || []).filter(function (l) { return safe(l.url); });
-    terms = res[2].terms || [];
-    notes = res[3].notes || [];
-    var d = parts(TODAY);
-    $("today").textContent = d.y + "." + pad(d.m) + "." + pad(d.d) + " " + DOW[dowOf(TODAY)];
-    lastHash = location.hash;
-    render();
-  }).catch(function () {
-    view.textContent = "목록을 불러오지 못했습니다. 웹 서버로 열어 주세요.";
+
+  $("menu-btn").addEventListener("click", function () { $("side").classList.add("open"); $("scrim").hidden = false; });
+  $("scrim").addEventListener("click", function () { $("side").classList.remove("open"); $("scrim").hidden = true; });
+
+  var q = $("q"), timer = null;
+  q.addEventListener("input", function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      var v = q.value.trim();
+      if (v) location.hash = href(["search"], { q: v });
+      else if (parseHash().path[0] === "search") location.hash = "#/";
+    }, 200);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); }
+    if (e.key === "Escape" && document.activeElement === q) q.blur();
   });
 })();

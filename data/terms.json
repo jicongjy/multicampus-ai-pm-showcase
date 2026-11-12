@@ -1,0 +1,291 @@
+{
+  "terms": [
+    {
+      "name": "A/B 테스트",
+      "def": "같은 화면의 두 안을 나눠 보여 주고 어느 쪽이 목표 행동을 더 끌어내는지 비교하는 실험",
+      "first": "2026-11-10",
+      "notes": [
+        "n-w3-day-02-web-crawling-event-taxonomy"
+      ],
+      "works": [
+        "w3-event-webapp",
+        "w3-ab-test-plan"
+      ]
+    },
+    {
+      "name": "ASIS/TOBE",
+      "def": "바뀌기 전 흐름과 바뀐 뒤 흐름을 나란히 그린 순서도",
+      "first": "2026-11-11",
+      "notes": [
+        "n-w3-day-03-emotion-book-recommendation"
+      ],
+      "works": [
+        "w3-book-proto",
+        "w3-asis-tobe",
+        "w3-ux-slides",
+        "w3-test-report"
+      ]
+    },
+    {
+      "name": "CRUD",
+      "def": "추가, 조회, 수정, 삭제 네 가지 기본 기능",
+      "first": "2026-11-06",
+      "notes": [
+        "n-w2-day-05-google-ai-studio-firebase"
+      ],
+      "works": [
+        "w2-event-form"
+      ]
+    },
+    {
+      "name": "IA",
+      "def": "화면들이 어떤 계층으로 이어지는지 정리한 구조표",
+      "first": "2026-11-03",
+      "notes": [
+        "n-w2-day-02-scenario-prd"
+      ],
+      "works": [
+        "w2-oliveyoung-mid"
+      ]
+    },
+    {
+      "name": "PRD",
+      "def": "만들 제품의 문제와 요구사항을 한 문서에 정리한 기획 문서",
+      "first": "2026-11-03",
+      "notes": [
+        "n-w2-day-02-scenario-prd",
+        "n-w2-day-03-data-deployment"
+      ],
+      "works": [
+        "w2-oliveyoung-mid"
+      ]
+    },
+    {
+      "name": "UX 점검",
+      "def": "화면 상태를 기준별로 확인해 문제와 양호한 곳을 나누는 일",
+      "first": "2026-11-11",
+      "notes": [
+        "n-w3-day-03-emotion-book-recommendation"
+      ],
+      "works": [
+        "w3-book-proto",
+        "w3-asis-tobe",
+        "w3-ux-slides",
+        "w3-test-report"
+      ]
+    },
+    {
+      "name": "가설",
+      "def": "이렇게 바꾸면 지표가 이렇게 달라질 것이라는, 아직 검증하지 않은 예상",
+      "first": "2026-11-02",
+      "notes": [
+        "n-w2-day-01-problem-definition"
+      ],
+      "works": []
+    },
+    {
+      "name": "개인정보 수집 이용 동의",
+      "def": "개인정보를 받기 전에 목적을 알리고 받는 동의. 저장까지 되어야 기록이 남는다",
+      "first": "2026-11-06",
+      "notes": [
+        "n-w2-day-05-google-ai-studio-firebase"
+      ],
+      "works": [
+        "w2-event-form"
+      ]
+    },
+    {
+      "name": "관리자 페이지",
+      "def": "신청 내역을 보고 고치고 지우는, 운영하는 사람용 화면",
+      "first": "2026-11-06",
+      "notes": [
+        "n-w2-day-05-google-ai-studio-firebase",
+        "n-w3-day-04-admin-page-claude-desktop"
+      ],
+      "works": [
+        "w2-event-form",
+        "w3-reading-menu"
+      ]
+    },
+    {
+      "name": "마스킹",
+      "def": "이름이나 번호의 일부를 가려서 보여 주는 처리",
+      "first": "2026-11-06",
+      "notes": [
+        "n-w2-day-05-google-ai-studio-firebase"
+      ],
+      "works": [
+        "w2-event-form"
+      ]
+    },
+    {
+      "name": "문제 정의",
+      "def": "해결책은 빼고, 지금 무엇이 막혀 있는지만 적은 문장",
+      "first": "2026-11-02",
+      "notes": [
+        "n-w2-day-01-problem-definition",
+        "n-w2-day-03-data-deployment"
+      ],
+      "works": []
+    },
+    {
+      "name": "배포",
+      "def": "만든 것을 링크로 열 수 있게 올려서 다른 사람이 볼 수 있게 하는 일",
+      "first": "2026-11-05",
+      "notes": [
+        "n-w2-day-04-deployment-storage-bolt"
+      ],
+      "works": [
+        "w2-event-form"
+      ]
+    },
+    {
+      "name": "브라우저 저장",
+      "def": "입력값을 서버가 아니라 그 브라우저 안에만 남기는 방식. 다른 사람과 공유되지 않는다",
+      "first": "2026-11-05",
+      "notes": [
+        "n-w2-day-04-deployment-storage-bolt"
+      ],
+      "works": [
+        "w2-event-form"
+      ]
+    },
+    {
+      "name": "승인된 도메인",
+      "def": "로그인을 허용해 둔 접속 주소 목록. 목록에 없는 주소에서는 구글 로그인이 막힌다",
+      "first": "2026-11-12",
+      "notes": [
+        "n-w3-day-04-admin-page-claude-desktop"
+      ],
+      "works": [
+        "w3-reading-menu"
+      ]
+    },
+    {
+      "name": "시나리오",
+      "def": "사용자가 하는 일과 시스템이 처리하는 일을 번호 순서로 적은 흐름",
+      "first": "2026-11-03",
+      "notes": [
+        "n-w2-day-02-scenario-prd"
+      ],
+      "works": [
+        "w2-oliveyoung-mid"
+      ]
+    },
+    {
+      "name": "와이어프레임",
+      "def": "색과 장식 없이 배치만 확인하려고 그린 단순한 화면 시안",
+      "first": "2026-11-03",
+      "notes": [
+        "n-w2-day-02-scenario-prd"
+      ],
+      "works": [
+        "w2-oliveyoung-mid"
+      ]
+    },
+    {
+      "name": "요구사항",
+      "def": "서비스가 해야 할 일을 입력, 결과, 실패 예시까지 적어 둔 조건",
+      "first": "2026-11-11",
+      "notes": [
+        "n-w3-day-03-emotion-book-recommendation"
+      ],
+      "works": [
+        "w3-book-proto",
+        "w3-asis-tobe",
+        "w3-ux-slides",
+        "w3-test-report"
+      ]
+    },
+    {
+      "name": "이벤트 텍소노미",
+      "def": "측정할 이벤트의 이름, 보내는 시점, 파라미터를 미리 정해 둔 분류표",
+      "first": "2026-11-10",
+      "notes": [
+        "n-w3-day-02-web-crawling-event-taxonomy"
+      ],
+      "works": [
+        "w3-event-webapp",
+        "w3-ab-test-plan"
+      ]
+    },
+    {
+      "name": "자리표시자",
+      "def": "실제 값이 정해지기 전에 임시로 비워 두거나 채워 둔 값",
+      "first": "2026-11-02",
+      "notes": [
+        "n-w2-day-01-problem-definition"
+      ],
+      "works": []
+    },
+    {
+      "name": "전처리",
+      "def": "원본은 그대로 두고, 쓰기 좋게 정리한 파일을 따로 만드는 일",
+      "first": "2026-11-10",
+      "notes": [
+        "n-w3-day-02-web-crawling-event-taxonomy"
+      ],
+      "works": [
+        "w3-event-webapp",
+        "w3-ab-test-plan"
+      ]
+    },
+    {
+      "name": "크롤링",
+      "def": "웹 페이지에 있는 데이터를 프로그램으로 모아 오는 일",
+      "first": "2026-11-10",
+      "notes": [
+        "n-w3-day-02-web-crawling-event-taxonomy"
+      ],
+      "works": [
+        "w3-event-webapp",
+        "w3-ab-test-plan"
+      ]
+    },
+    {
+      "name": "프로젝트 지침",
+      "def": "프로젝트 안의 모든 대화에 똑같이 적용되도록 미리 적어 두는 규칙",
+      "first": "2026-11-04",
+      "notes": [
+        "n-w2-day-03-data-deployment"
+      ],
+      "works": []
+    },
+    {
+      "name": "프롬프트",
+      "def": "AI에게 무엇을 어떻게 하라고 적어 주는 지시문",
+      "first": "2026-11-12",
+      "notes": [
+        "n-w3-day-04-admin-page-claude-desktop"
+      ],
+      "works": [
+        "w3-reading-menu"
+      ]
+    },
+    {
+      "name": "필드 정의",
+      "def": "입력칸마다 형식, 필수 여부, 중복 기준을 적어 둔 표",
+      "first": "2026-11-05",
+      "notes": [
+        "n-w2-day-04-deployment-storage-bolt"
+      ],
+      "works": [
+        "w2-event-form"
+      ]
+    },
+    {
+      "name": "환각",
+      "def": "AI가 없는 책이나 저자를 그럴듯하게 지어내는 현상",
+      "first": "2026-11-11",
+      "notes": [
+        "n-w3-day-03-emotion-book-recommendation"
+      ],
+      "works": [
+        "w3-book-proto",
+        "w3-asis-tobe",
+        "w3-ux-slides",
+        "w3-test-report"
+      ]
+    }
+  ]
+}

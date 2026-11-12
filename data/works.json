@@ -39,7 +39,7 @@
       "file": "works/week-01/bsi-verification-dashboard.html",
       "links": [],
       "thumb": "assets/thumbs/w1-bsi-dashboard.jpg",
-      "kb": 14
+      "did": "경기동향조사를 인용한 문장이 사실인지 검증하고, 제출 전 남은 항목을 확인하는 대시보드를 만들었다."
     },
     {
       "id": "w1-browser-monitor",
@@ -51,7 +51,7 @@
       "file": "works/week-01/모노톤 웹 프로토타입 코드 수정.html",
       "links": [],
       "thumb": "assets/thumbs/w1-browser-monitor.jpg",
-      "kb": 23
+      "did": "브라우저에 쌓이는 데이터를 한 화면에서 보는 모니터를 모노톤 프로토타입으로 만들었다."
     },
     {
       "id": "w2-oliveyoung-mid",
@@ -72,7 +72,7 @@
         }
       ],
       "thumb": "assets/thumbs/w2-oliveyoung-mid.jpg",
-      "kb": 42
+      "did": "올리브영 온라인몰의 검색부터 주문 완료까지 구매 흐름을 눌러 볼 수 있게 만들었다."
     },
     {
       "id": "w2-event-form",
@@ -84,7 +84,7 @@
       "file": "works/week-02/261106_이벤트신청폼_홍지영.html",
       "links": [],
       "thumb": "assets/thumbs/w2-event-form.jpg",
-      "kb": 744
+      "did": "입력 규칙과 중복 신청 판단을 갖춘 이벤트 신청 폼을 만들고, 관리자 페이지까지 붙였다."
     },
     {
       "id": "w3-ab-test-plan",
@@ -96,7 +96,7 @@
       "file": "works/week-03/261109_AB테스트계획서_홍지영_2.html",
       "links": [],
       "thumb": "assets/thumbs/w3-ab-test-plan.jpg",
-      "kb": 3251
+      "did": "신청서 위치를 옮긴 안과 기존 안의 신청 완료율을 14일간 비교하는 계획을 세웠다."
     },
     {
       "id": "w3-event-webapp",
@@ -108,7 +108,7 @@
       "file": "works/week-03/261110_이벤트웹앱_홍지영_7.html",
       "links": [],
       "thumb": "assets/thumbs/w3-event-webapp.jpg",
-      "kb": 2720
+      "did": "이름, 연락처, 관심 여행지만 받는 겨울여행 얼리버드 신청 웹앱을 만들었다."
     },
     {
       "id": "w3-book-proto",
@@ -120,7 +120,7 @@
       "file": "works/week-03/261111_프로토타입개선안_홍지영.html",
       "links": [],
       "thumb": "assets/thumbs/w3-book-proto.jpg",
-      "kb": 55
+      "did": "감정을 입력하면 어울리는 책을 추천하는 프로토타입을 개선했다."
     },
     {
       "id": "w3-asis-tobe",
@@ -132,12 +132,7 @@
       "file": "works/week-03/261111_ASISTOBE순서도_홍지영.png",
       "links": [],
       "thumb": "assets/thumbs/w3-asis-tobe.jpg",
-      "kb": 1140,
-      "metric": {
-        "value": "5곳",
-        "label": "화면이 바뀐 곳",
-        "note": "AI 처리 3곳 포함"
-      }
+      "did": "화면과 AI 처리가 바뀐 곳을 ASIS와 TOBE 순서도로 나란히 그렸다."
     },
     {
       "id": "w3-ux-slides",
@@ -149,12 +144,7 @@
       "file": "works/week-03/261111_UX점검슬라이드_홍지영.html",
       "links": [],
       "thumb": "assets/thumbs/w3-ux-slides.jpg",
-      "kb": 1872,
-      "metric": {
-        "value": "8건",
-        "label": "발견된 문제",
-        "note": "모두 표시·위치 문제, 동작 오류 없음"
-      }
+      "did": "독서 메뉴의 12개 화면 상태를 5개 기준으로 점검해 문제 8건을 찾았다."
     },
     {
       "id": "w3-test-report",
@@ -166,12 +156,7 @@
       "file": "works/week-03/261111_테스트보고서_홍지영.pdf",
       "links": [],
       "thumb": "assets/thumbs/w3-test-report.jpg",
-      "kb": 289,
-      "metric": {
-        "value": "59/59",
-        "label": "검증 항목 통과",
-        "note": "요구사항 7 + 기능 52"
-      }
+      "did": "개발본을 자동 브라우저로 직접 눌러 보며 요구사항 7개와 기능 52개를 확인했다."
     },
     {
       "id": "w3-reading-menu",
@@ -191,7 +176,8 @@
           "url": "https://github.com/jicongjy/jicongjy-multicampus-aistudio-bookservice"
         }
       ],
-      "thumb": "assets/thumbs/w3-reading-menu.jpg"
+      "thumb": "assets/thumbs/w3-reading-menu.jpg",
+      "did": "감정에 맞는 책을 추천하는 서비스를 만들고, 프롬프트와 도서 목록을 고치는 관리자 화면을 붙였다."
     },
     {
       "id": "w3-detail-page",
@@ -203,7 +189,7 @@
       "file": "works/week-03/상세페이지_지영_20261112.html",
       "links": [],
       "thumb": "assets/thumbs/w3-detail-page.jpg",
-      "kb": 1632
+      "did": "35cm와 50cm 미니 진주트리를 소개하는 겨울 상품 상세페이지를 만들었다."
     }
   ]
 }

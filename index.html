@@ -4,63 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI PM Archive</title>
-  <meta name="description" content="멀티캠퍼스 AI 프로덕트 매니저 과정에서 만든 기획 문서와 프로토타입 보관함">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+  <meta name="description" content="멀티캠퍼스 AI 프로덕트 매니저 과정에서 만든 결과물, 노트, 용어를 쌓아 가는 학습 보관함">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
   <div class="app" id="app">
     <aside class="side" id="side" aria-label="메뉴">
-      <a class="brand" href="#/" aria-label="홈으로">
-        <span class="brand-text">AI PM Archive</span>
-      </a>
-
+      <a class="brand" href="#/">AI PM Archive</a>
       <div class="profile" id="profile"></div>
-
       <nav class="nav" id="nav" aria-label="주 메뉴"></nav>
-
-      <div class="side-group">
-        <p class="side-title">주차</p>
-        <nav class="nav" id="weeknav" aria-label="주차별 보기"></nav>
-      </div>
-
-      <div class="side-group">
-        <p class="side-title">최근 항목</p>
-        <nav class="nav small" id="recent" aria-label="최근 항목"></nav>
-      </div>
-
       <div class="side-foot">
-        <a class="ext" href="https://github.com/jicongjy/pm-archive" target="_blank" rel="noopener noreferrer">
-          <span>깃허브</span><span aria-hidden="true">↗</span>
-        </a>
+        <a class="ext" href="https://github.com/jicongjy/pm-archive" target="_blank" rel="noopener noreferrer">깃허브 ↗</a>
       </div>
     </aside>
 
     <div class="scrim" id="scrim" hidden></div>
 
-    <div class="main">
+    <div class="main" id="main">
       <header class="top">
-        <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="메뉴 열기">
-          <span aria-hidden="true">☰</span>
-        </button>
+        <button class="menu-btn" id="menu-btn" type="button" aria-label="메뉴 열기">메뉴</button>
         <label class="search">
           <span class="sr">검색</span>
-          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M14 14l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          <input id="q" type="search" placeholder="프로젝트, 링크, 용어 찾기" autocomplete="off">
-          <kbd aria-hidden="true">/</kbd>
+          <input id="q" type="search" placeholder="결과물, 노트, 용어, 링크 찾기" autocomplete="off">
         </label>
         <p class="today" id="today"></p>
       </header>
-
       <main class="view" id="view" tabindex="-1">
         <p class="loading">불러오는 중입니다.</p>
       </main>
     </div>
   </div>
-
   <script src="assets/app.js"></script>
 </body>
 </html>

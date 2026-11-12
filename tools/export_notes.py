@@ -5,11 +5,12 @@
   python3 tools/export_notes.py <노트 저장소 경로> [--dry-run]
 
 동작
-  1. notes/ 아래 마크다운 중 앞부분 12줄 안에 '공개: 예' 줄이 있는 노트만 고른다.
+  1. notes/ 아래 마크다운 중 앞부분 20줄 안에 '공개: 예' 줄이 있는 노트만 고른다.
   2. '내 실습', '내가 만든 것', '배운 점', '한계' 같은 내 작업과 생각 구역만 남긴다. 수업 내용을 옮긴 구역은 뺀다.
   3. 회고, 출처, 메모, 과제, 링크, 강사, 교안, 슬랙 구역과 그 단어가 들어간 줄도 뺀다. 빠진 것은 화면에 모두 보여 주니 확인한다.
   4. 이메일, 전화번호, 키, 앱스 스크립트 주소 패턴이 남아 있으면 그 노트는 내보내지 않는다.
-  5. notes/아이디.html 조각과 data/notes.json을 만든다.
+  5. 머리말의 '결과물:', '용어: 이름 | 정의', '한줄:'을 읽어 노트와 용어 데이터에 쓴다(머리말은 본문에서 지운다).
+  6. notes/아이디.html 조각, data/notes.json, data/terms.json을 만든다.
 """
 import html
 import json
@@ -18,7 +19,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+HEAD_LINES = 20
 FLAG = re.compile(r"^\s*공개\s*[:：]\s*예\s*$")
+HEADER = re.compile(r"^\s*(공개|결과물|용어|한줄)\s*[:：]\s*(.*?)\s*$")
 DROP_HEADING = re.compile(r"교안|슬랙|회고|출처|메모|과제|링크|다음에|강사|피드백|정리자|참고")
 KEEP_HEADING = re.compile(r"내 실습|직접 실습|직접 해|별도 실습|실습 기록|실습 결과|내가|제가|만든|산출물|배운 점|느낀 점|해 보고 싶|겪은 문제|개선|결정")
 DROP_LINE = re.compile(r"교안|슬랙|강사|셀렉트웨이|비공개|미기입|내부|학습 저장소|multicampus-ai-product-manager")
@@ -30,6 +33,27 @@ SENSITIVE = [
 ]
 DATE = re.compile(r"(20\d{2})-(\d{2})-(\d{2})")
 YYMMDD = re.compile(r"\b(\d{2})(\d{2})(\d{2})\b")
+
+
+def split_header(lines):
+    """앞부분의 공개/결과물/용어/한줄 머리말을 읽고, 본문에서는 뺀다."""
+    info = {"works": [], "terms": [], "one": ""}
+    body = []
+    for i, l in enumerate(lines):
+        m = HEADER.match(l) if i < HEAD_LINES else None
+        if not m:
+            body.append(l)
+            continue
+        k, v = m.groups()
+        if k == "결과물":
+            info["works"] += [x.strip() for x in re.split(r"[,，]", v) if x.strip()]
+        elif k == "용어" and "|" in v:
+            name, d = [x.strip() for x in v.split("|", 1)]
+            if name and d:
+                info["terms"].append({"name": name, "def": d})
+        elif k == "한줄":
+            info["one"] = v
+    return info, body
 
 
 def heading(line):
@@ -275,6 +299,36 @@ def parts_of(lines):
     return [x for x in out if x["n"] > 0]
 
 
+def build_terms(rows, entries):
+    """노트에 적은 용어를 모은다. 처음 나온 날은 그 용어를 처음 적은 노트의 날짜다."""
+    by = {}
+    works_of = {e["id"]: e["works"] for e in entries}
+    for t, date, nid in sorted(rows, key=lambda r: (r[1], r[2])):
+        x = by.setdefault(t["name"], {"name": t["name"], "def": t["def"], "first": date, "notes": [], "works": []})
+        if nid not in x["notes"]:
+            x["notes"].append(nid)
+        for w in works_of.get(nid, []):
+            if w not in x["works"]:
+                x["works"].append(w)
+    return sorted(by.values(), key=lambda x: x["name"].lower())
+
+
+def print_report(entries, terms, work_ids):
+    print("\n== 점검 보고")
+    for e in entries:
+        if not e["terms"]:
+            print("  - 용어 없음: %s" % e["id"])
+        if not e["one"]:
+            print("  - 한줄 없음: %s" % e["id"])
+        for w in e["works"]:
+            if w not in work_ids:
+                print("  ! 없는 결과물 아이디: %s (%s)" % (w, e["id"]))
+    linked = {w for e in entries for w in e["works"]}
+    for w in sorted(work_ids - linked):
+        print("  - 노트와 연결 안 된 결과물: %s" % w)
+    print("  용어 %d개" % len(terms))
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     dry = "--dry-run" in sys.argv
@@ -283,12 +337,16 @@ def main():
         return 1
     repo = Path(args[0]).expanduser().resolve()
     files = sorted((repo / "notes").rglob("*.md"))
-    entries, blocked = [], 0
+    entries, blocked, all_terms = [], 0, []
+    work_ids = {w["id"] for w in json.loads((ROOT / "data" / "works.json").read_text(encoding="utf-8"))["works"]}
     for path in files:
         lines = path.read_text(encoding="utf-8").splitlines()
-        if not any(FLAG.match(l) for l in lines[:12]):
+        if not any(FLAG.match(l) for l in lines[:HEAD_LINES]):
             continue
-        lines = [l for l in lines if not FLAG.match(l)]
+        info, lines = split_header(lines)
+        lines = [l for l in lines if l is not None]
+        while lines and not lines[0].strip():
+            lines.pop(0)
         date, wk, title = meta(path, lines)
         report = []
         body_lines = clean(lines[1:] if heading(lines[0]) else lines, report)
@@ -307,9 +365,10 @@ def main():
         summary = summary_of(body_lines) or first_text(body_lines)
         heads = headings_of(body_lines)
         chars = len(re.sub(r"\s+", "", text))
+        all_terms.extend((t, date, nid) for t in info["terms"])
         entries.append({
             "id": nid, "title": re.sub(r"^\d{6}\s+", "", title), "week": wk, "date": date,
-            "summary": summary, "html": "notes/%s.html" % nid,
+            "summary": summary, "one": info["one"], "works": info["works"], "terms": [t["name"] for t in info["terms"]], "html": "notes/%s.html" % nid,
             "headings": heads[:5], "parts": parts_of(body_lines), "sections": len(heads), "mins": max(1, round(chars / 500)),
         })
         if not dry:
@@ -318,7 +377,10 @@ def main():
             out.write_text(render(body_lines) + "\n", encoding="utf-8")
         print("  + 내보냄: %s" % nid)
     entries.sort(key=lambda e: (e["date"], e["id"]), reverse=True)
+    terms = build_terms(all_terms, entries)
+    print_report(entries, terms, work_ids)
     if not dry:
+        (ROOT / "data" / "terms.json").write_text(json.dumps({"terms": terms}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         (ROOT / "data" / "notes.json").write_text(json.dumps({"notes": entries}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         keep = {e["id"] + ".html" for e in entries}
         for old in (ROOT / "notes").glob("n-*.html"):
