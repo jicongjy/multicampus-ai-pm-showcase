@@ -162,7 +162,7 @@
   function srcColor(s) {
     var order = [];
     links.forEach(function (l) { if (order.indexOf(l.source) === -1) order.push(l.source); });
-    var cols = ["var(--blue)", "var(--yellow)", "var(--red)", "var(--green)"];
+    var cols = ["var(--teal)", "var(--ochre)", "var(--clay)", "var(--sage)"];
     return cols[order.indexOf(s) % cols.length] || cols[0];
   }
 
@@ -720,6 +720,14 @@
     function safe(u) {
       try { return /^https?:$/.test(new URL(u).protocol); } catch (e) { return false; }
     }
+    function local(p) {
+      return typeof p === "string" && p && !/^[a-z][a-z0-9+.-]*:/i.test(p) && p.charAt(0) !== "/" && p.indexOf("\\") === -1 && p.split("/").indexOf("..") === -1;
+    }
+    works.forEach(function (w) {
+      if (w.file && !local(w.file)) w.file = "";
+      if (w.thumb && !local(w.thumb)) w.thumb = "";
+    });
+    (res[3].notes || []).forEach(function (n) { if (n.file && !local(n.file)) n.file = ""; });
     works.forEach(function (w) { w.links = (w.links || []).filter(function (l) { return safe(l.url); }); });
     links = (res[1].links || []).filter(function (l) { return safe(l.url); });
     terms = res[2].terms || [];
