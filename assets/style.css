@@ -543,3 +543,64 @@ a.dt-row:hover { background: #FAFAF9; }
 @media (max-width: 420px) {
   .tgrid { grid-template-columns: 1fr; }
 }
+
+/* ---------- 홈: 큰 타이포 목록 + 오른쪽 패널 ---------- */
+.top-brand, .topnav { display: none; }
+body.poster-mode { background: #EDEAE5; }
+body.poster-mode .app { margin: 0; height: 100vh; background: transparent; border-radius: 0; box-shadow: none; grid-template-columns: minmax(0, 1fr); }
+body.poster-mode .side, body.poster-mode .search, body.poster-mode .today { display: none; }
+body.poster-mode .top { background: transparent; backdrop-filter: none; height: 68px; padding: 0 28px; justify-content: space-between; position: static; }
+body.poster-mode .top-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; letter-spacing: -.03em; }
+body.poster-mode .topnav { display: flex; gap: 8px; }
+.topnav a { font-size: 14px; background: #fff; border-radius: 999px; padding: 7px 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.topnav a:hover { background: var(--ink); color: #fff; }
+body.poster-mode .view.fit { height: calc(100vh - 68px); padding: 0 28px 24px; }
+.poster { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 36px; height: 100%; }
+.p-left { display: flex; flex-direction: column; justify-content: space-between; min-height: 0; padding-top: 4px; }
+.dials { display: flex; gap: 22px; flex-wrap: wrap; }
+.dial { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; width: 112px; }
+.dial-c { width: 64px; height: 64px; border-radius: 50%; background: #2A2826; display: grid; place-items: center; color: #fff; margin-bottom: 8px; transition: transform .25s; }
+.dial-c.now { background: var(--acc); }
+.dial-c b { font-size: 22px; font-weight: 400; letter-spacing: -.03em; }
+.dial:hover .dial-c { transform: scale(1.08); }
+.dial-l { font-size: 14px; color: var(--sub); }
+.dial-s { font-size: 13px; color: var(--ink); }
+.bigs { display: flex; flex-direction: column; }
+.big { display: flex; align-items: baseline; gap: .32em; font-size: clamp(54px, 7.6vw, 112px); line-height: 1.04; letter-spacing: -.045em; color: #C3BFB8; transition: color .2s; }
+.big.on, .big:hover { color: var(--ink); }
+.bn { font-variant-numeric: tabular-nums; min-width: 1.5em; }
+.p-panel { background: #FCFBFA; border-radius: 24px; padding: 24px 28px; display: flex; flex-direction: column; min-height: 0; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.pp-h { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.pp-t { font-size: 26px; font-weight: 400; letter-spacing: -.035em; }
+.pp-s input { width: 190px; height: 42px; border-radius: 999px; border: 1px solid #E3E0DB; background: #fff; padding: 0 18px; font: inherit; font-size: 15px; }
+.pp-s input:focus { outline: 0; border-color: var(--ink); }
+.p-panel .pills { margin-bottom: 14px; }
+.p-panel .pill { font: inherit; font-size: 14px; cursor: pointer; border-color: #E3E0DB; }
+.pp-g { font-size: 14px; color: var(--sub); padding-bottom: 12px; }
+.pp-list { border-top: 1px solid #E6E3DE; }
+.pp-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 2px; border-bottom: 1px solid #E6E3DE; color: #6E6B66; font-size: 16px; transition: color .15s, padding .2s; }
+.pp-row:hover { color: var(--ink); padding-left: 8px; }
+.pp-n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-m { display: flex; gap: 14px; flex: none; font-size: 13px; color: #8F8C87; }
+@media (max-width: 1100px) {
+  .poster { grid-template-columns: 1fr; height: auto; gap: 28px; }
+  body.poster-mode .app { height: auto; }
+  body.poster-mode .view.fit { height: auto; }
+  .p-left { gap: 28px; }
+  .p-panel { height: 560px; }
+}
+@media (max-width: 960px) {
+  body.poster-mode .top { padding: 0 16px; flex-wrap: wrap; height: auto; min-height: 60px; gap: 8px; padding-top: 12px; }
+  body.poster-mode .menu-btn { display: none; }
+  .topnav { overflow-x: auto; max-width: 100%; }
+  .topnav a { white-space: nowrap; }
+  body.poster-mode .view.fit { padding: 8px 16px 32px; }
+  .big { font-size: clamp(46px, 14vw, 80px); }
+  .pp-s input { width: 130px; }
+}
+@media (max-width: 640px) {
+  .dials { gap: 6px; flex-wrap: nowrap; }
+  .dial { width: 33%; }
+  .dial-s { font-size: 13px; }
+  .topnav { padding-bottom: 2px; }
+}
