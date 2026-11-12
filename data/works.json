@@ -59,7 +59,16 @@
       "type": "프로토타입",
       "summary": "미드 피델리티 수준으로 만든 온라인몰 구매 흐름 프로토타입입니다.",
       "file": "works/week-02/261104_올리브영_미드델리피티_홍지영.html",
-      "links": [],
+      "links": [
+        {
+          "label": "PRD 문서",
+          "url": "https://docs.google.com/document/d/1lNpNV3FDt-eSslE8xsPWbaO5EipLfoTkloRtNP9tieE/edit"
+        },
+        {
+          "label": "시나리오 연습 시트",
+          "url": "https://docs.google.com/spreadsheets/d/1AmqNaCtE07ADmD7S9FTpfo2QIdk4h_NS-0486pGTVI4/edit"
+        }
+      ],
       "thumb": "assets/thumbs/w2-oliveyoung-mid.jpg"
     },
     {
@@ -154,7 +163,7 @@
         },
         {
           "label": "소스 코드",
-          "url": "https://github.com/jicongjy/multicampus-aistudio-bookservice"
+          "url": "https://github.com/jicongjy/jicongjy-multicampus-aistudio-bookservice"
         }
       ],
       "thumb": "assets/thumbs/w3-reading-menu.jpg"
