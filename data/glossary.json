@@ -1,0 +1,67 @@
+{
+  "terms": [
+    {
+      "term": "PRD",
+      "full": "Product Requirements Document",
+      "def": "제품이 무엇을, 왜, 누구를 위해 만들어지는지와 요구사항을 정리한 기획 문서입니다.",
+      "works": []
+    },
+    {
+      "term": "MVP",
+      "full": "Minimum Viable Product",
+      "def": "핵심 가치를 검증할 수 있는 가장 작은 범위로 먼저 만든 제품입니다.",
+      "works": []
+    },
+    {
+      "term": "A/B 테스트",
+      "full": "A/B Test",
+      "def": "두 가지 안을 사용자 그룹에 나누어 보여 주고 지표 차이로 더 나은 안을 가리는 실험입니다.",
+      "works": [
+        "w3-ab-test-plan"
+      ]
+    },
+    {
+      "term": "와이어프레임",
+      "full": "Wireframe",
+      "def": "화면의 구조와 요소 배치를 색과 장식 없이 그린 설계 도면입니다.",
+      "works": []
+    },
+    {
+      "term": "프로토타입",
+      "full": "Prototype",
+      "def": "실제 개발 전에 흐름과 화면을 눌러 보며 검증하려고 만든 시제품입니다.",
+      "works": [
+        "w1-bsi-dashboard",
+        "w1-browser-monitor"
+      ]
+    },
+    {
+      "term": "미드 피델리티",
+      "full": "Mid-fidelity",
+      "def": "로우 피델리티보다 화면 모습이 구체적이고 하이 피델리티보다 덜 다듬은 중간 수준의 프로토타입입니다.",
+      "works": [
+        "w2-oliveyoung-mid"
+      ]
+    },
+    {
+      "term": "사용자 스토리",
+      "full": "User Story",
+      "def": "누가 무엇을 왜 원하는지를 한 문장으로 적은 요구사항 단위입니다.",
+      "works": []
+    },
+    {
+      "term": "KPI",
+      "full": "Key Performance Indicator",
+      "def": "목표 달성 정도를 재는 핵심 성과 지표입니다.",
+      "works": []
+    },
+    {
+      "term": "ASIS와 TOBE",
+      "full": "As-Is / To-Be",
+      "def": "현재 상태와 개선 후 상태를 나란히 그려 바뀌는 점을 보여 주는 방식입니다.",
+      "works": [
+        "w3-asis-tobe"
+      ]
+    }
+  ]
+}

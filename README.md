@@ -7,8 +7,12 @@
 ```
 .
 ├── index.html         # 페이지
-├── assets/            # style.css, app.js
-├── data/works.json    # 결과물 목록 (화면의 기준)
+├── assets/            # style.css, app.js, thumbs/ (썸네일 이미지)
+├── tools/make_thumbs.py  # 썸네일 자동 생성
+├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
+├── data/links.json    # 링크 모음
+├── data/glossary.json # 용어
+├── data/notes.json    # 공개한 노트 (비어 있으면 안내 화면)
 └── works/             # 결과물 파일, 주차별 폴더
     ├── week-01/
     ├── week-02/
@@ -31,7 +35,17 @@
 | file | 열어 볼 파일 경로. 파일이 없으면 비워 둡니다 |
 | links | `{ "label": "서비스 열기", "url": "..." }` 목록 |
 
-새 주차가 생기면 `weeks` 배열에도 추가합니다.
+새 주차가 생기면 `weeks` 배열(start, end 날짜 포함)에도 추가합니다.
+
+## 썸네일 만들기
+
+Chrome이 설치된 맥에서 아래 명령을 실행하면 `works.json`의 모든 결과물 화면을 `assets/thumbs/아이디.jpg`로 만듭니다. 특정 결과물만 만들려면 아이디를 뒤에 붙입니다.
+
+```bash
+python3 tools/make_thumbs.py
+```
+
+항목에 `"thumb": "assets/thumbs/아이디.jpg"`를 적어야 카드에 표시됩니다.
 
 ## 내 컴퓨터에서 보기
 

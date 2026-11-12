@@ -1,0 +1,26 @@
+{
+  "links": [
+    {
+      "id": "l-reading-menu",
+      "title": "오늘의 독서 메뉴",
+      "url": "https://reading-menu.ai.studio/",
+      "source": "실습",
+      "tags": [
+        "웹서비스"
+      ],
+      "date": "2026-11-12",
+      "work": "w3-reading-menu"
+    },
+    {
+      "id": "l-bookservice-repo",
+      "title": "오늘의 독서 메뉴 소스 코드",
+      "url": "https://github.com/jicongjy/multicampus-aistudio-bookservice",
+      "source": "실습",
+      "tags": [
+        "깃허브"
+      ],
+      "date": "2026-11-12",
+      "work": "w3-reading-menu"
+    }
+  ]
+}
