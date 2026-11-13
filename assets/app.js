@@ -442,6 +442,21 @@
     page.appendChild(side);
     view.appendChild(page);
     view.classList.add("fit");
+    alignBigNumbers(page);
+  }
+
+  /* 큰 숫자는 글자마다 왼쪽 여백이 달라서(1, 8, 2…) 눈에 보이는 시작점이 어긋난다. 실제 글자 모양을 재서 맞춘다. */
+  function alignBigNumbers(root) {
+    function run() {
+      var ctx = document.createElement("canvas").getContext("2d");
+      Array.prototype.forEach.call(root.querySelectorAll(".sc-n"), function (n) {
+        var cs = getComputedStyle(n);
+        ctx.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+        var m = ctx.measureText(n.textContent);
+        n.style.marginLeft = m.actualBoundingBoxLeft + "px";
+      });
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
   }
 
   /* 용어가 어느 노트에 나왔는지 보여 주는 칸 줄 */
