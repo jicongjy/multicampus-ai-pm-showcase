@@ -9,8 +9,8 @@
   --pale: #A8A8A6;
   --line: #E9E9E6;
   --soft: #F3F3F1;
-  --red: #FF6A1F;
-  --acc: #FF6A1F;
+  --red: #1536E8;
+  --acc: #1536E8;
   --p-green: #BFE7D2; --p-orange: #FBCFB3; --p-blue: #BBD3FB; --p-violet: #D9D2F6; --p-gray: #E4E4E1;
   --g0: #EDEDEA; --g1: #D6D6D2; --g2: #AFAFAB; --g3: #7C7C79; --g4: #2C2C2C;
   --font: "Pretendard Variable", Pretendard, sans-serif;
@@ -549,8 +549,9 @@ a.dt-row:hover { background: #FAFAF9; }
 .top-brand, .topnav { display: none; }
 body.poster-mode { background: #fff; }
 body.poster-mode .app { margin: 0; height: 100vh; background: transparent; border-radius: 0; box-shadow: none; grid-template-columns: minmax(0, 1fr); }
-body.poster-mode .side, body.poster-mode .search, body.poster-mode .today, body.poster-mode .menu-btn { display: none; }
-body.poster-mode .top { background: #fff; backdrop-filter: none; height: 64px; padding: 0 32px; justify-content: space-between; position: static; border-bottom: 1px solid var(--line); }
+body.poster-mode .side, body.poster-mode .today, body.poster-mode .menu-btn, body.home-mode .search { display: none; }
+body.poster-mode { --frame: 0px; --top-h: 64px; }
+body.poster-mode .top { background: #fff; backdrop-filter: none; height: 64px; padding: 0 32px; justify-content: space-between; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line); }
 body.poster-mode .top-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; letter-spacing: -.03em; }
 body.poster-mode .topnav { display: flex; gap: 30px; }
 .topnav a { font-size: 15px; color: #555; padding: 21px 0 19px; border-bottom: 2px solid transparent; }
@@ -639,4 +640,17 @@ body.poster-mode .view.fit { height: calc(100vh - 64px); padding: 0; }
   .dl { font-size: 13px; transform: scale(1); }
   .scards { grid-template-columns: 1fr; margin-top: 44px; }
   .d-side { padding-bottom: 24px; }
+}
+
+/* ---------- 안쪽 페이지도 같은 톤 ---------- */
+body.poster-mode .search { flex: 0 1 260px; margin-left: 24px; }
+body.poster-mode .search input { height: 38px; border-radius: 10px; background: #fff; border: 1px solid #E5E5E3; }
+.tab.on em { background: #E6EAFD; color: var(--blue); }
+.btn.primary { background: var(--blue); border-color: var(--blue); }
+.t-orange { background: #E6EAFD; } .t-orange i { background: var(--blue); }
+.page, .dview { padding-top: 6px; }
+.dpanes, .tile, .kpi { background: #F5F5F4; }
+.nav-item.on { background: #E6EAFD; }
+@media (max-width: 960px) {
+  body.poster-mode .search { flex: 1 1 100%; margin: 8px 0 10px; order: 3; }
 }

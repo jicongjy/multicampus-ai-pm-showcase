@@ -795,7 +795,13 @@
     if (key === "lessons" || key === "calendar") { location.replace("#/weeks"); return; }
     view.textContent = "";
     view.className = "view";
-    document.body.classList.toggle("poster-mode", !key);
+    document.body.classList.add("poster-mode");
+    document.body.classList.toggle("home-mode", !key);
+    Array.prototype.forEach.call(document.querySelectorAll(".topnav a"), function (a) {
+      var on = a.getAttribute("href") === "#/" + key;
+      a.classList.toggle("on", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
     masonry.hosts = [];
     setActive(key === "search" ? "" : key);
     $("side").classList.remove("open");
