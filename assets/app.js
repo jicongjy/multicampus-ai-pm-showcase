@@ -28,6 +28,10 @@
   function diffDays(a, b) { return Math.round((utc(a) - utc(b)) / 86400000); }
   function koDay(date) { var p = parts(date); return p.m + "월 " + p.d + "일 (" + DOW[dowOf(date)] + ")"; }
   function mmdd(date) { var p = parts(date); return p.m + "." + p.d; }
+  function safeUrl(u) {
+    try { var p = new URL(u, location.href); return (p.protocol === "http:" || p.protocol === "https:" || p.protocol === "mailto:") ? p.href : "#"; }
+    catch (e) { return "#"; }
+  }
   function host(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; } }
 
   var now = new Date();
@@ -349,7 +353,7 @@
       if (k === "projects") works.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (w) { if (inWeek(w.date)) out.push({ t: w.title, m: [w.type, mmdd(w.date)], h: href(["projects", w.id]), n: isNew(w.date) }); });
       if (k === "notes") notes.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (n) { if (inWeek(n.date)) out.push({ t: noteTitle(n), m: [weekOf(n.week).label, mmdd(n.date)], h: href(["notes", n.id]), n: isNew(n.date) }); });
       if (k === "terms") terms.slice().sort(function (a, b) { return a.first < b.first ? 1 : a.first > b.first ? -1 : a.name < b.name ? -1 : 1; }).forEach(function (t) { if (inWeek(t.first)) out.push({ t: t.name, m: ["노트 " + t.notes.length + "개", mmdd(t.first)], h: href(["terms", t.name]), n: isNew(t.first) }); });
-      if (k === "links") links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (l) { out.push({ t: l.title, m: [host(l.url)], h: l.url, ext: true }); });
+      if (k === "links") links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (l) { out.push({ t: l.title, m: [host(l.url)], h: safeUrl(l.url), ext: true }); });
       if (k === "weeks") data.weeks.slice().reverse().forEach(function (w) { var c = counts(w); out.push({ t: w.label, m: ["결과물 " + c.w, "노트 " + c.n, "용어 " + c.t], h: href(["weeks"]), n: w.id === cw.id }); });
       return out;
     }
@@ -468,7 +472,7 @@
       if (ls.length) {
         col.appendChild(secHead("교안", "" + ls.length));
         col.appendChild(el("ul", { class: "plain" }, ls.map(function (l) {
-          return el("li", {}, [el("a", { href: l.url, target: "_blank", rel: "noopener noreferrer", text: l.title.replace(/^\d주차\s*/, "") + " ↗" })]);
+          return el("li", {}, [el("a", { href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer", text: l.title.replace(/^\d주차\s*/, "") + " ↗" })]);
         })));
       }
       grid.appendChild(col);
@@ -554,7 +558,7 @@
     if (!w) { notFound(href(["projects"]), "결과물 목록"); return; }
     var used = termsOfWork(w.id), ns = notesOfWork(w.id);
     var acts = [];
-    (w.links || []).forEach(function (l) { acts.push(el("a", { class: "btn", href: l.url, target: "_blank", rel: "noopener noreferrer", text: l.label + " ↗" })); });
+    (w.links || []).forEach(function (l) { acts.push(el("a", { class: "btn", href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer", text: l.label + " ↗" })); });
     if (w.file) acts.push(el("a", { class: "btn primary", href: enc(w.file), target: "_blank", rel: "noopener noreferrer", text: "열어 보기 ↗" }));
     var page = el("div", { class: "dview" });
     page.appendChild(dhead(href(["projects"]), w.title, [tchip(w.type), mspan("calendar", mmdd(w.date)), mspan("home", weekOf(w.week).label), mspan("note", "노트 " + ns.length), mspan("term", "용어 " + used.length)], acts));
@@ -699,7 +703,7 @@
     page.appendChild(pageHead("REFERENCES", "링크 모음", "참고하려고 모아 둔 사이트입니다."));
     var sorted = links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     page.appendChild(sorted.length ? el("div", { class: "lgrid" }, sorted.map(function (l, i) {
-      return el("a", { class: "card lcard rise", style: "animation-delay:" + i * 40 + "ms", href: l.url, target: "_blank", rel: "noopener noreferrer" }, [
+      return el("a", { class: "card lcard rise", style: "animation-delay:" + i * 40 + "ms", href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer" }, [
         el("div", { class: "lc-top" }, [art("browser"), el("span", { class: "lc-n", text: pad(i + 1) })]),
         el("h3", { text: l.title }),
         el("p", { class: "sub", text: host(l.url) }),
@@ -721,7 +725,7 @@
       ["결과물", works.filter(function (w) { return has(w.title, w.did, w.summary, w.type); }).map(function (w) { return { t: w.title, sub: w.did, h: href(["projects", w.id]) }; })],
       ["노트", notes.filter(function (n) { return has(n.title, n.one, n.terms.join(" ")); }).map(function (n) { return { t: noteTitle(n), sub: n.one, h: href(["notes", n.id]) }; })],
       ["용어", terms.filter(function (t) { return has(t.name, t.def); }).map(function (t) { return { t: t.name, sub: t.def, h: href(["terms", t.name]) }; })],
-      ["링크", links.filter(function (l) { return has(l.title, l.url, l.note || ""); }).map(function (l) { return { t: l.title, sub: host(l.url), h: l.url, ext: true }; })]
+      ["링크", links.filter(function (l) { return has(l.title, l.url, l.note || ""); }).map(function (l) { return { t: l.title, sub: host(l.url), h: safeUrl(l.url), ext: true }; })]
     ];
     var any = false;
     groups.forEach(function (g) {
