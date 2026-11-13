@@ -19,14 +19,38 @@
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function today() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
 
-  /* ---------- 설정(토큰) ---------- */
+  /* ---------- 설정과 토큰 보관 ----------
+     토큰은 암호로 암호화(AES-GCM, PBKDF2)해서 이 브라우저에만 저장한다. 풀린 토큰은 메모리에만 있고 새로고침, 잠그기, 15분 무조작이면 사라진다. */
+  var TOKEN = "", idleTimer = null;
+  var IDLE_MS = 15 * 60 * 1000;
   function cfg() { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { return {}; } }
   function saveCfg(c) { try { localStorage.setItem(LS, JSON.stringify(c)); } catch (e) {} }
+  function b64(buf) { var a = new Uint8Array(buf), s = ""; for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s); }
+  function unb64(t) { var s = atob(t), a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  function deriveKey(pw, salt) {
+    return crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]).then(function (base) {
+      return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 310000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    });
+  }
+  function encryptToken(token, pw) {
+    var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    return deriveKey(pw, salt).then(function (k) { return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, k, new TextEncoder().encode(token)); })
+      .then(function (ct) { return { salt: b64(salt), iv: b64(iv), ct: b64(ct) }; });
+  }
+  function decryptToken(enc, pw) {
+    return deriveKey(pw, unb64(enc.salt)).then(function (k) { return crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(enc.iv) }, k, unb64(enc.ct)); })
+      .then(function (pt) { return new TextDecoder().decode(pt); });
+  }
+  function lock(redraw) { TOKEN = ""; clearTimeout(idleTimer); if (redraw) redraw(); }
+  function touch(redraw) {
+    clearTimeout(idleTimer);
+    if (TOKEN) idleTimer = setTimeout(function () { lock(redraw); }, IDLE_MS);
+  }
 
   /* ---------- GitHub API ---------- */
   function gh(path, opt) {
     var c = cfg(); opt = opt || {};
-    var headers = { Authorization: "Bearer " + c.token, Accept: opt.raw ? "application/vnd.github.raw+json" : "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+    var headers = { Authorization: "Bearer " + TOKEN, Accept: opt.raw ? "application/vnd.github.raw+json" : "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
     if (opt.body) headers["Content-Type"] = "application/json";
     return fetch("https://api.github.com/repos/" + c.repo + path, { method: opt.method || "GET", cache: "no-store", headers: headers, body: opt.body ? JSON.stringify(opt.body) : undefined })
       .then(function (r) {
@@ -165,7 +189,12 @@
   function draw(body, tab) {
     body.textContent = "";
     var c = cfg();
-    if (!c.token) { body.appendChild(connectPanel(function () { draw(body, tab); })); return; }
+    if (c.token) { c = { repo: c.repo, branch: c.branch }; saveCfg(c); }   /* 예전에 평문으로 저장된 토큰은 지운다 */
+    var again = function () { draw(body, tab); };
+    if (!c.enc) { body.appendChild(connectPanel(again)); return; }
+    if (!TOKEN) { body.appendChild(unlockPanel(c, again)); return; }
+    touch(again);
+    body.onclick = body.onkeydown = function () { touch(again); };
 
     var bar = el("div", { class: "ad-bar" });
     var tabs = el("div", { class: "ad-tabs" }, [["notes", "노트"], ["links", "링크"]].map(function (t) {
@@ -173,10 +202,13 @@
       b.addEventListener("click", function () { draw(body, t[0]); });
       return b;
     }));
+    var lk = el("button", { type: "button", class: "ad-link", text: "잠그기" });
+    lk.addEventListener("click", function () { lock(again); });
     var out = el("button", { type: "button", class: "ad-link", text: "연결 해제" });
-    out.addEventListener("click", function () { saveCfg({}); draw(body, tab); });
+    out.addEventListener("click", function () { if (confirm("저장된 토큰을 이 브라우저에서 지울까요?")) { lock(); saveCfg({}); again(); } });
     bar.appendChild(tabs);
     bar.appendChild(el("span", { class: "ad-conn", text: c.repo + " · " + (c.branch || "main") }));
+    bar.appendChild(lk);
     bar.appendChild(out);
     body.appendChild(bar);
     statusEl = el("p", { class: "ad-status", role: "status" });
@@ -188,32 +220,61 @@
     return el("label", { class: "ad-f" }, [el("span", { class: "ad-l", text: label }), input, hint ? el("small", { text: hint }) : null]);
   }
 
-  /* ----- 연결 ----- */
+  /* ----- 연결, 잠금 해제 ----- */
   function connectPanel(done) {
     var repo = el("input", { type: "text", value: DEFAULT_REPO, autocomplete: "off", spellcheck: "false" });
     var token = el("input", { type: "password", placeholder: "github_pat_…", autocomplete: "off", spellcheck: "false" });
+    var pw = el("input", { type: "password", placeholder: "8자 이상", autocomplete: "new-password" });
+    var pw2 = el("input", { type: "password", placeholder: "한 번 더", autocomplete: "new-password" });
     var msg = el("p", { class: "ad-status" });
-    var go = el("button", { type: "button", class: "ad-btn", text: "연결" });
+    var go = el("button", { type: "button", class: "ad-btn", text: "연결하고 암호 걸기" });
+    function fail(t) { msg.textContent = t; msg.className = "ad-status err"; go.disabled = false; }
     go.addEventListener("click", function () {
       var t = token.value.trim(), r = repo.value.trim();
-      if (!t || !/^[\w.-]+\/[\w.-]+$/.test(r)) { msg.textContent = "저장소(주인/이름)와 토큰을 입력하세요."; msg.className = "ad-status err"; return; }
-      saveCfg({ token: t, repo: r, branch: "main" });
-      msg.textContent = "확인 중…"; msg.className = "ad-status";
+      if (!t || !/^[\w.-]+\/[\w.-]+$/.test(r)) { fail("저장소(주인/이름)와 토큰을 입력하세요."); return; }
+      if (pw.value.length < 8) { fail("암호는 8자 이상으로 정하세요."); return; }
+      if (pw.value !== pw2.value) { fail("암호 두 칸이 서로 다릅니다."); return; }
+      go.disabled = true; msg.textContent = "확인 중…"; msg.className = "ad-status";
+      saveCfg({ repo: r, branch: "main" }); TOKEN = t;
+      var branch = "main";
       gh("").then(function (info) {
         if (!info.permissions || !info.permissions.push) throw new Error("이 토큰에는 쓰기 권한이 없습니다. Contents 권한을 Read and write로 만드세요.");
-        saveCfg({ token: t, repo: r, branch: info.default_branch || "main" });
-        done();
-      }).catch(function (e) { saveCfg({}); msg.textContent = "연결하지 못했습니다. " + e.message; msg.className = "ad-status err"; });
+        branch = info.default_branch || "main";
+        return encryptToken(t, pw.value);
+      }).then(function (enc) { saveCfg({ repo: r, branch: branch, enc: enc }); done(); })
+        .catch(function (e) { TOKEN = ""; saveCfg({}); fail("연결하지 못했습니다. " + e.message); });
     });
     return el("section", { class: "ad-card ad-connect" }, [
       el("h2", { text: "GitHub 연결" }),
-      el("p", { class: "ad-help", text: "이 저장소에만 쓰기 권한이 있는 토큰을 한 번 입력하면, 이 브라우저에 저장됩니다. 코드나 저장소에는 올라가지 않습니다." }),
+      el("p", { class: "ad-help", text: "이 저장소에만 쓰기 권한이 있는 토큰을 한 번 입력하고 암호를 정하면, 토큰은 암호로 잠겨서 이 브라우저에만 저장됩니다. 다음부터는 암호만 넣으면 됩니다." }),
       el("ol", { class: "ad-steps" }, [
         el("li", { text: "GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token" }),
         el("li", { text: "Repository access: Only select repositories → pm-archive" }),
         el("li", { text: "Permissions: Contents → Read and write (이것 하나면 됩니다)" })
       ]),
-      field("저장소", repo), field("토큰", token), go, msg
+      field("저장소", repo), field("토큰", token), field("암호", pw), field("암호 확인", pw2, "암호를 잊으면 복구할 수 없고, 토큰을 다시 넣어야 합니다."), go, msg
+    ]);
+  }
+
+  function unlockPanel(c, done) {
+    var pw = el("input", { type: "password", placeholder: "암호", autocomplete: "current-password" });
+    var msg = el("p", { class: "ad-status" });
+    var go = el("button", { type: "button", class: "ad-btn", text: "열기" });
+    var reset = el("button", { type: "button", class: "ad-link", text: "암호를 잊었어요 (토큰 다시 입력)" });
+    function open() {
+      if (!pw.value) return;
+      go.disabled = true; msg.textContent = "확인 중…"; msg.className = "ad-status";
+      decryptToken(c.enc, pw.value).then(function (t) { TOKEN = t; done(); })
+        .catch(function () { go.disabled = false; pw.value = ""; msg.textContent = "암호가 맞지 않습니다."; msg.className = "ad-status err"; pw.focus(); });
+    }
+    go.addEventListener("click", open);
+    pw.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
+    reset.addEventListener("click", function () { if (confirm("저장된 토큰을 지우고 처음부터 다시 연결할까요?")) { saveCfg({}); done(); } });
+    setTimeout(function () { pw.focus(); }, 50);
+    return el("section", { class: "ad-card ad-connect" }, [
+      el("h2", { text: "관리 화면 잠금" }),
+      el("p", { class: "ad-help", text: "저장해 둔 토큰은 암호로 잠겨 있습니다. 암호를 입력하면 열립니다." }),
+      field("암호", pw), go, msg, reset
     ]);
   }
 

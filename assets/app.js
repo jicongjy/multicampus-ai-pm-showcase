@@ -855,7 +855,7 @@
     if (window.PMAdmin) { go(); return; }
     view.appendChild(el("p", { class: "empty", text: "불러오는 중입니다." }));
     var sc = document.createElement("script");
-    sc.src = "assets/admin.js?v=20261113d";
+    sc.src = "assets/admin.js?v=20261113f";
     sc.onload = function () { if (parseHash().path[0] === "admin") { view.textContent = ""; go(); } };
     sc.onerror = function () { view.textContent = ""; view.appendChild(el("p", { class: "empty", text: "관리 화면을 불러오지 못했습니다." })); };
     document.head.appendChild(sc);
