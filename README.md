@@ -88,7 +88,7 @@ python3 tools/export_notes.py ~/노트저장소경로 --dry-run
 
 ## 링크 추가하기
 
-`data/links.json`의 `links` 배열에 `id`, `title`, `url`, `date`, `note`(한 줄 설명, 선택)를 적고 아래 명령을 실행하면, 각 사이트의 아이콘을 `assets/links/`에 내려받아 `icon` 경로를 적어 줍니다. 아이콘을 못 찾으면 도메인 첫 글자가 대신 보입니다.
+`data/links.json`의 `links` 배열에 `id`, `title`, `url`, `date`, `week`(`week-01` 등. 없으면 날짜로 정함), `note`(한 줄 설명, 선택)를 적고 아래 명령을 실행하면, 각 사이트의 아이콘을 `assets/links/`에 내려받아 `icon` 경로를 적어 줍니다. 아이콘을 못 찾으면 도메인 첫 글자가 대신 보입니다.
 
 ```bash
 python3 tools/fetch_link_icons.py

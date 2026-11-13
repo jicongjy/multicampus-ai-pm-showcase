@@ -784,3 +784,58 @@ body.poster-mode .side > .profile .avatar { width: 36px; height: 36px; font-size
 .bootdots > div:nth-child(5) i { animation-delay: .4s; background: var(--blue); }
 @keyframes bootdot { 0%, 100% { opacity: .12; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .bootdots i { animation: none; opacity: .6; } }
+
+/* ---------- 디자인 수정 ---------- */
+/* 라운드 줄이기 */
+.card, .lcard { border-radius: 10px; }
+.tile { border-radius: 10px; }
+.kpi { border-radius: 10px; }
+.dpanes { border-radius: 12px; }
+.dshot { border-radius: 8px; }
+.dtable { border-radius: 10px; }
+.scard { border-radius: 12px; }
+.pfit .wcol { border-radius: 12px; }
+.btn { border-radius: 8px; }
+.rbtn { border-radius: 8px; }
+.lc-ico { border-radius: 10px; }
+.ci { border-radius: 8px; }
+.tbl, .prose pre { border-radius: 8px; }
+body.poster-mode .search input { border-radius: 8px; }
+.d-search input { border-radius: 8px; }
+
+/* 홈: 날짜 카드 */
+.dcard { width: 300px; border-radius: 10px; padding: 12px 8px 8px; border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(20, 30, 60, .08); backdrop-filter: none; background: #fff; }
+.dcard .dp-h { padding: 0 8px 8px; margin-bottom: 4px; border-bottom: 1px solid var(--line); flex-direction: row; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dcard .dp-h b { font-size: 15px; font-weight: 600; }
+.dcard .dp-h .sub { font-size: 13px; }
+.dcard .dchips { gap: 0; }
+.dcard .dchip { display: flex; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 7px 8px; font-size: 14px; line-height: 1.4; }
+.dcard .dchip:hover { background: var(--soft); }
+.k { font-size: 13px; line-height: 1.5; padding: 0 7px; border-radius: 5px; background: #EEEEEC; color: #555; flex: none; }
+.k-w { background: #E6EAFD; color: var(--blue); }
+.k-t { background: #E4F3EA; color: #1E7A4A; }
+.dcard .dchip em { font-size: 13px; color: inherit; }
+
+/* 홈: 하단 카드 정렬 (같은 위치에서 시작) */
+@media (min-width: 961px) {
+  .scard { grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: auto auto auto; row-gap: 0; align-content: space-between; }
+  .sc-h { grid-column: 1 / -1; grid-row: 1; }
+  .sc-n { grid-column: 1; grid-row: 2; align-self: start; margin: 8px 0 0; font-size: 44px; line-height: 1.05; }
+  .sc-s { grid-column: 1; grid-row: 3; align-self: start; margin-top: 2px; }
+  .sbars { grid-column: 2; grid-row: 2 / 4; height: 72px; align-self: end; }
+}
+
+/* 노트: 읽기 영역 배경, 속성 블록 */
+.split-read { background: #F7F8FB; }
+.split-read h1 { font-size: clamp(30px, 3vw, 40px); margin: 4px 0 10px; }
+.split-read .lead { margin: 0 0 22px; }
+.props { display: flex; flex-direction: column; gap: 2px; padding: 0 0 22px; margin-bottom: 4px; border-bottom: 1px solid #E5E8EF; }
+.prop { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 12px; align-items: start; min-height: 36px; padding: 5px 0; }
+.pk { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--sub); line-height: 26px; }
+.pk svg { width: 16px; height: 16px; }
+.pv { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; min-height: 26px; }
+.vchip { display: inline-block; font-size: 14px; line-height: 1.5; padding: 1px 9px; border-radius: 5px; background: #EBEDF2; color: #2B2F3A; }
+a.vchip.link:hover { background: #DEE2EA; }
+.split-read .chip { border-radius: 5px; border-color: #DDE1E9; background: #fff; padding: 1px 9px; line-height: 1.5; }
+.split-read .prose { margin-top: 28px; }
+@media (max-width: 960px) { .prop { grid-template-columns: 1fr; gap: 2px; } }

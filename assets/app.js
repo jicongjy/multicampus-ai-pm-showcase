@@ -274,9 +274,9 @@
     box.appendChild(el("p", { class: "dp-h" }, [el("b", { text: koDay(date) }), el("span", { class: "sub", text: a ? "결과물 " + a.works.length + " · 노트 " + a.notes.length + " · 용어 " + a.terms.length : "기록 없음" })]));
     if (!total(a)) return box;
     var rows = [];
-    a.works.forEach(function (w) { rows.push(el("a", { class: "dchip", href: href(["projects", w.id]) }, [el("em", { text: "결과물" }), txt(w.title)])); });
-    a.notes.forEach(function (n) { rows.push(el("a", { class: "dchip", href: href(["notes", n.id]) }, [el("em", { text: "노트" }), txt(noteTitle(n))])); });
-    a.terms.forEach(function (t) { rows.push(el("a", { class: "dchip", href: href(["terms", t.name]) }, [el("em", { text: "용어" }), txt(t.name)])); });
+    a.works.forEach(function (w) { rows.push(el("a", { class: "dchip", href: href(["projects", w.id]) }, [el("em", { class: "k k-w", text: "결과물" }), txt(w.title)])); });
+    a.notes.forEach(function (n) { rows.push(el("a", { class: "dchip", href: href(["notes", n.id]) }, [el("em", { class: "k k-n", text: "노트" }), txt(noteTitle(n))])); });
+    a.terms.forEach(function (t) { rows.push(el("a", { class: "dchip", href: href(["terms", t.name]) }, [el("em", { class: "k k-t", text: "용어" }), txt(t.name)])); });
     box.appendChild(el("div", { class: "dchips" }, rows));
     return box;
   }
@@ -301,9 +301,9 @@
   }
   function figs(c) {
     return el("div", { class: "figs" }, [
-      el("span", {}, [el("b", { text: "" + c.w }), el("em", { text: "결과물" })]),
-      el("span", {}, [el("b", { text: "" + c.n }), el("em", { text: "노트" })]),
-      el("span", {}, [el("b", { text: "" + c.t }), el("em", { text: "용어" })])
+      el("span", {}, [el("b", { text: "" + c.w }), el("em", { class: "k k-w", text: "결과물" })]),
+      el("span", {}, [el("b", { text: "" + c.n }), el("em", { class: "k k-n", text: "노트" })]),
+      el("span", {}, [el("b", { text: "" + c.t }), el("em", { class: "k k-t", text: "용어" })])
     ]);
   }
 
@@ -629,13 +629,19 @@
     var read = el("article", { class: "split-read" });
     if (cur) {
       read.appendChild(el("a", { class: "back only-m", href: href(["notes"]), text: "← 노트 목록" }));
-      read.appendChild(el("p", { class: "eyebrow", text: "NOTE · " + mmdd(cur.date) + " " + ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][dowOf(cur.date)] + " · " + weekOf(cur.week).label }));
+      var cp = parts(cur.date);
       read.appendChild(el("h1", { text: noteTitle(cur) }));
       if (cur.one) read.appendChild(el("p", { class: "lead", text: cur.one }));
-      var tt = cur.terms.map(function (n) { return termByName(n) ? termChip(n) : chip(n); });
-      if (tt.length) read.appendChild(el("div", { class: "rel" }, [el("span", { class: "flabel", text: "배운 용어" }), el("div", { class: "chips" }, tt)]));
-      var ws = cur.works.map(workById).filter(Boolean);
-      if (ws.length) read.appendChild(el("div", { class: "rel" }, [el("span", { class: "flabel", text: "만든 결과물" }), el("div", { class: "chips" }, ws.map(function (w) { return el("a", { class: "chip link", href: href(["projects", w.id]), text: w.title }); }))]));
+      var props = el("div", { class: "props" });
+      function prop(ic, label, kids) {
+        if (!kids.length) return;
+        props.appendChild(el("div", { class: "prop" }, [el("span", { class: "pk" }, [icon(ic), txt(label)]), el("div", { class: "pv" }, kids)]));
+      }
+      prop("calendar", "날짜", [el("span", { class: "vchip", text: cp.y + ". " + pad(cp.m) + ". " + pad(cp.d) + " (" + DOW[dowOf(cur.date)] + ")" })]);
+      prop("home", "주차", [el("a", { class: "vchip link", href: href(["weeks"]), text: weekOf(cur.week).label })]);
+      prop("term", "배운 용어", cur.terms.map(function (n) { return termByName(n) ? termChip(n) : chip(n); }));
+      prop("folder", "만든 결과물", cur.works.map(workById).filter(Boolean).map(function (w) { return el("a", { class: "chip link", href: href(["projects", w.id]), text: w.title }); }));
+      read.appendChild(props);
       var body = el("div", { class: "prose" }, [el("p", { class: "sub", text: "불러오는 중입니다." })]);
       read.appendChild(body);
       fetch(cur.html).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -722,10 +728,20 @@
     return box;
   }
 
-  function viewLinks() {
+  function weekIdOfLink(l) {
+    if (l.week) return l.week;
+    var w = data.weeks.filter(function (x) { return l.date >= x.start && l.date <= x.end; })[0];
+    return w ? w.id : (l.date > data.weeks[data.weeks.length - 1].end ? data.weeks[data.weeks.length - 1].id : data.weeks[0].id);
+  }
+
+  function viewLinks(q) {
+    q = q || {};
     var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("REFERENCES", "링크 모음", "참고하려고 모아 둔 사이트입니다."));
-    var sorted = links.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    var lc = { "": links.length };
+    data.weeks.forEach(function (w) { lc[w.id] = links.filter(function (l) { return weekIdOfLink(l) === w.id; }).length; });
+    page.appendChild(tabsBar(data.weeks.map(function (w) { return { id: w.id, t: w.label }; }), q.week || "", function (v) { return href(["links"], { week: v }); }, lc));
+    var sorted = links.filter(function (l) { return !q.week || weekIdOfLink(l) === q.week; }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
     var fsL = el("div", { class: "fscroll" });
     page.appendChild(fsL);
     fsL.appendChild(sorted.length ? el("div", { class: "lgrid" }, sorted.map(function (l, i) {
@@ -736,7 +752,7 @@
         l.note ? el("p", { class: "did", text: l.note }) : null,
         el("span", { class: "lc-go", text: "↗" })
       ]);
-    })) : empty("아직 모은 링크가 없습니다."));
+    })) : empty("이 주차에 모은 링크가 없습니다."));
     view.appendChild(page);
   }
 
@@ -826,7 +842,7 @@
     else if (key === "projects") { if (p[1]) viewWork(p[1]); else viewProjects(r.q); }
     else if (key === "notes") viewNotes(p[1]);
     else if (key === "terms") viewTerms(p[1], r.q);
-    else if (key === "links") viewLinks();
+    else if (key === "links") viewLinks(r.q);
     else if (key === "search") viewSearch(r.q);
     else viewHome();
     if (["weeks", "projects", "terms", "links"].indexOf(key) !== -1) view.classList.add("fit");
