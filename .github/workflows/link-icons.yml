@@ -1,0 +1,36 @@
+name: 링크 아이콘 가져오기
+
+# 링크를 추가해서 data/links.json이 바뀌면, 아이콘이 없는 링크의 파비콘을 받아 저장소에 커밋한다.
+on:
+  push:
+    branches: [main]
+    paths: ["data/links.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: link-icons
+  cancel-in-progress: false
+
+jobs:
+  icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 아이콘 내려받기
+        run: python3 tools/fetch_link_icons.py
+      - name: 바뀐 것이 있으면 커밋
+        run: |
+          if [ -n "$(git status --porcelain data/links.json assets/links)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/links.json assets/links
+            git commit -m "chore: 새 링크의 아이콘 자동 추가"
+            git pull --rebase origin main
+            git push
+          fi
