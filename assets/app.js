@@ -359,7 +359,7 @@
     var sf = el("input", { type: "search", placeholder: "결과물, 노트, 용어 검색", autocomplete: "off", "aria-label": "검색" });
     sf.addEventListener("keydown", function (e) { if (e.key === "Enter" && sf.value.trim()) location.hash = "#/search?q=" + encodeURIComponent(sf.value.trim()); });
     main.appendChild(el("div", { class: "d-title rise" }, [
-      el("div", {}, [el("p", { class: "d-crumb", text: "← 학습 현황" }), el("h1", { text: cw.label }), el("span", { class: "tag", text: (diffDays(TODAY, data.weeks[0].start) + 1) + "일째 · " + cw.period })]),
+      el("div", {}, [el("h1", { text: cw.label }), el("span", { class: "tag", text: (diffDays(TODAY, data.weeks[0].start) + 1) + "일째 · " + cw.period })]),
       el("label", { class: "d-search" }, [sf])
     ]));
 
@@ -368,8 +368,7 @@
     main.appendChild(el("div", { class: "d-hero rise" }, [
       el("div", { class: "d-num" }, [
         el("b", { text: "" + all }),
-        el("p", { class: "d-delta" }, [el("span", { class: delta >= 0 ? "up" : "down", text: (delta >= 0 ? "↑ +" : "↓ ") + delta }), txt(" 지난주 대비 · " + mmdd(TODAY))]),
-        el("p", { class: "d-note", text: "점 하나가 하루에 쌓은 기록" + (per > 1 ? " " + per + "건" : " 1건") + "입니다. 결과물, 노트, 용어를 모두 센 값입니다." })
+        el("p", { class: "d-delta" }, [el("span", { class: delta >= 0 ? "up" : "down", text: (delta >= 0 ? "↑ +" : "↓ ") + delta }), txt(" 지난주 대비 · 점 하나 " + (per > 1 ? per + "건" : "1건"))]),
       ]),
       el("p", { class: "d-state" }, [
         el("b", { text: koDay(pick) + "에는 결과물 " + cd.works.length + "개, 노트 " + cd.notes.length + "개, 용어 " + cd.terms.length + "개를 기록했습니다. " }),
@@ -456,7 +455,7 @@
 
   /* ---------- 주차: 3열 타임라인 ---------- */
   function viewWeeks() {
-    var page = el("div", { class: "page wide" });
+    var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("TIMELINE", "주차", "주차마다 만든 것, 쓴 노트, 처음 나온 용어를 한 줄로 이어서 봅니다."));
     var cw = currentWeek();
     var mx = maxTotal();
@@ -507,7 +506,7 @@
   }
 
   function viewProjects(q) {
-    var page = el("div", { class: "page wide" });
+    var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("WORKS", "결과물", "직접 만든 프로토타입, 기획 문서, 보고서입니다."));
     var types = [];
     works.forEach(function (w) { if (types.indexOf(w.type) === -1) types.push(w.type); });
@@ -527,9 +526,11 @@
     page.appendChild(bar);
     var list = works.filter(function (w) { return (!q.week || w.week === q.week) && (!q.type || w.type === q.type); })
       .sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
-    if (!list.length) page.appendChild(empty("조건에 맞는 결과물이 없습니다."));
-    else if (mode === "table") page.appendChild(workTable(list));
-    else page.appendChild(masonry(list, workCard));
+    var fs = el("div", { class: "fscroll" });
+    page.appendChild(fs);
+    if (!list.length) fs.appendChild(empty("조건에 맞는 결과물이 없습니다."));
+    else if (mode === "table") fs.appendChild(workTable(list));
+    else fs.appendChild(masonry(list, workCard));
     view.appendChild(page);
   }
 
@@ -570,7 +571,7 @@
     var acts = [];
     (w.links || []).forEach(function (l) { acts.push(el("a", { class: "btn", href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer", text: l.label + " ↗" })); });
     if (w.file) acts.push(el("a", { class: "btn primary", href: enc(w.file), target: "_blank", rel: "noopener noreferrer", text: "열어 보기 ↗" }));
-    var page = el("div", { class: "dview" });
+    var page = el("div", { class: "dview pfit" });
     page.appendChild(dhead(href(["projects"]), w.title, [tchip(w.type), mspan("calendar", mmdd(w.date)), mspan("home", weekOf(w.week).label), mspan("note", "노트 " + ns.length), mspan("term", "용어 " + used.length)], acts));
 
     var L = el("div", { class: "dp-l" });
@@ -650,7 +651,7 @@
   /* ---------- 용어: 타일 + 상세 ---------- */
   function viewTerms(name, q) {
     if (name) { viewTerm(name); return; }
-    var page = el("div", { class: "page wide" });
+    var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("GLOSSARY", "용어", "배운 말을 내 문장으로 정리했습니다. 아래 칸은 용어가 나온 노트를 날짜순으로 표시합니다."));
     var tc = { "": terms.length };
     data.weeks.forEach(function (w) { tc[w.id] = terms.filter(function (t) { return t.first >= w.start && t.first <= w.end; }).length; });
@@ -659,7 +660,9 @@
     var list = terms.filter(function (t) { return !wk || (t.first >= wk.start && t.first <= wk.end); })
       .sort(function (a, b) { return a.first < b.first ? 1 : a.first > b.first ? -1 : a.name.localeCompare(b.name, "ko"); });
     page.appendChild(el("p", { class: "sub count", text: list.length + "개 · 처음 나온 날 순" }));
-    page.appendChild(el("div", { class: "tgrid" }, list.map(function (t, i) {
+    var fsT = el("div", { class: "fscroll" });
+    page.appendChild(fsT);
+    fsT.appendChild(el("div", { class: "tgrid" }, list.map(function (t, i) {
       return el("a", { class: "tile rise", style: "animation-delay:" + Math.min(i, 12) * 30 + "ms", href: href(["terms", t.name]) }, [
         el("p", { class: "t-top" }, [el("span", { class: "meta" }, [isNew(t.first) ? dot() : null, txt(mmdd(t.first))]), el("span", { class: "t-n", text: "×" + t.notes.length })]),
         el("h3", { text: t.name }),
@@ -675,7 +678,7 @@
     if (!t) { notFound(href(["terms"]), "용어 목록"); return; }
     var ns = t.notes.map(noteById).filter(Boolean).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     var ws = t.works.map(workById).filter(Boolean);
-    var page = el("div", { class: "dview" });
+    var page = el("div", { class: "dview pfit" });
     page.appendChild(dhead(href(["terms"]), t.name, [mspan("calendar", "처음 " + mmdd(t.first)), mspan("note", "노트 " + ns.length + "개"), mspan("folder", "결과물 " + ws.length + "개")], []));
 
     var L = el("div", { class: "dp-l" });
@@ -709,10 +712,12 @@
 
   /* ---------- 링크 모음 ---------- */
   function viewLinks() {
-    var page = el("div", { class: "page wide" });
+    var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("REFERENCES", "링크 모음", "참고하려고 모아 둔 사이트입니다."));
     var sorted = links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-    page.appendChild(sorted.length ? el("div", { class: "lgrid" }, sorted.map(function (l, i) {
+    var fsL = el("div", { class: "fscroll" });
+    page.appendChild(fsL);
+    fsL.appendChild(sorted.length ? el("div", { class: "lgrid" }, sorted.map(function (l, i) {
       return el("a", { class: "card lcard rise", style: "animation-delay:" + i * 40 + "ms", href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer" }, [
         el("div", { class: "lc-top" }, [art("browser"), el("span", { class: "lc-n", text: pad(i + 1) })]),
         el("h3", { text: l.title }),
@@ -813,6 +818,7 @@
     else if (key === "links") viewLinks();
     else if (key === "search") viewSearch(r.q);
     else viewHome();
+    if (["weeks", "projects", "terms", "links"].indexOf(key) !== -1) view.classList.add("fit");
     $("main").scrollTop = 0;
     window.scrollTo(0, 0);
     document.title = (TITLES[key] ? TITLES[key] + " · " : "") + "AI PM Archive";
