@@ -803,7 +803,7 @@
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     masonry.hosts = [];
-    setActive(key === "search" ? "" : key);
+    setActive(key === "search" ? "none" : key);
     $("side").classList.remove("open");
     $("scrim").hidden = true;
     if (key === "weeks") viewWeeks();
