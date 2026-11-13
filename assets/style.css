@@ -759,3 +759,9 @@ body.poster-mode .ext span { display: none; }
   .page.pfit, .dview.pfit { height: auto; }
   .pfit .fscroll { overflow: visible; }
 }
+
+/* 링크 카드 아이콘 */
+.lc-ico { width: 60px; height: 60px; border-radius: 16px; background: var(--soft); display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); }
+.lc-ico img { width: 36px; height: 36px; object-fit: contain; display: block; }
+.lc-ico b { font-size: 24px; font-weight: 500; color: var(--sub); }
+.lcard:hover .lc-ico { background: #fff; }

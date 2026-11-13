@@ -10,6 +10,7 @@
 ├── assets/            # style.css, app.js, thumbs/ (썸네일 이미지)
 ├── tools/make_thumbs.py  # 썸네일 자동 생성
 ├── tools/export_notes.py # 공개 노트 내보내기
+├── tools/fetch_link_icons.py # 링크 아이콘(파비콘) 내려받기
 ├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
 ├── data/links.json    # 링크 모음 (참고용으로 모아 둔 글과 사이트. 실습 결과물 사이트는 넣지 않음)
 ├── data/lessons.json  # 교안 링크 (주차 화면에 표시, 내용은 옮기지 않고 링크만)
@@ -76,6 +77,14 @@ python3 tools/export_notes.py ~/노트저장소경로 --dry-run
 3. 결과를 확인한 뒤 `--dry-run`을 빼고 실행하면 `notes/`, `data/notes.json`, `data/terms.json`이 만들어집니다.
 
 자동으로 빠지는 것: 교안, 슬랙, 회고, 출처, 메모, 과제, 링크 모음, 다음에 할 일 구역과, 교안이나 슬랙을 언급한 줄. 이메일, 전화번호, 키, 앱스 스크립트 주소 패턴이 남아 있으면 그 노트는 내보내지 않습니다. 공개 전에 결과 파일을 한 번 읽어 보세요.
+
+## 링크 추가하기
+
+`data/links.json`의 `links` 배열에 `id`, `title`, `url`, `date`, `note`(한 줄 설명, 선택)를 적고 아래 명령을 실행하면, 각 사이트의 아이콘을 `assets/links/`에 내려받아 `icon` 경로를 적어 줍니다. 아이콘을 못 찾으면 도메인 첫 글자가 대신 보입니다.
+
+```bash
+python3 tools/fetch_link_icons.py
+```
 
 ## 내 컴퓨터에서 보기
 

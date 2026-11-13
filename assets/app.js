@@ -711,6 +711,17 @@
   }
 
   /* ---------- 링크 모음 ---------- */
+  function linkIcon(l) {
+    var box = el("span", { class: "lc-ico" });
+    function letter() { box.textContent = ""; box.appendChild(el("b", { text: host(l.url).charAt(0).toUpperCase() })); }
+    if (l.icon) {
+      var img = el("img", { src: enc(l.icon), alt: "", loading: "lazy", width: "36", height: "36" });
+      img.addEventListener("error", letter);
+      box.appendChild(img);
+    } else letter();
+    return box;
+  }
+
   function viewLinks() {
     var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("REFERENCES", "링크 모음", "참고하려고 모아 둔 사이트입니다."));
@@ -719,7 +730,7 @@
     page.appendChild(fsL);
     fsL.appendChild(sorted.length ? el("div", { class: "lgrid" }, sorted.map(function (l, i) {
       return el("a", { class: "card lcard rise", style: "animation-delay:" + i * 40 + "ms", href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer" }, [
-        el("div", { class: "lc-top" }, [art("browser"), el("span", { class: "lc-n", text: pad(i + 1) })]),
+        el("div", { class: "lc-top" }, [linkIcon(l), el("span", { class: "lc-n", text: pad(i + 1) })]),
         el("h3", { text: l.title }),
         el("p", { class: "sub", text: host(l.url) }),
         l.note ? el("p", { class: "did", text: l.note }) : null,

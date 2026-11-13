@@ -5,42 +5,48 @@
       "title": "SEO를 넘어 GEO로, 생성형 AI 시대 이커머스 대응 전략",
       "url": "https://www.tosspayments.com/blog/articles/39461",
       "note": "토스페이먼츠 블로그",
-      "date": "2026-11-13"
+      "date": "2026-11-13",
+      "icon": "assets/links/l-ref-toss-geo.png"
     },
     {
       "id": "l-ref-daangn-policy",
       "title": "당근 운영정책",
       "url": "https://www.daangn.com/wv/faqs/slug/operation_policy",
       "note": "당근 고객센터",
-      "date": "2026-11-13"
+      "date": "2026-11-13",
+      "icon": "assets/links/l-ref-daangn-policy.ico"
     },
     {
       "id": "l-ref-schema",
       "title": "Schema.org",
       "url": "https://schema.org/",
       "note": "구조화 데이터 표준 어휘",
-      "date": "2026-11-13"
+      "date": "2026-11-13",
+      "icon": "assets/links/l-ref-schema.png"
     },
     {
       "id": "l-ref-nngroup",
       "title": "Nielsen Norman Group",
       "url": "https://www.nngroup.com/",
       "note": "UX 리서치와 교육",
-      "date": "2026-11-13"
+      "date": "2026-11-13",
+      "icon": "assets/links/l-ref-nngroup.ico"
     },
     {
       "id": "l-ref-500korea",
       "title": "500 Korea | 500 Global",
       "url": "https://500.co/korea-home-kr",
       "note": "500 Global 한국 페이지",
-      "date": "2026-11-13"
+      "date": "2026-11-13",
+      "icon": "assets/links/l-ref-500korea.ico"
     },
     {
       "id": "l-ref-hbr",
       "title": "하버드비즈니스리뷰 코리아",
       "url": "https://www.hbrkorea.com/",
       "note": "경영, 전략 아티클",
-      "date": "2026-11-13"
+      "date": "2026-11-13",
+      "icon": "assets/links/l-ref-hbr.png"
     }
   ]
 }
