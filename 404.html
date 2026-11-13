@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>404 · 아무것도 없음</title>
+<meta name="robots" content="noindex" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="icon" href="/portfolio/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/portfolio/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/portfolio/apple-touch-icon.png" />
+<style>
+:root{--ink:#0a0a0a;--muted:#6b6b6b;--bg:#f6f6f4;color-scheme:light}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;word-break:keep-all;-webkit-font-smoothing:antialiased;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));overflow:hidden}
+main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;padding:48px 0;text-align:center}
+h1{margin:0;font-size:clamp(34px,6vw,84px);line-height:1.2;font-weight:600;letter-spacing:-.045em;text-wrap:balance}
+.code{position:fixed;inset:0;z-index:-1;margin:0;display:flex;align-items:center;justify-content:center;font-size:clamp(220px,52vw,720px);line-height:1;font-weight:800;letter-spacing:-.05em;color:#e9e9e4;font-variant-numeric:tabular-nums;user-select:none;pointer-events:none}
+main{position:relative;z-index:1}
+.eyes{display:flex;gap:clamp(12px,2vw,24px);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation}
+.eye{position:relative;width:clamp(84px,12vw,148px);height:clamp(84px,12vw,148px);border-radius:50%;background:#fff;box-shadow:inset 0 0 0 3px var(--ink);overflow:hidden;transition:transform .12s ease}
+.eye i{position:absolute;left:50%;top:50%;width:38%;height:38%;margin:-19% 0 0 -19%;border-radius:50%;background:var(--ink);will-change:transform}
+.eyes.blink .eye{transform:scaleY(.08)}
+.tip{position:fixed;left:0;top:0;z-index:10;padding:8px 14px 9px;border-radius:999px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;line-height:1.2;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s ease,background-color .15s ease,color .15s ease;will-change:transform}
+.tip.on{opacity:1}
+.tip.hot{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+@media (hover:none){.tip{display:none}}
+@keyframes nudge{0%,86%,100%{transform:translateY(0)}90%{transform:translateY(-14px)}94%{transform:translateY(0)}97%{transform:translateY(-6px)}}
+.eyes:not(.poked) .eye{animation:nudge 4.2s ease-in-out 1.6s infinite}
+.eyes:not(.poked) .eye+.eye{animation-delay:1.7s}
+.cap{margin:0;min-height:1.7em;font-size:17px;line-height:1.7;color:var(--muted)}
+/* 어지러운 상태: 눈이 소용돌이로 바뀌고, 배경이 최면처럼 돈다 */
+body::before{content:"";position:fixed;inset:-70%;z-index:-2;pointer-events:none;opacity:0;transition:opacity .5s ease;background:repeating-conic-gradient(from 0deg,#0a0a0a 0 9deg,#f6f6f4 9deg 18deg)}
+body.dizzy::before{opacity:1;animation:swirl 2.4s linear infinite}
+body.dizzy .code{opacity:0}
+.code{transition:opacity .4s ease}
+body.dizzy h1,body.dizzy .cap{background:rgba(246,246,244,.94);padding:.08em .5em;border-radius:14px}
+body.dizzy .eyes{pointer-events:none;cursor:not-allowed;animation:wobble .55s ease-in-out infinite}
+body.dizzy .eye i{width:100%;height:100%;left:0;top:0;margin:0;border-radius:50%;background:repeating-radial-gradient(circle at 50% 50%,#0a0a0a 0 4px,#fff 4px 9px),repeating-conic-gradient(#0a0a0a 0 20deg,#fff 20deg 40deg);background-blend-mode:difference;animation:spin .7s linear infinite}
+body.dizzy .eye+.eye i{animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes swirl{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.25)}100%{transform:rotate(360deg) scale(1)}}
+@keyframes wobble{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.eye{transition:none}.eyes:not(.poked) .eye{animation:none}.tip{transition:none}body.dizzy::before,body.dizzy .eye i,body.dizzy .eyes{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <p class="code" aria-label="오류 코드 404">404</p>
+  <h1>여기엔<br>아무것도 없어요</h1>
+  <div class="eyes" id="eyes" role="button" tabindex="0" aria-label="눈을 눌러 보세요"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
+  <p class="cap" id="cap" aria-live="polite">정말이에요. 구석구석 찾아봤는데 먼지뿐이었어요.</p>
+</main>
+<div class="tip" id="tip" aria-hidden="true">눌러 봐</div>
+<script>
+(function () {
+  var eyes = document.getElementById('eyes'), cap = document.getElementById('cap');
+  var pupils = [].slice.call(eyes.querySelectorAll('i')), eyeEls = [].slice.call(eyes.querySelectorAll('.eye'));
+  function look(x, y) {
+    pupils.forEach(function (p, i) {
+      var r = eyeEls[i].getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var dx = x - cx, dy = y - cy, d = Math.sqrt(dx * dx + dy * dy) || 1, max = r.width * 0.2, k = Math.min(max, d) / d;
+      p.style.transform = 'translate(' + (dx * k).toFixed(1) + 'px,' + (dy * k).toFixed(1) + 'px)';
+    });
+  }
+  window.addEventListener('pointermove', function (e) { look(e.clientX, e.clientY); }, { passive: true });
+  window.addEventListener('touchstart', function (e) { var t = e.touches[0]; if (t) look(t.clientX, t.clientY); }, { passive: true });
+  var lines = ['아무것도 없다니까요.', '진짜예요. 믿어 주세요.', '그래도 눈은 마주쳤네요.', '자꾸 누르면 어지러워요.', '', '여기까지 오신 건 대단한데, 정말 없어요.', '커피나 한잔 하고 오세요.'];
+  var backLines = ['휴… 이제 좀 괜찮아요. 그래도 살살 눌러 주세요.', '아직 머리가 핑 돌아요. 정말로 아무것도 없다니까요.', '돌아왔어요! 다음엔 천천히 부탁드려요.'];
+  var n = 0, bn = 0, locked = false;
+  function dizzy() {
+    locked = true;
+    document.body.classList.add('dizzy');
+    cap.textContent = '으으… 세상이 빙글빙글…';
+    tip.textContent = '어지러워…'; tip.classList.add('hot');
+    setTimeout(function () {
+      document.body.classList.remove('dizzy');
+      locked = false;
+      cap.textContent = backLines[bn++ % backLines.length];
+      tip.textContent = '눌러 봐'; tip.classList.remove('hot');
+    }, 3400);
+  }
+  function poke() {
+    if (locked) return;
+    eyes.classList.add('blink');
+    setTimeout(function () { eyes.classList.remove('blink'); }, 140);
+    var i = n++ % lines.length;
+    if (i === 4) { dizzy(); return; }
+    cap.textContent = lines[i];
+  }
+  var tip = document.getElementById('tip'), tx = 0, ty = 0, cx = 0, cy = 0, seen = false, busy = false, pokes = 0;
+  function frame() {
+    cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18;
+    tip.style.transform = 'translate(' + (cx + 18).toFixed(1) + 'px,' + (cy + 22).toFixed(1) + 'px)';
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    tx = e.clientX; ty = e.clientY;
+    if (!seen) { seen = true; cx = tx; cy = ty; tip.classList.add('on'); requestAnimationFrame(frame); }
+  }, { passive: true });
+  document.addEventListener('pointerleave', function () { tip.classList.remove('on'); seen = false; });
+  function say(t) { tip.textContent = t; }
+  eyes.addEventListener('pointerenter', function () { if (!busy) { say(pokes > 3 ? '또 눌러 봐' : '여기, 여기!'); tip.classList.add('hot'); } });
+  eyes.addEventListener('pointerleave', function () { if (!busy) { say('눌러 봐'); tip.classList.remove('hot'); } });
+  eyes.addEventListener('click', function () {
+    pokes++; eyes.classList.add('poked'); busy = true; say('아야!'); tip.classList.add('hot');
+    setTimeout(function () { busy = false; if (locked) return; say(eyes.matches(':hover') ? '또 눌러 봐' : '눌러 봐'); if (!eyes.matches(':hover')) tip.classList.remove('hot'); }, 650);
+  });
+  eyes.addEventListener('click', poke);
+  eyes.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); poke(); } });
+  var t = 0;
+  (function idle() { if (!window.__moved) look(innerWidth / 2 + Math.sin(t) * 120, innerHeight / 2 + 160); t += 0.02; });
+  look(innerWidth / 2, innerHeight / 2 + 200);
+})();
+</script>
+</body>
+</html>
