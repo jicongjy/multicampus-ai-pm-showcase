@@ -336,101 +336,111 @@
   }
 
   function viewHome() {
-    var cw = currentWeek();
-    var weekFilter = "";
-    var q = "";
-    var CATS = [
-      { k: "projects", t: "결과물", n: works.length },
-      { k: "notes", t: "노트", n: notes.length },
-      { k: "terms", t: "용어", n: terms.length },
-      { k: "links", t: "링크", n: links.length },
-      { k: "weeks", t: "주차", n: data.weeks.length }
-    ];
-    var cur = CATS[0];
-    function inWeek(date) { if (!weekFilter) return true; var w = weekOf(weekFilter); return date >= w.start && date <= w.end; }
-    function rowsOf(k) {
-      var out = [];
-      if (k === "projects") works.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (w) { if (inWeek(w.date)) out.push({ t: w.title, m: [w.type, mmdd(w.date)], h: href(["projects", w.id]), n: isNew(w.date) }); });
-      if (k === "notes") notes.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (n) { if (inWeek(n.date)) out.push({ t: noteTitle(n), m: [weekOf(n.week).label, mmdd(n.date)], h: href(["notes", n.id]), n: isNew(n.date) }); });
-      if (k === "terms") terms.slice().sort(function (a, b) { return a.first < b.first ? 1 : a.first > b.first ? -1 : a.name < b.name ? -1 : 1; }).forEach(function (t) { if (inWeek(t.first)) out.push({ t: t.name, m: ["노트 " + t.notes.length + "개", mmdd(t.first)], h: href(["terms", t.name]), n: isNew(t.first) }); });
-      if (k === "links") links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (l) { out.push({ t: l.title, m: [host(l.url)], h: safeUrl(l.url), ext: true }); });
-      if (k === "weeks") data.weeks.slice().reverse().forEach(function (w) { var c = counts(w); out.push({ t: w.label, m: ["결과물 " + c.w, "노트 " + c.n, "용어 " + c.t], h: href(["weeks"]), n: w.id === cw.id }); });
-      return out;
+    var map = activity();
+    var cw = currentWeek(), ci = data.weeks.indexOf(cw);
+    var cs = data.weeks.map(counts);
+    function sum(c) { return c.w + c.n + c.t; }
+    var all = works.length + notes.length + terms.length;
+    var days = [];
+    for (var d = data.weeks[0].start; d <= TODAY; d = addDays(d, 1)) days.push(d);
+    days.forEach(function (x) { if (!map[x]) map[x] = { works: [], notes: [], terms: [] }; });
+    var mx = Math.max.apply(null, days.map(function (x) { return total(map[x]); })) || 1;
+    var per = Math.max(1, Math.ceil(mx / 13));
+    var active = days.filter(function (x) { return total(map[x]) > 0; });
+    var pick = active[active.length - 1] || TODAY;
+    var best = days.reduce(function (a, x) { return total(map[x]) > total(map[a]) ? x : a; }, days[0]);
+    var thisW = sum(cs[ci]), lastW = ci > 0 ? sum(cs[ci - 1]) : 0;
+    var delta = thisW - lastW;
+
+    var page = el("div", { class: "dash" });
+    var main = el("div", { class: "d-main" });
+
+    /* 제목줄 */
+    var sf = el("input", { type: "search", placeholder: "결과물, 노트, 용어 검색", autocomplete: "off", "aria-label": "검색" });
+    sf.addEventListener("keydown", function (e) { if (e.key === "Enter" && sf.value.trim()) location.hash = "#/search?q=" + encodeURIComponent(sf.value.trim()); });
+    main.appendChild(el("div", { class: "d-title rise" }, [
+      el("div", {}, [el("p", { class: "d-crumb", text: "← 학습 현황" }), el("h1", { text: cw.label }), el("span", { class: "tag", text: (diffDays(TODAY, data.weeks[0].start) + 1) + "일째 · " + cw.period })]),
+      el("label", { class: "d-search" }, [sf])
+    ]));
+
+    /* 큰 숫자와 문장 */
+    var cd = map[pick];
+    main.appendChild(el("div", { class: "d-hero rise" }, [
+      el("div", { class: "d-num" }, [
+        el("b", { text: "" + all }),
+        el("p", { class: "d-delta" }, [el("span", { class: delta >= 0 ? "up" : "down", text: (delta >= 0 ? "↑ +" : "↓ ") + delta }), txt(" 지난주 대비 · " + mmdd(TODAY))]),
+        el("p", { class: "d-note", text: "점 하나가 하루에 쌓은 기록" + (per > 1 ? " " + per + "건" : " 1건") + "입니다. 결과물, 노트, 용어를 모두 센 값입니다." })
+      ]),
+      el("p", { class: "d-state" }, [
+        el("b", { text: koDay(pick) + "에는 결과물 " + cd.works.length + "개, 노트 " + cd.notes.length + "개, 용어 " + cd.terms.length + "개를 기록했습니다. " }),
+        txt("지금까지 모두 " + all + "건이고, 가장 많이 쌓은 날은 " + koDay(best) + "입니다.")
+      ])
+    ]));
+
+    /* 점 차트 */
+    var chart = el("div", { class: "d-chart rise" });
+    var cols = el("div", { class: "dcols" });
+    var card = el("div", { class: "dcard" });
+    var colEls = {};
+    function select(day) {
+      Object.keys(colEls).forEach(function (k) { colEls[k].classList.toggle("sel", k === day); });
+      card.textContent = "";
+      card.appendChild(dayPanel(map, day));
     }
-
-    var page = el("div", { class: "poster" });
-
-    /* 왼쪽 */
-    var left = el("section", { class: "p-left rise" });
-    var dials = el("div", { class: "dials" });
-    data.weeks.forEach(function (w) {
-      var c = counts(w);
-      dials.appendChild(el("a", { class: "dial", href: href(["weeks"]) }, [
-        el("span", { class: "dial-c" + (w.id === cw.id ? " now" : "") }, [el("b", { text: "" + (c.w + c.n + c.t) })]),
-        el("span", { class: "dial-l", text: w.label }),
-        el("span", { class: "dial-s", text: "결과물 " + c.w + " · 노트 " + c.n })
-      ]));
+    days.forEach(function (day) {
+      var wk = data.weeks.filter(function (w) { return day >= w.start && day <= w.end; })[0];
+      var n = Math.ceil(total(map[day]) / per);
+      var col = el("button", { type: "button", class: "dc" + (wk && wk.id === cw.id ? " cur" : "") + (wk && wk.start === day ? " ws" : ""), title: koDay(day) + " " + total(map[day]) + "건" });
+      var dots = el("span", { class: "dd" });
+      for (var i = 0; i < n; i++) dots.appendChild(el("i"));
+      col.appendChild(dots);
+      col.appendChild(el("span", { class: "dl", text: "" + parts(day).d }));
+      if (wk && wk.start === day) col.appendChild(el("span", { class: "dw", text: wk.label }));
+      col.addEventListener("click", function () { select(day); });
+      col.addEventListener("mouseenter", function () { select(day); });
+      colEls[day] = col;
+      cols.appendChild(col);
     });
-    left.appendChild(dials);
-    var big = el("div", { class: "bigs" });
-    var bigEls = CATS.map(function (c) {
-      var a = el("a", { class: "big", href: c.k === "links" ? href(["links"]) : href([c.k]) }, [el("span", { class: "bn", text: "" + c.n }), el("span", { class: "bt", text: c.t })]);
-      a.addEventListener("mouseenter", function () { pick(c); });
-      a.addEventListener("focus", function () { pick(c); });
-      big.appendChild(a);
-      return a;
-    });
-    left.appendChild(big);
+    chart.appendChild(cols);
+    chart.appendChild(card);
+    main.appendChild(chart);
+    select(pick);
 
-    /* 오른쪽 패널 */
-    var panel = el("section", { class: "p-panel rise" });
-    var title = el("h2", { class: "pp-t" });
-    var input = el("input", { type: "search", placeholder: "검색", autocomplete: "off", "aria-label": "목록 안에서 검색" });
-    var pills = el("div", { class: "pills" });
-    var group = el("p", { class: "pp-g" });
-    var list = el("div", { class: "pp-list scroll" });
-    panel.appendChild(el("div", { class: "pp-h" }, [title, el("label", { class: "pp-s" }, [input])]));
-    panel.appendChild(pills);
-    panel.appendChild(group);
-    panel.appendChild(list);
-    input.addEventListener("input", function () { q = input.value.trim().toLowerCase(); draw(); });
+    /* 통계 카드 */
+    function statCard(cls, label, ic, key, tot, hrefv) {
+      var series = days.map(function (x) { return map[x][key].length; });
+      var m = Math.max.apply(null, series) || 1;
+      var thisN = cs[ci][{ works: "w", notes: "n", terms: "t" }[key]];
+      var bars = el("div", { class: "sbars" });
+      series.forEach(function (v) { bars.appendChild(el("i", { style: v ? "height:" + Math.max(8, v / m * 100) + "%" : "height:2px;opacity:.3" })); });
+      return el("a", { class: "scard " + cls + " rise", href: hrefv }, [
+        el("div", { class: "sc-h" }, [el("span", { class: "sc-l" }, [icon(ic), txt(label)]), el("span", { class: "sc-go", text: "↗" })]),
+        el("b", { class: "sc-n", text: "" + tot }),
+        el("p", { class: "sc-s", text: "이번 주 +" + thisN }),
+        bars
+      ]);
+    }
+    main.appendChild(el("div", { class: "scards" }, [
+      statCard("navy", "결과물", "folder", "works", works.length, href(["projects"])),
+      statCard("sky", "노트", "note", "notes", notes.length, href(["notes"])),
+      statCard("mono", "용어", "term", "terms", terms.length, href(["terms"]))
+    ]));
 
-    function drawPills() {
-      pills.textContent = "";
-      if (cur.k === "links" || cur.k === "weeks") { pills.hidden = true; return; }
-      pills.hidden = false;
-      [{ id: "", t: "전체" }].concat(data.weeks.map(function (w) { return { id: w.id, t: w.label }; })).forEach(function (v) {
-        var b = el("button", { type: "button", class: "pill" + (weekFilter === v.id ? " on" : ""), text: v.t });
-        b.addEventListener("click", function () { weekFilter = v.id; drawPills(); draw(); });
-        pills.appendChild(b);
-      });
-    }
-    function draw() {
-      title.textContent = cur.t;
-      var rows = rowsOf(cur.k).filter(function (r) { return !q || r.t.toLowerCase().indexOf(q) !== -1; });
-      group.textContent = rows.length + "개";
-      list.textContent = "";
-      if (!rows.length) list.appendChild(el("p", { class: "empty", text: "맞는 항목이 없습니다." }));
-      rows.forEach(function (r) {
-        var attrs = { class: "pp-row", href: r.h };
-        if (r.ext) { attrs.target = "_blank"; attrs.rel = "noopener noreferrer"; }
-        list.appendChild(el("a", attrs, [
-          el("span", { class: "pp-n" }, [r.n ? dot() : null, txt(r.t)]),
-          el("span", { class: "pp-m" }, r.m.map(function (x) { return el("span", { text: x }); }))
-        ]));
-      });
-    }
-    function pick(c) {
-      if (c === cur) return;
-      cur = c; weekFilter = ""; input.value = ""; q = "";
-      bigEls.forEach(function (e, i) { e.classList.toggle("on", CATS[i] === c); });
-      drawPills(); draw();
-    }
-    bigEls[0].classList.add("on");
-    drawPills(); draw();
-
-    page.appendChild(left);
-    page.appendChild(panel);
+    /* 오른쪽 파란 패널 */
+    var recent = [];
+    works.forEach(function (w) { recent.push({ date: w.date, kind: "결과물", title: w.title, href: href(["projects", w.id]) }); });
+    notes.forEach(function (n) { recent.push({ date: n.date, kind: "노트", title: noteTitle(n), href: href(["notes", n.id]) }); });
+    recent.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    var side = el("aside", { class: "d-side rise" }, [
+      el("h2", { text: "최근 기록" }),
+      el("div", { class: "ds-stat" }, [el("span", { text: "이번 주 기록" }), el("b", { text: "" + thisW }), el("em", { text: "결과물 " + cs[ci].w + " · 노트 " + cs[ci].n + " · 용어 " + cs[ci].t })]),
+      el("div", { class: "ds-list" }, recent.slice(0, 7).map(function (r) {
+        return el("a", { class: "ds-row", href: r.href }, [el("span", { class: "ds-k", text: r.kind }), el("span", { class: "ds-t", text: r.title }), el("span", { class: "ds-d", text: mmdd(r.date) })]);
+      })),
+      el("div", { class: "ds-art" }, [art("hero")])
+    ]);
+    page.appendChild(main);
+    page.appendChild(side);
     view.appendChild(page);
     view.classList.add("fit");
   }
