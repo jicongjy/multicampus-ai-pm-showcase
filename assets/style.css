@@ -908,6 +908,7 @@ body.poster-mode .nav-item:hover { background: transparent; color: #6A6A68; }
 body.poster-mode .nav-item.on:hover { background: var(--blue); color: #fff; }
 body.poster-mode .ext:hover { background: transparent; color: #6A6A68; }
 @media (min-width: 961px) {
+  body.poster-mode .nav-item:hover .nl, body.poster-mode .nav-item:focus-visible .nl, body.poster-mode .ext:hover .nl, body.poster-mode .profile:hover .p-t, body.poster-mode .profile:focus-visible .p-t { transform: none; }
   body.poster-mode .side:hover, body.poster-mode .side:focus-within { width: 64px; box-shadow: none; }
   body.poster-mode .side.shut { pointer-events: auto; }
   body.poster-mode .side:not(.shut):hover, body.poster-mode .side:not(.shut):has(:focus-visible) {
