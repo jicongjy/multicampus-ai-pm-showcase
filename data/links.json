@@ -7,7 +7,7 @@
       "note": "토스페이먼츠 블로그",
       "date": "2026-11-13",
       "icon": "assets/links/l-ref-toss-geo.png",
-      "week": "week-03"
+      "week": "week-01"
     },
     {
       "id": "l-ref-daangn-policy",
@@ -16,7 +16,7 @@
       "note": "당근 고객센터",
       "date": "2026-11-13",
       "icon": "assets/links/l-ref-daangn-policy.ico",
-      "week": "week-03"
+      "week": "week-01"
     },
     {
       "id": "l-ref-schema",
@@ -25,7 +25,7 @@
       "note": "구조화 데이터 표준 어휘",
       "date": "2026-11-13",
       "icon": "assets/links/l-ref-schema.png",
-      "week": "week-03"
+      "week": "week-01"
     },
     {
       "id": "l-ref-nngroup",
@@ -34,7 +34,7 @@
       "note": "UX 리서치와 교육",
       "date": "2026-11-13",
       "icon": "assets/links/l-ref-nngroup.ico",
-      "week": "week-03"
+      "week": "week-01"
     },
     {
       "id": "l-ref-500korea",
@@ -43,7 +43,7 @@
       "note": "500 Global 한국 페이지",
       "date": "2026-11-13",
       "icon": "assets/links/l-ref-500korea.ico",
-      "week": "week-03"
+      "week": "week-01"
     },
     {
       "id": "l-ref-hbr",
@@ -52,7 +52,7 @@
       "note": "경영, 전략 아티클",
       "date": "2026-11-13",
       "icon": "assets/links/l-ref-hbr.png",
-      "week": "week-03"
+      "week": "week-01"
     }
   ]
 }
