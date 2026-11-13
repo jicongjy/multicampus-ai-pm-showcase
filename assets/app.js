@@ -774,27 +774,30 @@
   /* ---------- 검색 ---------- */
   function viewSearch(q) {
     var s = (q.q || "").trim().toLowerCase();
-    var page = el("div", { class: "page" });
+    var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("SEARCH", "검색", s ? "\"" + q.q + "\"" : "검색어를 입력하세요."));
     if (!s) { view.appendChild(page); return; }
     function has() { return Array.prototype.slice.call(arguments).join(" ").toLowerCase().indexOf(s) !== -1; }
     var groups = [
-      ["결과물", works.filter(function (w) { return has(w.title, w.did, w.summary, w.type); }).map(function (w) { return { t: w.title, sub: w.did, h: href(["projects", w.id]) }; })],
-      ["노트", notes.filter(function (n) { return has(n.title, n.one, n.terms.join(" ")); }).map(function (n) { return { t: noteTitle(n), sub: n.one, h: href(["notes", n.id]) }; })],
-      ["용어", terms.filter(function (t) { return has(t.name, t.def); }).map(function (t) { return { t: t.name, sub: t.def, h: href(["terms", t.name]) }; })],
-      ["링크", links.filter(function (l) { return has(l.title, l.url, l.note || ""); }).map(function (l) { return { t: l.title, sub: host(l.url), h: safeUrl(l.url), ext: true }; })]
+      ["결과물", works.filter(function (w) { return has(w.title, w.did, w.summary, w.type); }).map(function (w) { return { t: w.title, sub: w.did, m: [w.type, mmdd(w.date)], h: href(["projects", w.id]) }; })],
+      ["노트", notes.filter(function (n) { return has(n.title, n.one, n.terms.join(" ")); }).map(function (n) { return { t: noteTitle(n), sub: n.one, m: [weekOf(n.week).label, mmdd(n.date)], h: href(["notes", n.id]) }; })],
+      ["용어", terms.filter(function (t) { return has(t.name, t.def); }).map(function (t) { return { t: t.name, sub: t.def, m: ["노트 " + t.notes.length + "개", mmdd(t.first)], h: href(["terms", t.name]) }; })],
+      ["링크", links.filter(function (l) { return has(l.title, l.url, l.note || ""); }).map(function (l) { return { t: l.title, sub: l.note || "", m: [host(l.url)], h: safeUrl(l.url), ext: true }; })]
     ];
     var any = false;
+    var fs = el("div", { class: "fscroll" });
+    page.appendChild(fs);
     groups.forEach(function (g) {
       if (!g[1].length) return;
       any = true;
-      page.appendChild(el("section", { class: "block" }, [secHead(g[0], "" + g[1].length), el("div", { class: "plainlist" }, g[1].map(function (r) {
+      fs.appendChild(el("section", { class: "block" }, [secHead(g[0], "" + g[1].length), el("div", { class: "plainlist" }, g[1].map(function (r) {
         return el("a", { class: "li", href: r.h, target: r.ext ? "_blank" : null, rel: r.ext ? "noopener noreferrer" : null }, [
-          el("span", { class: "li-main" }, [el("b", { text: r.t }), r.sub ? el("span", { class: "sub clamp1", text: r.sub }) : null])
+          el("span", { class: "li-main" }, [el("b", { text: r.t }), r.sub ? el("span", { class: "sub clamp1", text: r.sub }) : null]),
+          el("span", { class: "li-meta" }, (r.m || []).map(function (x) { return el("span", { text: x }); }))
         ]);
       }))]));
     });
-    if (!any) page.appendChild(empty("찾은 것이 없습니다."));
+    if (!any) fs.appendChild(empty("찾은 것이 없습니다."));
     view.appendChild(page);
   }
 
@@ -860,7 +863,7 @@
     else if (key === "links") viewLinks(r.q);
     else if (key === "search") viewSearch(r.q);
     else viewHome();
-    if (["weeks", "projects", "terms", "links"].indexOf(key) !== -1) view.classList.add("fit");
+    if (["weeks", "projects", "terms", "links", "search"].indexOf(key) !== -1) view.classList.add("fit");
     $("main").scrollTop = 0;
     window.scrollTo(0, 0);
     document.title = (TITLES[key] ? TITLES[key] + " · " : "") + "AI PM Archive";

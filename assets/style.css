@@ -843,3 +843,23 @@ a.vchip.link:hover { background: #E3E4E8; }
 /* 홈 카드 테두리: 검정 */
 .scard { border: 1px solid var(--ink); }
 .dcard { border: 1px solid var(--ink); }
+
+/* 검색 결과: 가운데 정렬 대신 전체 너비, 왼쪽 제목과 오른쪽 정보를 양끝으로 */
+@media (min-width: 961px) {
+  .page:not(.pfit) { max-width: none; margin: 0; padding: 18px 32px; }
+  .pfit .block { margin-top: 22px; }
+  .pfit .block:first-child { margin-top: 0; }
+}
+.plainlist .li { gap: 24px; padding: 13px 0; justify-content: space-between; }
+.li-meta { display: flex; gap: 16px; flex: none; font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; }
+.li-meta span:first-child:not(:last-child) { background: var(--soft); border-radius: 5px; padding: 0 8px; color: #4A4A48; }
+@media (max-width: 640px) { .li-meta span:first-child:not(:last-child) { display: none; } }
+
+/* notes header matches the other pages */
+@media (min-width: 961px) {
+  .split { border-top: 0; }
+  .split-list { padding-top: 18px; padding-left: 22px; }
+  .split-top { padding-bottom: 14px; }
+  .split-top .eyebrow { display: none; }
+  .split-top h1 { font-size: 30px; margin-top: 0; }
+}
