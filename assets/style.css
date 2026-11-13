@@ -826,17 +826,17 @@ body.poster-mode .search input { border-radius: 8px; }
 }
 
 /* 노트: 읽기 영역 배경, 속성 블록 */
-.split-read { background: #F7F8FB; }
+.split-read { background: #FAFAFB; }
 .split-read h1 { font-size: clamp(30px, 3vw, 40px); margin: 4px 0 10px; }
 .split-read .lead { margin: 0 0 22px; }
-.props { display: flex; flex-direction: column; gap: 2px; padding: 0 0 22px; margin-bottom: 4px; border-bottom: 1px solid #E5E8EF; }
+.props { display: flex; flex-direction: column; gap: 2px; padding: 0 0 22px; margin-bottom: 4px; border-bottom: 1px solid #E8E9EC; }
 .prop { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 12px; align-items: start; min-height: 36px; padding: 5px 0; }
 .pk { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--sub); line-height: 26px; }
 .pk svg { width: 16px; height: 16px; }
 .pv { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; min-height: 26px; }
-.vchip { display: inline-block; font-size: 14px; line-height: 1.5; padding: 1px 9px; border-radius: 5px; background: #EBEDF2; color: #2B2F3A; }
-a.vchip.link:hover { background: #DEE2EA; }
-.split-read .chip { border-radius: 5px; border-color: #DDE1E9; background: #fff; padding: 1px 9px; line-height: 1.5; }
+.vchip { display: inline-block; font-size: 14px; line-height: 1.5; padding: 1px 9px; border-radius: 5px; background: #EEEFF1; color: #2B2D33; }
+a.vchip.link:hover { background: #E3E4E8; }
+.split-read .chip { border-radius: 5px; border-color: #E2E3E6; background: #fff; padding: 1px 9px; line-height: 1.5; }
 .split-read .prose { margin-top: 28px; }
 @media (max-width: 960px) { .prop { grid-template-columns: 1fr; gap: 2px; } }
 
