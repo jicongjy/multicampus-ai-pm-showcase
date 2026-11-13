@@ -902,3 +902,24 @@ body.poster-mode .ext .ico { width: 22px; height: 22px; flex: none; }
   body.poster-mode .p-t { min-width: 0; max-width: 150px; }
   body.poster-mode .p-t b, body.poster-mode .p-t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* 왼쪽 메뉴 펼침 v2: 항목 호버 없음, 클릭하면 접힘, 더 정돈된 패널 */
+body.poster-mode .nav-item:hover { background: transparent; color: #6A6A68; }
+body.poster-mode .nav-item.on:hover { background: var(--blue); color: #fff; }
+body.poster-mode .ext:hover { background: transparent; color: #6A6A68; }
+@media (min-width: 961px) {
+  body.poster-mode .side:hover, body.poster-mode .side:focus-within { width: 64px; box-shadow: none; }
+  body.poster-mode .side.shut { pointer-events: auto; }
+  body.poster-mode .side:not(.shut):hover, body.poster-mode .side:not(.shut):has(:focus-visible) {
+    width: 232px; border-radius: 0 20px 20px 0; border-right-color: transparent;
+    box-shadow: 0 0 0 1px rgba(20,20,30,.06), 0 24px 64px rgba(20,20,40,.16);
+  }
+  body.poster-mode .side:hover .nl, body.poster-mode .side:focus-within .nl, body.poster-mode .side:hover .p-t, body.poster-mode .side:focus-within .p-t { opacity: 0; transition: opacity .1s; }
+  body.poster-mode .side:not(.shut):hover .nl, body.poster-mode .side:not(.shut):hover .p-t,
+  body.poster-mode .side:not(.shut):has(:focus-visible) .nl, body.poster-mode .side:not(.shut):has(:focus-visible) .p-t { opacity: 1; transition: opacity .2s .1s; }
+  body.poster-mode .nav-item .nl, body.poster-mode .ext .nl { font-size: 15px; font-weight: 500; letter-spacing: -.01em; color: #2A2A2A; }
+  body.poster-mode .nav-item.on .nl { color: #fff; font-weight: 500; }
+  body.poster-mode .ext .nl { color: #6A6A68; }
+  body.poster-mode .p-t b { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  body.poster-mode .nav-g { margin-left: 20px; margin-right: 20px; }
+}

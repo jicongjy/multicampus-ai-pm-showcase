@@ -834,6 +834,18 @@
     });
   }
 
+  /* 사이드 메뉴: 항목을 누르면 접히고, 마우스가 나갔다 들어올 때까지 다시 펼쳐지지 않음 */
+  (function () {
+    var sd = document.getElementById("side");
+    if (!sd) return;
+    sd.addEventListener("click", function (e) {
+      if (!e.target.closest("a")) return;
+      sd.classList.add("shut");
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    });
+    sd.addEventListener("mouseleave", function () { sd.classList.remove("shut"); });
+  })();
+
   /* ---------- render ---------- */
   var TITLES = { weeks: "주차", projects: "결과물", notes: "노트", terms: "용어", links: "링크 모음", search: "검색" };
 
