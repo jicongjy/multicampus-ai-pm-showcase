@@ -816,13 +816,28 @@ body.poster-mode .search input { border-radius: 8px; }
 .k-t { background: #E4F3EA; color: #1E7A4A; }
 .dcard .dchip em { font-size: 13px; color: inherit; }
 
-/* 홈: 하단 카드 정렬 (같은 위치에서 시작) */
+/* 홈: 하단 카드 (라벨 위, 숫자와 막대는 아래 줄, 위아래 여백 동일) */
 @media (min-width: 961px) {
-  .scard { grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: auto auto auto; row-gap: 0; align-content: space-between; }
+  .scard { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr auto; column-gap: 18px; row-gap: 0; padding: 22px 24px; position: relative; overflow: hidden; }
+  .scard > * { position: relative; z-index: 1; }
   .sc-h { grid-column: 1 / -1; grid-row: 1; }
-  .sc-n { grid-column: 1; grid-row: 2; align-self: start; margin: 8px 0 0; font-size: 44px; line-height: 1.05; }
-  .sc-s { grid-column: 1; grid-row: 3; align-self: start; margin-top: 2px; }
-  .sbars { grid-column: 2; grid-row: 2 / 4; height: 72px; align-self: end; }
+  .sc-n { grid-column: 1; grid-row: 2; align-self: end; margin: 0; font-size: 48px; line-height: 1; }
+  .sc-s { grid-column: 1; grid-row: 3; align-self: start; margin: 8px 0 0; }
+  .sbars { grid-column: 2; grid-row: 2 / 4; height: 64px; align-self: end; padding-top: 0; }
+  .scard { height: auto; min-height: 150px; }
+}
+.sc-go { font-size: 16px; }
+.scard { position: relative; overflow: hidden; }
+.scard > * { position: relative; z-index: 1; }
+/* 카드 배경: 은은하게 흐르는 점 패턴 */
+.scard::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(currentColor 1.3px, transparent 1.7px); background-size: 16px 16px;
+  opacity: .16; -webkit-mask-image: radial-gradient(circle at 88% 0%, #000 0%, transparent 62%); mask-image: radial-gradient(circle at 88% 0%, #000 0%, transparent 62%);
+  animation: scdrift 14s linear infinite, scbreathe 6s ease-in-out infinite; }
+.scard.mono::before { opacity: .12; }
+@keyframes scdrift { to { background-position: 16px 16px; } }
+@keyframes scbreathe { 50% { opacity: .07; } }
+@media (prefers-reduced-motion: reduce) { .scard::before { animation: none; } }
 }
 
 /* 노트: 읽기 영역 배경, 속성 블록 */
@@ -841,7 +856,6 @@ a.vchip.link:hover { background: #E3E4E8; }
 @media (max-width: 960px) { .prop { grid-template-columns: 1fr; gap: 2px; } }
 
 /* 홈 카드 테두리: 검정 */
-.scard { border: 1px solid var(--ink); }
 .dcard { border: 1px solid var(--ink); }
 
 /* 검색 결과: 가운데 정렬 대신 전체 너비, 왼쪽 제목과 오른쪽 정보를 양끝으로 */

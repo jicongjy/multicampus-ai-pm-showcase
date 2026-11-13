@@ -413,7 +413,7 @@
       var bars = el("div", { class: "sbars" });
       series.forEach(function (v) { bars.appendChild(el("i", { style: v ? "height:" + Math.max(8, v / m * 100) + "%" : "height:2px;opacity:.3" })); });
       return el("a", { class: "scard " + cls + " rise", href: hrefv }, [
-        el("div", { class: "sc-h" }, [el("span", { class: "sc-l" }, [icon(ic), txt(label)]), el("span", { class: "sc-go", text: "↗" })]),
+        el("div", { class: "sc-h" }, [el("span", { class: "sc-l", text: label }), el("span", { class: "sc-go", text: "↗" })]),
         el("b", { class: "sc-n", text: "" + tot }),
         el("p", { class: "sc-s", text: "이번 주 +" + thisN }),
         bars
