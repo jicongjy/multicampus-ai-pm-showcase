@@ -846,8 +846,23 @@
     sd.addEventListener("mouseleave", function () { sd.classList.remove("shut"); });
   })();
 
+  /* 관리 화면은 필요할 때만 불러온다 */
+  function viewAdmin() {
+    function go() {
+      if (parseHash().path[0] !== "admin") return;
+      window.PMAdmin.mount(view, { data: data, works: works, notes: notes, terms: terms, links: links });
+    }
+    if (window.PMAdmin) { go(); return; }
+    view.appendChild(el("p", { class: "empty", text: "불러오는 중입니다." }));
+    var sc = document.createElement("script");
+    sc.src = "assets/admin.js?v=20261113d";
+    sc.onload = function () { if (parseHash().path[0] === "admin") { view.textContent = ""; go(); } };
+    sc.onerror = function () { view.textContent = ""; view.appendChild(el("p", { class: "empty", text: "관리 화면을 불러오지 못했습니다." })); };
+    document.head.appendChild(sc);
+  }
+
   /* ---------- render ---------- */
-  var TITLES = { weeks: "주차", projects: "결과물", notes: "노트", terms: "용어", links: "링크 모음", search: "검색" };
+  var TITLES = { weeks: "주차", projects: "결과물", notes: "노트", terms: "용어", links: "링크 모음", search: "검색", admin: "관리" };
 
   function render() {
     var r = parseHash();
@@ -865,7 +880,7 @@
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     masonry.hosts = [];
-    setActive(key === "search" ? "none" : key);
+    setActive(key === "search" || key === "admin" ? "none" : key);
     $("side").classList.remove("open");
     $("scrim").hidden = true;
     if (key === "weeks") viewWeeks();
@@ -874,8 +889,9 @@
     else if (key === "terms") viewTerms(p[1], r.q);
     else if (key === "links") viewLinks(r.q);
     else if (key === "search") viewSearch(r.q);
+    else if (key === "admin") viewAdmin();
     else viewHome();
-    if (["weeks", "projects", "terms", "links", "search"].indexOf(key) !== -1) view.classList.add("fit");
+    if (["weeks", "projects", "terms", "links", "search", "admin"].indexOf(key) !== -1) view.classList.add("fit");
     $("main").scrollTop = 0;
     window.scrollTo(0, 0);
     document.title = (TITLES[key] ? TITLES[key] + " · " : "") + "AI PM Archive";
