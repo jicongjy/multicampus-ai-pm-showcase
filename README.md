@@ -11,6 +11,8 @@
 ├── tools/make_thumbs.py  # 썸네일 자동 생성
 ├── tools/export_notes.py # 공개 노트 내보내기
 ├── tools/fetch_link_icons.py # 링크 아이콘(파비콘) 내려받기
+├── tools/make_icons.py   # 사이트 파비콘 세트 만들기
+├── tools/make_og.py      # 공유 미리보기 이미지(assets/og.png) 만들기
 ├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
 ├── data/links.json    # 링크 모음 (참고용으로 모아 둔 글과 사이트. 실습 결과물 사이트는 넣지 않음)
 ├── data/lessons.json  # 교안 링크 (주차 화면에 표시, 내용은 옮기지 않고 링크만)
@@ -77,6 +79,12 @@ python3 tools/export_notes.py ~/노트저장소경로 --dry-run
 3. 결과를 확인한 뒤 `--dry-run`을 빼고 실행하면 `notes/`, `data/notes.json`, `data/terms.json`이 만들어집니다.
 
 자동으로 빠지는 것: 교안, 슬랙, 회고, 출처, 메모, 과제, 링크 모음, 다음에 할 일 구역과, 교안이나 슬랙을 언급한 줄. 이메일, 전화번호, 키, 앱스 스크립트 주소 패턴이 남아 있으면 그 노트는 내보내지 않습니다. 공개 전에 결과 파일을 한 번 읽어 보세요.
+
+## 파비콘과 공유 이미지
+
+- 파비콘(`favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-512.png`)은 `python3 tools/make_icons.py`로 만듭니다.
+- 링크를 공유할 때 뜨는 이미지(`assets/og.png`)는 데이터의 개수와 일별 점 차트로 만들어서, 기록이 늘면 `python3 tools/make_og.py`로 다시 만듭니다. 이름은 넣지 않습니다.
+- 카카오톡, 슬랙은 이미지를 한동안 기억해서 바뀐 이미지가 바로 안 보일 수 있습니다.
 
 ## 링크 추가하기
 

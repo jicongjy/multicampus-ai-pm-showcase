@@ -836,6 +836,12 @@
   }
 
   /* ---------- init ---------- */
+  function hideBoot() {
+    var b = document.getElementById("boot");
+    if (!b) return;
+    b.classList.add("done");
+    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 450);
+  }
   function load(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(url + " " + r.status); return r.json(); }); }
 
   Promise.all([load("data/works.json"), load("data/links.json"), load("data/lessons.json"), load("data/notes.json"), load("data/terms.json")])
@@ -846,8 +852,10 @@
       buildSide();
       window.addEventListener("hashchange", render);
       render();
+      requestAnimationFrame(hideBoot);
     })
     .catch(function (e) {
+      hideBoot();
       view.textContent = "";
       view.appendChild(el("p", { class: "empty", text: "데이터를 불러오지 못했습니다. 웹 서버로 열어야 합니다. (" + e.message + ")" }));
     });

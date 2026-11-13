@@ -770,3 +770,17 @@ body.poster-mode .ext span { display: none; }
 body.poster-mode .side > .profile { width: 64px; height: 64px; margin: 0; padding: 0; justify-content: center; border-radius: 0; border-bottom: 1px solid var(--line); }
 body.poster-mode .side > .profile .avatar { width: 36px; height: 36px; font-size: 16px; }
 @media (max-width: 960px) { body.poster-mode .side > .profile { display: none; } }
+
+/* ---------- 처음 불러올 때 점 로딩 ---------- */
+.boot { position: fixed; inset: 0; z-index: 1000; background: #fff; display: grid; place-items: center; transition: opacity .35s ease; }
+.boot.done { opacity: 0; pointer-events: none; }
+.bootdots { display: flex; align-items: flex-end; gap: 10px; height: 92px; }
+.bootdots > div { display: flex; flex-direction: column-reverse; gap: 6px; }
+.bootdots i { display: block; width: 12px; height: 12px; border-radius: 50%; background: #161616; opacity: .12; animation: bootdot 1.3s ease-in-out infinite; }
+.bootdots > div:nth-child(1) i { animation-delay: 0s; }
+.bootdots > div:nth-child(2) i { animation-delay: .1s; }
+.bootdots > div:nth-child(3) i { animation-delay: .2s; }
+.bootdots > div:nth-child(4) i { animation-delay: .3s; }
+.bootdots > div:nth-child(5) i { animation-delay: .4s; background: var(--blue); }
+@keyframes bootdot { 0%, 100% { opacity: .12; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .bootdots i { animation: none; opacity: .6; } }
