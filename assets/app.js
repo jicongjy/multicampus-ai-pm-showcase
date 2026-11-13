@@ -714,7 +714,7 @@
   function viewLinks() {
     var page = el("div", { class: "page wide pfit" });
     page.appendChild(pageHead("REFERENCES", "링크 모음", "참고하려고 모아 둔 사이트입니다."));
-    var sorted = links.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    var sorted = links.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
     var fsL = el("div", { class: "fscroll" });
     page.appendChild(fsL);
     fsL.appendChild(sorted.length ? el("div", { class: "lgrid" }, sorted.map(function (l, i) {

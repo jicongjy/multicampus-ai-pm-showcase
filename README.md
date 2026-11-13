@@ -11,7 +11,7 @@
 ├── tools/make_thumbs.py  # 썸네일 자동 생성
 ├── tools/export_notes.py # 공개 노트 내보내기
 ├── data/works.json    # 프로젝트(결과물) 목록 (화면의 기준)
-├── data/links.json    # 링크 모음 (강사님이 "이런 건 좋아요" 하고 알려 준 사이트만)
+├── data/links.json    # 링크 모음 (참고용으로 모아 둔 글과 사이트. 실습 결과물 사이트는 넣지 않음)
 ├── data/lessons.json  # 교안 링크 (주차 화면에 표시, 내용은 옮기지 않고 링크만)
 ├── data/notes.json    # 공개한 노트 (노트 내보내기가 만듦)
 ├── data/terms.json    # 용어 (노트 머리말에서 자동 수집, 직접 고치지 않음)
