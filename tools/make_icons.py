@@ -17,7 +17,7 @@ def svg():
             fill = LAST_BLUE if i == len(COLS) - 1 else "#161616"
             dots.append(f'<circle cx="{14 + i * 12}" cy="{50 - k * 12}" r="5" fill="{fill}"/>')
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
-            '<rect x="1" y="1" width="62" height="62" rx="14" fill="#fff" stroke="#DADAD6" stroke-width="2"/>'
+            '<rect width="64" height="64" rx="14" fill="#fff"/>'
             + "".join(dots) + "</svg>\n")
 
 
@@ -27,7 +27,7 @@ def png(size):
     im = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     u = S / 64
-    d.rounded_rectangle([1 * u, 1 * u, 63 * u, 63 * u], radius=14 * u, fill="#FFFFFF", outline="#DADAD6", width=max(1, int(2 * u)))
+    d.rounded_rectangle([0, 0, S - 1, S - 1], radius=14 * u, fill="#FFFFFF")
     for i, n in enumerate(COLS):
         color = LAST_BLUE if i == len(COLS) - 1 else "#161616"
         for j in range(n):
