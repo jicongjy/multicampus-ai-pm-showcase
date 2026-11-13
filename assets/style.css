@@ -765,3 +765,8 @@ body.poster-mode .ext span { display: none; }
 .lc-ico img { width: 36px; height: 36px; object-fit: contain; display: block; }
 .lc-ico b { font-size: 24px; font-weight: 500; color: var(--sub); }
 .lcard:hover .lc-ico { background: #fff; }
+
+/* 레일 맨 위: 이름 아이콘 */
+body.poster-mode .side > .profile { width: 64px; height: 64px; margin: 0; padding: 0; justify-content: center; border-radius: 0; border-bottom: 1px solid var(--line); }
+body.poster-mode .side > .profile .avatar { width: 36px; height: 36px; font-size: 16px; }
+@media (max-width: 960px) { body.poster-mode .side > .profile { display: none; } }
